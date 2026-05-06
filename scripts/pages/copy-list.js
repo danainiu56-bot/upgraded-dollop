@@ -235,7 +235,7 @@ function renderCopyListTable() {
   const tbody = document.getElementById('cf-tbody');
   if (!tbody) return;
   if (copyCurrentListData.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="14" style="text-align:center;padding:60px 16px;color:var(--text-light);">
+    tbody.innerHTML = `<tr><td colspan="15" style="text-align:center;padding:60px 16px;color:var(--text-light);">
       <div style="font-size:28px;margin-bottom:8px;">📭</div>
       <div>没有匹配的数据</div>
     </td></tr>`;
@@ -257,6 +257,7 @@ function renderCopyListTable() {
       <td><span class="person-cell">${r.op}</span></td>
       <td><span class="person-cell">${r.writer}</span></td>
       <td><span class="submit-time-cell">${(r.submit_time || '—').split(' ')[0]}</span></td>
+      <td>${renderLaunchDate(r)}</td>
       <td>${r.date}</td>
       <td><span class="submit-time-cell">${r.review_time || '—'}</span></td>
       <td><span class="status-pill ${statusCls}">${r.status || '—'}</span></td>

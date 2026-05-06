@@ -476,7 +476,7 @@ function buildSummaryTags() {
   const brand = skuInfo && /AUVON/i.test(skuInfo.name || '') ? 'AUVON' : 'AUVON';
   const priority = typeof renderPriorityTag === 'function'
     ? renderPriorityTag({ type: reqTypeLabels[document.getElementById('req-type').value] || '' })
-    : '<span>P1 中</span>';
+    : '<span>P1</span>';
   const subSel = document.getElementById('subcategory');
   const subValue = subSel.value;
   const subText = subValue

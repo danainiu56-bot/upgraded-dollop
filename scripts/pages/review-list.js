@@ -175,6 +175,7 @@ function reviewMgrTemplate() {
             <th style="width:80px;">优先级</th>
             <th style="width:100px;">需求提交人</th>
             <th style="width:100px;">文案人员</th>
+            <th style="width:120px;">开卖时间</th>
             <th style="width:120px;">期望交付时间</th>
             <th style="width:160px;">提交审核时间</th>
             <th style="width:160px;">审核时间</th>
@@ -417,7 +418,7 @@ function renderReviewListTable() {
   const tbody = document.getElementById('rv-tbody');
   if (!tbody) return;
   if (!reviewCurrentListData.length) {
-    tbody.innerHTML = `<tr><td colspan="14" style="text-align:center;padding:60px 16px;color:var(--text-light);">
+    tbody.innerHTML = `<tr><td colspan="15" style="text-align:center;padding:60px 16px;color:var(--text-light);">
       <div style="font-size:28px;margin-bottom:8px;">📭</div>
       <div>没有匹配的数据</div>
     </td></tr>`;
@@ -439,6 +440,7 @@ function renderReviewListTable() {
       <td>${renderPriorityTag(row)}</td>
       <td><span class="person-cell">${row.op || '—'}</span></td>
       <td><span class="person-cell">${row.writer || '—'}</span></td>
+      <td>${renderLaunchDate(row)}</td>
       <td>${row.date || '—'}</td>
       <td><span class="submit-time-cell">${row.submit_time || '—'}</span></td>
       <td><span class="submit-time-cell">${row.review_time || '—'}</span></td>

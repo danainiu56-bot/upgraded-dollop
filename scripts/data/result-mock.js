@@ -9,8 +9,10 @@ const RESULT_MODULES = [
   { id: 'mod-seo',       iconKey: 'keyword', iconBg: 'pink',   title: 'SEO 信息', desc: 'SEO 关键词与搜索频率' },
   { id: 'mod-competitor',iconKey: 'compete', iconBg: 'blue',   title: '竞对信息',  desc: '主要竞品' },
   { id: 'mod-selling',   iconKey: 'bullets', iconBg: 'green',  title: '卖点信息',  desc: '核心卖点排序与说明' },
+  { id: 'mod-image-creative', iconKey: 'image', iconBg: 'pink', title: '卖点创意信息', desc: '主图、图2-图7与富文本创意方向' },
   { id: 'mod-audience',  iconKey: 'user',    iconBg: 'purple', title: '目标人群',  desc: '用户画像与触达渠道' },
   { id: 'mod-pain',      iconKey: 'aplus',   iconBg: 'orange', title: '用户痛点',  desc: '产品可解决的用户痛点' },
+  { id: 'mod-faq-extra', iconKey: 'faq',     iconBg: 'purple', title: '补充信息',  desc: 'GEO 助手查询与 Rufus 交互补充' },
   { id: 'mod-stp',       iconKey: 'compete', iconBg: 'purple', title: '产品 STP', desc: '细分 / 目标 / 定位' },
 ];
 
@@ -46,6 +48,24 @@ const MOCK_DATA = {
       { label: 'K 好编码',   value: 'KH-2024-PO-001' },
       { label: 'K 好标签',   value: '医疗健康 / 长期复购 / 礼品场景' },
       { label: 'K 好备注',   value: '同 SKU 多色可联动出，组合套装转化更高' },
+    ],
+  },
+  imageProduct: {
+    competitorAdvantages: [
+      { label: '容量表达', value: '竞品多强调 7 天分装，本品可突出 17X4 全黑款的大容量与清晰分区，适合多药/补剂用户。' },
+      { label: '品牌露出', value: '竞品主图多为纯产品展示，本品带 AUVON logo，可强化品牌可信度与专业感。' },
+      { label: '便携安全', value: '相比普通翻盖药盒，本品可突出卡扣闭合、防误开、适合旅行携带。' },
+    ],
+    complaints: [
+      '竞品用户反馈盖子松动，外出携带容易洒出药片。',
+      '部分竞品格子太小，不适合鱼油、维生素等大颗粒补剂。',
+      '颜色过于鲜艳，用户认为不够商务、放在包里不够低调。',
+    ],
+    packingList: [
+      '17X4 全黑 7 格便携药盒 × 1',
+      'AUVON 品牌外包装 × 1',
+      '使用说明卡 × 1',
+      '售后服务卡 × 1',
     ],
   },
   seo: {
@@ -115,6 +135,72 @@ const MOCK_DATA = {
       ],
     },
   ],
+  faqCompetitors: [
+    {
+      label: 'BSR #1',
+      brand: 'EZY DOSE',
+      link: 'https://www.amazon.com/dp/B07YYYY1234',
+      image: 'assets/competitor-ezy-dose-rainbow-pill-box.png',
+      faqs: [
+        'Q1: Is it large enough for fish oil or vitamins? A: Yes, each compartment is designed for daily pills and supplements.',
+        'Q2: Are the lids easy for seniors to open? A: The lids are designed to open easily while staying closed in daily use.',
+        'Q3: Is the plastic BPA-free? A: Yes, it is made with BPA-free plastic for medication storage.',
+        'Q4: Can it be used for travel? A: Yes, the compact weekly format is suitable for trips and daily carry.',
+        'Q5: Does each day detach separately? A: This model keeps all days in one weekly case.',
+      ],
+    },
+    {
+      label: 'BSR #2',
+      brand: 'Sukuos',
+      link: 'https://www.amazon.com/dp/B08ZZZZ5678',
+      image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=320&q=80',
+      faqs: [
+        'Q1: How many pills fit in each slot? A: Capacity depends on pill size, and each slot fits common daily medication.',
+        'Q2: Is it suitable for AM/PM use? A: Yes, the layout supports morning and evening dose planning.',
+        'Q3: Will the lids pop open in a bag? A: The snap-shut lids help reduce accidental opening.',
+        'Q4: Are the letters easy to read? A: Large labels help users identify each day quickly.',
+        'Q5: Can it hold supplements? A: Yes, it can hold vitamins and supplements of common sizes.',
+      ],
+    },
+    {
+      label: 'BSR #3',
+      brand: 'Sagely',
+      link: 'https://www.amazon.com/dp/B09WWWW9012',
+      image: 'https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=320&q=80',
+      faqs: [
+        'Q1: Is it good for complex medication schedules? A: It is designed for users who need organized daily planning.',
+        'Q2: Does it have reminder support? A: Some models work with reminders, depending on the product version.',
+        'Q3: Is it waterproof? A: It helps protect pills from daily moisture but should not be submerged.',
+        'Q4: Is it easy to clean? A: It can be wiped clean and dried before reuse.',
+        'Q5: Is it giftable for parents? A: Many users buy it for parents or caregivers managing weekly medication.',
+      ],
+    },
+    {
+      label: '直接竞对',
+      brand: 'AUVON 同类药盒',
+      link: 'https://www.amazon.com/dp/B0DIRECT123',
+      image: 'assets/product-pill-box-black.png',
+      faqs: [
+        'Q1: What makes this different from a basic pill box? A: It combines weekly organization, visible compartments and a portable form.',
+        'Q2: Can it hold larger supplements? A: The compartments are suitable for many daily pills and vitamins.',
+        'Q3: Is it safe for long-term medication storage? A: The material is designed for routine pill organization.',
+        'Q4: Who is it best for? A: It is best for adults, seniors and caregivers managing weekly medication.',
+        'Q5: Can I take it while traveling? A: Yes, it is compact enough for travel, office and daily carry.',
+      ],
+    },
+  ],
+  faqSupplement: {
+    geo: [
+      { title: '本地化表达', content: '美区 FAQ 建议使用直接、可验证的短句，避免夸大医疗效果，优先回答容量、安全、携带和适用人群。' },
+      { title: '搜索习惯', content: '用户常用 question style 搜索：Is it BPA-free? Can it hold large pills? Is it good for travel?' },
+      { title: '合规提醒', content: '避免承诺治疗、治愈或改善疾病，只表达 pill organization、daily medication routine、travel storage 等场景。' },
+    ],
+    rufus: [
+      { question: 'Can this pill organizer hold large vitamins?', answer: '建议回答容量与药片尺寸有关，并强调适合常见维生素、鱼油和日常药物。' },
+      { question: 'Is it safe for seniors?', answer: '建议从清晰分区、易识别、一周规划角度回答，不做医疗功效承诺。' },
+      { question: 'Will it open in my bag?', answer: '建议结合卡扣闭合和旅行携带场景回答，降低用户对药片洒出的担心。' },
+    ],
+  },
   selling: {
     usp: [
       { title: '7 天日历式分隔', desc: '行业首创整周可视化用药动线，对比传统药盒「按格序号」更易记忆，避免漏服 / 重服。' },
@@ -130,6 +216,70 @@ const MOCK_DATA = {
       { title: '5 色可选',   desc: '满足不同审美与场景，礼盒装可作为关怀礼品。' },
       { title: '便携收纳袋', desc: '随机附赠仿绒收纳袋，旅行 / 通勤无忧。' },
       { title: '终身保修',   desc: '12 个月质量保修 + 30 天无理由退换货，降低决策门槛。' },
+    ],
+    summary: '围绕「大容量分装 + 防洒便携 + 品牌可信」建立图片卖点主线：主图强调一眼可见的黑色质感与 AUVON 标识，后续图片逐步解释容量、防潮防洒、老人友好、旅行携带和包装清单。',
+  },
+  imageCreative: {
+    gallery: [
+      {
+        image: '主图',
+        benchmark: 'EZY DOSE / Sukuos 同类 7 日药盒主图',
+        competitorPoint: '竞品主图主要展示彩色分格与 7-day 使用场景，但品牌识别和防洒安全表达较弱。',
+        productPoint: '突出全黑外观、AUVON logo、7 格清晰分区和大容量药片展示。',
+        advantage: '用低饱和黑色质感建立专业信任，同时用打开状态展示容量，区别于竞品的单纯彩色分格。',
+      },
+      {
+        image: '图2',
+        benchmark: '竞品容量说明图',
+        competitorPoint: '竞品常用数字标注格数，但缺少真实药片容量对比。',
+        productPoint: '展示每格可容纳多种常见药片/维生素，并标注一周用药一次配齐。',
+        advantage: '让用户直接理解“大容量”不是概念，而是能放下日常药物组合。',
+      },
+      {
+        image: '图3',
+        benchmark: '竞品开合结构图',
+        competitorPoint: '竞品通常只展示盖子打开状态，对防洒、防误开说明不足。',
+        productPoint: '放大卡扣闭合结构，突出包内携带不易散落。',
+        advantage: '回应用户对“药片洒出”的核心顾虑，增强旅行场景购买理由。',
+      },
+      {
+        image: '图4',
+        benchmark: '竞品材质安全图',
+        competitorPoint: '竞品常见 BPA-Free 图标化表达，缺少与药品接触安全的解释。',
+        productPoint: '强调食品级材质、无异味、适合长期接触药片。',
+        advantage: '从安全感角度说服慢病长期用药人群。',
+      },
+      {
+        image: '图5',
+        benchmark: '竞品人群场景图',
+        competitorPoint: '竞品多展示老人用药，但画面同质化。',
+        productPoint: '展示居家配药、办公携带、旅行收纳三类场景。',
+        advantage: '扩大使用场景，让用户意识到它不只是老人药盒，也是日常补剂收纳工具。',
+      },
+      {
+        image: '图6',
+        benchmark: '竞品尺寸说明图',
+        competitorPoint: '竞品尺寸图偏工程化，用户难以感知实际便携性。',
+        productPoint: '用手持、包内、桌面对比展示尺寸。',
+        advantage: '降低尺寸理解成本，强化“容量大但不笨重”。',
+      },
+      {
+        image: '图7',
+        benchmark: '竞品包装清单图',
+        competitorPoint: '竞品包装清单通常只展示产品本体。',
+        productPoint: '展示药盒、说明卡、售后卡、品牌包装。',
+        advantage: '提升交付完整感，适合作为礼品或家庭关怀场景。',
+      },
+    ],
+    richText: [
+      { title: '一周用药，清晰规划', content: '7 格分区帮助用户把一周药物提前整理好，减少漏服、重复服用和临时找药的焦虑。' },
+      { title: '大容量不笨重', content: '兼顾多药收纳和日常便携，适合维生素、鱼油、处方药等多种药片组合。' },
+      { title: '带得出门的安心感', content: '稳固卡扣与紧凑结构适合放入包内，通勤、旅行、露营都能保持药片有序。' },
+    ],
+    richTextImages: [
+      { content: '一周用药，清晰规划', image: '建议关联图2容量说明与一周分区示意' },
+      { content: '大容量不笨重', image: '建议关联图6手持/包内尺寸对比' },
+      { content: '带得出门的安心感', image: '建议关联图3卡扣结构与旅行场景' },
     ],
   },
   audience: {

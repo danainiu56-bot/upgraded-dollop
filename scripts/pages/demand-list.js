@@ -42,9 +42,14 @@ function getRowPriority(row) {
 
 function renderPriorityTag(row) {
   const priority = getRowPriority(row);
-  const labelMap = { P0: 'P0 高', P1: 'P1 中', P2: 'P2' };
   const clsMap = { P0: 'priority-high', P1: 'priority-mid', P2: 'priority-low' };
-  return `<span class="priority-pill ${clsMap[priority] || 'priority-low'}">${labelMap[priority] || priority}</span>`;
+  return `<span class="priority-pill ${clsMap[priority] || 'priority-low'}">${priority}</span>`;
+}
+
+function renderLaunchDate(row) {
+  const type = row && row.type ? row.type : '';
+  const isNewListing = type.includes('新品Listing') || type.includes('新品 Listing');
+  return isNewListing ? (row.launch_date || '—') : '—';
 }
 
 // 人员选择器数据
@@ -361,7 +366,7 @@ function renderListTable() {
   if (!tbody) return;
   currentListData = sortDemandListByStatus(currentListData);
   if (currentListData.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="15" style="text-align:center;padding:60px 16px;color:var(--text-light);">
+    tbody.innerHTML = `<tr><td colspan="16" style="text-align:center;padding:60px 16px;color:var(--text-light);">
       <div style="font-size:28px;margin-bottom:8px;">📭</div>
       <div>没有匹配的数据</div>
     </td></tr>`;
@@ -391,6 +396,7 @@ function renderListTable() {
       <td><span class="person-cell">${r.op}</span></td>
       <td><span class="person-cell">${r.writer}</span></td>
       <td><span class="submit-time-cell">${r.submit_time || '—'}</span></td>
+      <td>${renderLaunchDate(r)}</td>
       <td>${r.date}</td>
       <td><span class="status-pill ${statusCls}">${r.status || '—'}</span></td>
       <td onclick="event.stopPropagation()">${renderRowActions(r)}</td>

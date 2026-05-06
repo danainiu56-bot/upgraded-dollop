@@ -45,9 +45,10 @@ function showResultPage() {
 
 function renderResultNav() {
   const nav = document.getElementById('result-nav-list');
-  nav.innerHTML = RESULT_MODULES.map((m, i) => `
+  const modules = getActiveResultModules();
+  nav.innerHTML = modules.map((m, i) => `
     <li class="result-nav-item ${i === 0 ? 'active' : ''}" data-target="${m.id}" onclick="scrollToModule('${m.id}')">
-      <span class="nav-icon">${I(m.iconKey, 14)}</span>
+      <span class="nav-icon ${m.iconBg || ''}">${I(m.iconKey, 14)}</span>
       <span class="nav-label">${m.title}</span>
     </li>
   `).join('');
@@ -55,7 +56,76 @@ function renderResultNav() {
 
 function renderResultContent() {
   const c = document.getElementById('result-content');
-  c.innerHTML = RESULT_MODULES.map(m => renderModuleCard(m)).join('');
+  c.innerHTML = getActiveResultModules().map(m => renderModuleCard(m)).join('');
+}
+
+function getCurrentResultType() {
+  const key = document.getElementById('req-type') ? document.getElementById('req-type').value : '';
+  if (!key) return { key: '', stage: currentStage || 'new', biz: currentBiz || '', sub: currentSub || '' };
+  const [stage, biz, sub] = key.split('-');
+  return { key, stage, biz, sub: sub || '' };
+}
+
+function isSellingPointImageDemand() {
+  return getCurrentResultType().biz === 'listing7';
+}
+
+function isFaqDemand() {
+  return getCurrentResultType().biz === 'faq';
+}
+
+function getActiveResultModules() {
+  const { biz, sub } = getCurrentResultType();
+  const listingModules = ['mod-basic', 'mod-product', 'mod-seo', 'mod-competitor', 'mod-selling', 'mod-audience', 'mod-pain', 'mod-stp'];
+  const moduleMap = {
+    title: listingModules,
+    td: listingModules,
+    titletd: listingModules,
+    listing7: ['mod-basic', 'mod-product', 'mod-selling', 'mod-image-creative'],
+    video: ['mod-basic', 'mod-product', 'mod-selling', 'mod-audience', 'mod-pain'],
+    package: ['mod-basic', 'mod-product', 'mod-selling', 'mod-audience', 'mod-pain'],
+    manual: ['mod-basic', 'mod-product', 'mod-selling', 'mod-audience', 'mod-pain'],
+    faq: ['mod-basic', 'mod-product', 'mod-audience', 'mod-pain', 'mod-selling', 'mod-competitor', 'mod-faq-extra'],
+    ad: ['mod-basic', 'mod-product', 'mod-seo', 'mod-selling', 'mod-audience'],
+    grass: ['mod-basic', 'mod-product', 'mod-selling', 'mod-audience', 'mod-pain'],
+    news: ['mod-basic', 'mod-product', 'mod-selling', 'mod-audience'],
+  };
+  const profile = biz === 'titletd' ? sub : biz;
+  const ids = moduleMap[profile] || moduleMap.titletd;
+  return ids.map(id => RESULT_MODULES.find(m => m.id === id)).filter(Boolean);
+}
+
+function getResultModuleById(id) {
+  return getActiveResultModules().find(x => x.id === id) || RESULT_MODULES.find(x => x.id === id);
+}
+
+function getCurrentRequirementLabel() {
+  const key = document.getElementById('req-type') ? document.getElementById('req-type').value : '';
+  return (typeof reqTypeLabels !== 'undefined' && reqTypeLabels[key]) || buildReqTypeLabel() || '新品 · Listing';
+}
+
+function getCurrentResultPriority() {
+  const label = getCurrentRequirementLabel().replace(/\s*·\s*/g, '');
+  return typeof getRowPriority === 'function' ? getRowPriority({ type: label }) : 'P1';
+}
+
+function getResultBasicRows() {
+  const siteVal = document.getElementById('site') ? document.getElementById('site').value : '';
+  const subSel = document.getElementById('subcategory');
+  const subValue = subSel ? subSel.value : '';
+  const skuCode = skuList[0] || 'PO17X4011';
+  const skuInfo = (typeof allSkusData !== 'undefined' ? allSkusData : []).find(s => s.code === skuCode);
+  const productName = skuInfo ? skuInfo.name : '7格便携药盒';
+  const brand = /ZIKEE/i.test(productName) ? 'ZIKEE' : (/AMOOS/i.test(productName) ? 'AMOOS' : 'AUVON');
+  return [
+    { label: '文案需求类型', value: getCurrentRequirementLabel() },
+    { label: '站点',         value: (typeof siteLabels !== 'undefined' && siteLabels[siteVal]) || 'Amazon US' },
+    { label: '品牌',         value: brand },
+    { label: '子品类',       value: subValue ? ((subSel.selectedOptions && subSel.selectedOptions[0] && subSel.selectedOptions[0].textContent.trim()) || subValue) : 'Pill Organizers' },
+    { label: 'SKU',          value: skuCode },
+    { label: '优先级',       value: getCurrentResultPriority() },
+    { label: '文案人员',     value: 'Mason' },
+  ];
 }
 
 function renderModuleCard(m) {
@@ -69,6 +139,8 @@ function renderModuleCard(m) {
     case 'mod-audience':   bodyHtml = renderAudience(); break;
     case 'mod-pain':       bodyHtml = renderPain(); break;
     case 'mod-stp':        bodyHtml = renderSTP(); break;
+    case 'mod-image-creative': bodyHtml = renderImageCreative(); break;
+    case 'mod-faq-extra':  bodyHtml = renderFaqExtra(); break;
   }
   const meta = getModuleMeta(m.id);
   return `
@@ -93,14 +165,19 @@ function renderModuleCard(m) {
 
 function getModuleMeta(id) {
   switch (id) {
-    case 'mod-basic':      return [{ text: `${MOCK_DATA.basic.length} 字段`, cls: 'ok' }];
-    case 'mod-product':    return [{ text: `${MOCK_DATA.product.credentials.length} 项资质`, cls: 'ok' }, { text: `${MOCK_DATA.product.indications.length} 个适用病症`, cls: '' }];
+    case 'mod-basic':      return [{ text: `${getResultBasicRows().length} 字段`, cls: 'ok' }];
+    case 'mod-product':
+      if (isFaqDemand()) return [{ text: '2 类资料', cls: 'ok' }];
+      if (isSellingPointImageDemand()) return [{ text: '5 类资料', cls: 'ok' }, { text: `${MOCK_DATA.imageProduct.competitorAdvantages.length} 个优势差异`, cls: '' }];
+      return [{ text: `${MOCK_DATA.product.credentials.length} 项资质`, cls: 'ok' }, { text: `${MOCK_DATA.product.indications.length} 个适用病症`, cls: '' }];
     case 'mod-seo': {
       const total = MOCK_DATA.seo.rows.length;
       const strong = MOCK_DATA.seo.rows.filter(r => r.relevance === '强').length;
       return [{ text: `${total} 个关键词`, cls: '' }, { text: `${strong} 个强相关`, cls: 'ok' }];
     }
-    case 'mod-competitor': return [{ text: `${MOCK_DATA.competitor.length} 个竞品`, cls: '' }];
+    case 'mod-competitor':
+      if (isFaqDemand()) return [{ text: `${MOCK_DATA.faqCompetitors.length} 个来源`, cls: 'ok' }, { text: '每个 5 条 FQA', cls: '' }];
+      return [{ text: `${MOCK_DATA.competitor.length} 个竞品`, cls: '' }];
     case 'mod-selling': {
       const s = MOCK_DATA.selling;
       return [
@@ -112,6 +189,8 @@ function getModuleMeta(id) {
     case 'mod-audience':   return [{ text: '4 项画像', cls: 'ok' }, { text: `${MOCK_DATA.audience.userInfo.length} 项用户信息`, cls: '' }];
     case 'mod-pain':       return [{ text: `${MOCK_DATA.pain.length} 个痛点`, cls: '' }];
     case 'mod-stp':        return [{ text: `${MOCK_DATA.stp.columns.length - 1} 个竞品`, cls: 'ok' }, { text: `${MOCK_DATA.stp.rows.length} 项拼比`, cls: '' }];
+    case 'mod-image-creative': return [{ text: `${MOCK_DATA.imageCreative.gallery.length} 张图`, cls: 'ok' }, { text: `${MOCK_DATA.imageCreative.richText.length} 段富文本`, cls: '' }];
+    case 'mod-faq-extra':  return [{ text: 'GEO 助手', cls: 'ok' }, { text: 'Rufus 补充', cls: '' }];
     default: return [];
   }
 }
@@ -122,8 +201,9 @@ function getModuleMeta(id) {
 
 // ===== 1. 基础信息 =====
 function renderBasic() {
+  const rows = getResultBasicRows();
   return `<div class="info-grid-2">
-    ${MOCK_DATA.basic.map((b, i) =>
+    ${rows.map((b, i) =>
       `<div class="info-grid-item">
         <div class="label">${b.label}</div>
         <div class="value">${editableField(`basic.${i}.value`, b.value, { cls: 'edit-inline-value' })}</div>
@@ -134,6 +214,8 @@ function renderBasic() {
 
 // ===== 2. 产品信息 =====
 function renderProduct() {
+  if (isFaqDemand()) return renderFaqProduct();
+  if (isSellingPointImageDemand()) return renderImageProduct();
   const p = MOCK_DATA.product;
   return `
     <div class="prod-section">
@@ -185,6 +267,78 @@ function renderProduct() {
     </div>`;
 }
 
+function renderFaqProduct() {
+  const p = MOCK_DATA.product;
+  return `
+    <div class="image-product-grid faq-product-grid">
+      <div class="prod-section image-product-main">
+        <div class="prod-section-label">产品图</div>
+        <div class="product-image-wrap">
+          <img class="product-image" src="${p.image}" alt="${p.imageAlt || ''}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+          <div class="product-image-fallback" style="display:none;">暂无产品图</div>
+          <div class="product-image-cap">${editableField('product.imageAlt', p.imageAlt || '', { cls: 'edit-inline-value' })}</div>
+        </div>
+        <div class="image-product-position">
+          <div class="prod-section-label">产品定位</div>
+          <div class="text-block editable">${editableField('product.positioning', p.positioning, { cls: 'edit-block', multiline: true })}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderImageProduct() {
+  const p = MOCK_DATA.product;
+  const img = MOCK_DATA.imageProduct;
+  return `
+    <div class="image-product-grid">
+      <div class="prod-section image-product-main">
+        <div class="prod-section-label">产品图</div>
+        <div class="product-image-wrap">
+          <img class="product-image" src="${p.image}" alt="${p.imageAlt || ''}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+          <div class="product-image-fallback" style="display:none;">暂无产品图</div>
+          <div class="product-image-cap">${editableField('product.imageAlt', p.imageAlt || '', { cls: 'edit-inline-value' })}</div>
+        </div>
+        <div class="image-product-position">
+          <div class="prod-section-label">产品定位</div>
+          <div class="text-block editable">${editableField('product.positioning', p.positioning, { cls: 'edit-block', multiline: true })}</div>
+        </div>
+      </div>
+    </div>
+    <div class="prod-section image-product-follow-section">
+      <div class="prod-section-label">竞争对手对比-优势差异点 <span class="prod-section-hint">(${img.competitorAdvantages.length} 项)</span></div>
+      <div class="image-insight-list">
+        ${img.competitorAdvantages.map((it, i) => `
+          <div class="image-insight-item">
+            <strong>${editableField(`imageProduct.competitorAdvantages.${i}.label`, it.label, { cls: 'edit-inline-value' })}</strong>
+            <div class="image-insight-text">${editableField(`imageProduct.competitorAdvantages.${i}.value`, it.value, { cls: 'edit-inline-value', multiline: true })}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="prod-section">
+      <div class="prod-section-label">竞对主要客诉点 <span class="prod-section-hint">(${img.complaints.length} 条)</span></div>
+      <div class="pain-list pain-list-simple">
+        ${img.complaints.map((text, i) => `
+          <div class="pain-row">
+            <div class="pain-row-num">${i + 1}</div>
+            <div class="pain-row-body">
+              <div class="pain-row-label">客诉 ${i + 1}</div>
+              <div class="pain-row-text">${editableField(`imageProduct.complaints.${i}`, text, { cls: 'edit-inline-value', multiline: true })}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="prod-section">
+      <div class="prod-section-label">出货清单 <span class="prod-section-hint">(${img.packingList.length} 项)</span></div>
+      <div class="feature-tags">
+        ${img.packingList.map((it, i) => `
+          <span class="feature-tag">${editableField(`imageProduct.packingList.${i}`, it, { cls: 'edit-tag' })}</span>
+        `).join('')}
+      </div>
+    </div>`;
+}
+
 // ===== 3. SEO 信息 =====
 function renderSEO() {
   const s = MOCK_DATA.seo;
@@ -212,6 +366,7 @@ function renderSEO() {
 
 // ===== 4. 竞对信息 =====
 function renderCompetitor() {
+  if (isFaqDemand()) return renderFaqCompetitor();
   return `<div class="competitor-list">
     ${MOCK_DATA.competitor.map((c, i) => `
       <div class="competitor-card">
@@ -253,6 +408,32 @@ function renderCompetitor() {
   </div>`;
 }
 
+function renderFaqCompetitor() {
+  return `<div class="faq-competitor-list">
+    ${MOCK_DATA.faqCompetitors.map((c, i) => `
+      <div class="faq-competitor-card">
+        <div class="faq-competitor-side">
+          <span>${editableField(`faqCompetitors.${i}.label`, c.label, { cls: 'edit-inline-value' })}</span>
+          <div class="faq-competitor-img-wrap">
+            <img class="faq-competitor-img" src="${c.image}" alt="${c.brand}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+            <div class="competitor-image-fallback" style="display:none;">无图</div>
+          </div>
+          <strong>${editableField(`faqCompetitors.${i}.brand`, c.brand, { cls: 'edit-inline-value' })}</strong>
+          <a href="${c.link}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${editableField(`faqCompetitors.${i}.link`, c.link, { cls: 'edit-inline-value' })}</a>
+        </div>
+        <div class="faq-question-list">
+          ${c.faqs.map((item, fi) => `
+            <div class="faq-question-item">
+              <b>FQA${fi + 1}</b>
+              <div>${editableField(`faqCompetitors.${i}.faqs.${fi}`, item, { cls: 'edit-inline-value', multiline: true })}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('')}
+  </div>`;
+}
+
 // ===== 5. 卖点信息 =====
 function renderSelling() {
   const s = MOCK_DATA.selling;
@@ -285,7 +466,147 @@ function renderSelling() {
         </div>
       </div>
     `).join('')}
-  </div>`;
+  </div>
+  ${(isSellingPointImageDemand() || isFaqDemand()) ? `
+    <div class="prod-section sell-summary-section">
+      <div class="prod-section-label">卖点总概</div>
+      <div class="text-block editable">${editableField('selling.summary', s.summary, { cls: 'edit-block', multiline: true })}</div>
+    </div>
+  ` : ''}`;
+}
+
+function renderImageCreative() {
+  const data = MOCK_DATA.imageCreative;
+  return `
+    <div class="creative-gallery-list">
+      ${data.gallery.map((it, i) => `
+        <div class="creative-card ${i === 0 ? 'primary' : ''}">
+          <div class="creative-card-head">
+            <div>
+              <span>${editableField(`imageCreative.gallery.${i}.image`, it.image, { cls: 'edit-inline-value' })}</span>
+              <p>${i === 0 ? '第一眼建立产品专业感与容量感' : '承接主图卖点，补充解释购买理由'}</p>
+            </div>
+            ${i === 0 ? '<em>核心主图</em>' : ''}
+          </div>
+          <div class="creative-brief-body">
+            <div class="creative-main-point">
+              <label>本图核心表达</label>
+              <div class="creative-main-text">${editableField(`imageCreative.gallery.${i}.productPoint`, it.productPoint, { cls: 'edit-inline-value', multiline: true })}</div>
+            </div>
+            <div class="creative-reference">
+              <div>
+                <label>对标竞品</label>
+                <div class="creative-card-text">${editableField(`imageCreative.gallery.${i}.benchmark`, it.benchmark, { cls: 'edit-inline-value', multiline: true })}</div>
+              </div>
+              <div>
+                <label>竞对核心卖点</label>
+                <div class="creative-card-text">${editableField(`imageCreative.gallery.${i}.competitorPoint`, it.competitorPoint, { cls: 'edit-inline-value', multiline: true })}</div>
+              </div>
+            </div>
+            <div class="creative-advantage">
+              <label>差异化优势</label>
+              <div>${editableField(`imageCreative.gallery.${i}.advantage`, it.advantage, { cls: 'edit-inline-value', multiline: true })}</div>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="prod-section creative-follow-section">
+      <div class="prod-section-label">富文本</div>
+      <div class="richtext-list">
+        ${data.richText.map((it, i) => `
+          <div class="richtext-card">
+            <strong>${editableField(`imageCreative.richText.${i}.title`, it.title, { cls: 'edit-inline-value' })}</strong>
+            <div class="richtext-card-text">${editableField(`imageCreative.richText.${i}.content`, it.content, { cls: 'edit-inline-value', multiline: true })}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="prod-section creative-follow-section">
+      <div class="prod-section-label">富文本关联图</div>
+      <table class="compact-table">
+        <thead><tr><th style="width:220px;">富文本内容</th><th>关联图片建议</th></tr></thead>
+        <tbody>
+          ${data.richTextImages.map((it, i) => `
+            <tr>
+              <td>${editableField(`imageCreative.richTextImages.${i}.content`, it.content, { cls: 'edit-inline-value' })}</td>
+              <td>${editableField(`imageCreative.richTextImages.${i}.image`, it.image, { cls: 'edit-inline-value', multiline: true })}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function renderFaqExtra() {
+  const data = MOCK_DATA.faqSupplement;
+  return `
+    <div class="faq-screenshot-board">
+      <div class="faq-shot-card geo-shot">
+        <div class="faq-shot-title">GEO助手查截屏</div>
+        <div class="geo-screen">
+          <div class="geo-screen-head">
+            <strong>Amazon Q&A / Rufus 问题查询</strong>
+            <span>Chrome 插件</span>
+          </div>
+          <div class="geo-screen-body">
+            <aside class="geo-filter">
+              <b>筛选条件</b>
+              <span>站点：US</span>
+              <span>主题类目：Pill Organizers</span>
+              <span>来源：Rufus / Q&A</span>
+            </aside>
+            <div class="geo-question-table">
+              ${[
+                ['Replacement tops for best results', '28', '强相关', '容量'],
+                ['Does it work on back pain', '19', '中相关', '适用'],
+                ['Compare Bexeen vs reminder effectiveness', '19', '强相关', '竞品'],
+                ['Can it be applied to knee', '18', '中相关', '场景'],
+                ['How much should I use Patches?', '17', '强相关', '用法'],
+                ['Is it scented?', '17', '弱相关', '材质'],
+                ['Tips for sensitive skin users?', '16', '中相关', '风险'],
+              ].map((row, i) => `
+                <div class="geo-question-row">
+                  <span>${editableField(`faqSupplement.geoQuery.${i}.question`, row[0], { cls: 'edit-inline-value' })}</span>
+                  <b>${row[1]}</b>
+                  <em>${row[2]}</em>
+                  <i>${row[3]}</i>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          <div class="geo-screen-foot">
+            ${data.geo.map((it, i) => `<span>${editableField(`faqSupplement.geo.${i}.title`, it.title, { cls: 'edit-inline-value' })}</span>`).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-shot-card rufus-shot">
+        <div class="faq-shot-title">Rufus交互截屏补充</div>
+        <div class="rufus-screen">
+          <div class="rufus-search-panel">
+            <strong>Looking for specific info?</strong>
+            <div class="rufus-search-box">Ask Rufus or search reviews and Q&A</div>
+            <div class="rufus-chip-row">
+              <span>Can this pill case hold large pills?</span>
+              <span>Is it easy to carry?</span>
+              <span>How secure is the lid?</span>
+            </div>
+          </div>
+          <div class="rufus-phone">
+            <div class="rufus-phone-head">Rufus</div>
+            <div class="rufus-answer-card">
+              ${data.rufus.map((it, i) => `
+                <div class="rufus-answer-item">
+                  <b>${editableField(`faqSupplement.rufus.${i}.question`, it.question, { cls: 'edit-inline-value' })}</b>
+                  <p>${editableField(`faqSupplement.rufus.${i}.answer`, it.answer, { cls: 'edit-inline-value', multiline: true })}</p>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
 }
 
 // ===== 6. 目标人群 =====
@@ -390,7 +711,7 @@ function scrollToModule(id) {
 
 function setupScrollSpy() {
   const items = document.querySelectorAll('.result-nav-item');
-  const sections = RESULT_MODULES.map(m => document.getElementById(m.id));
+  const sections = getActiveResultModules().map(m => document.getElementById(m.id));
   const onScroll = () => {
     const offset = 200;
     let activeIdx = 0;
@@ -437,14 +758,14 @@ function confirmModule(id) {
 }
 
 function copyModule(id) {
-  const m = RESULT_MODULES.find(x => x.id === id);
+  const m = getResultModuleById(id);
   showToast(`「${m ? m.title : '内容'}」已复制到剪贴板`, 'success');
   try { navigator.clipboard.writeText(`【${m.title}】内容`); } catch (e) {}
 }
 
 
 function regenerateModule(id) {
-  const m = RESULT_MODULES.find(x => x.id === id);
+  const m = getResultModuleById(id);
   showToast(`正在重新生成「${m.title}」...`, 'success');
   const card = document.getElementById(id);
   if (card) {
@@ -463,7 +784,7 @@ function previewImage(name) {
 // ===== 详情弹窗 =====
 let modalCurrentContent = '';
 function openDetailModal(id) {
-  const m = RESULT_MODULES.find(x => x.id === id);
+  const m = getResultModuleById(id);
   if (!m) return;
   document.getElementById('modal-title').textContent = m.title;
   document.getElementById('modal-subtitle').textContent = m.desc;
@@ -472,12 +793,25 @@ function openDetailModal(id) {
   switch (id) {
     case 'mod-basic':
       html = `<table class="compact-table"><tbody>
-        ${MOCK_DATA.basic.map(b => `<tr><td style="width:40%;color:var(--text-muted);">${b.label}</td><td><strong>${b.value}</strong></td></tr>`).join('')}
+        ${getResultBasicRows().map(b => `<tr><td style="width:40%;color:var(--text-muted);">${b.label}</td><td><strong>${b.value}</strong></td></tr>`).join('')}
       </tbody></table>`;
-      copyText = MOCK_DATA.basic.map(b => `${b.label}: ${b.value}`).join('\n');
+      copyText = getResultBasicRows().map(b => `${b.label}: ${b.value}`).join('\n');
       break;
     case 'mod-product': {
       const p = MOCK_DATA.product;
+      if (isSellingPointImageDemand()) {
+        const img = MOCK_DATA.imageProduct;
+        html = `
+          ${p.image ? `<p><img src="${p.image}" alt="${p.imageAlt||''}" style="max-width:100%;border-radius:8px;border:1px solid var(--border);" /></p>` : ''}
+          <p style="margin-top:8px;"><strong>产品定位：</strong>${p.positioning}</p>
+          <p style="margin-top:12px;"><strong>竞争对手对比-优势差异点：</strong></p>
+          <table class="compact-table"><tbody>${img.competitorAdvantages.map(it => `<tr><td style="width:30%;color:var(--text-muted);">${it.label}</td><td>${it.value}</td></tr>`).join('')}</tbody></table>
+          <p style="margin-top:12px;"><strong>竞对主要客诉点：</strong></p>
+          <ol style="padding-left:20px;line-height:1.7;">${img.complaints.map(t => `<li>${t}</li>`).join('')}</ol>
+          <p style="margin-top:12px;"><strong>出货清单：</strong>${img.packingList.join('、')}</p>`;
+        copyText = `${p.positioning}\n\n优势差异点：${img.competitorAdvantages.map(it => `${it.label} - ${it.value}`).join('；')}`;
+        break;
+      }
       html = `
         ${p.image ? `<p><img src="${p.image}" alt="${p.imageAlt||''}" style="max-width:100%;border-radius:8px;border:1px solid var(--border);" /></p>` : ''}
         <p style="margin-top:8px;"><strong>产品定位：</strong></p>
@@ -550,6 +884,23 @@ function openDetailModal(id) {
       </table>`;
       break;
     }
+    case 'mod-image-creative': {
+      const c = MOCK_DATA.imageCreative;
+      html = `
+        ${c.gallery.map((it, i) => `
+          <div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);">
+            <p><strong>${it.image}${i === 0 ? '（核心主图）' : ''}</strong></p>
+            <p style="margin-top:6px;"><strong>对标竞品：</strong>${it.benchmark}</p>
+            <p><strong>竞对核心卖点：</strong>${it.competitorPoint}</p>
+            <p><strong>本品卖点：</strong>${it.productPoint}</p>
+            <p><strong>差异化优势：</strong>${it.advantage}</p>
+          </div>
+        `).join('')}
+        <p><strong>富文本：</strong></p>
+        ${c.richText.map(it => `<p style="margin:6px 0;"><strong>${it.title}：</strong>${it.content}</p>`).join('')}`;
+      copyText = c.gallery.map(it => `${it.image}\n对标竞品：${it.benchmark}\n竞对核心卖点：${it.competitorPoint}\n本品卖点：${it.productPoint}\n差异化优势：${it.advantage}`).join('\n\n');
+      break;
+    }
     default:
       html = `<p style="color:var(--text-muted);">该模块的详细预览（${m.title}）...</p>`;
   }
@@ -583,7 +934,7 @@ function exportResult() {
 
 function submitRequirement() {
   const num = confirmedModules.size;
-  const total = RESULT_MODULES.length;
+  const total = getActiveResultModules().length;
   if (num === 0) {
     if (!confirm(`您还未确认任何模块，是否直接提交全部 ${total} 个模块？`)) return;
   } else if (num < total) {
