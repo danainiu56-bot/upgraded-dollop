@@ -1,0 +1,45 @@
+/* ============================================
+   可编辑字段 .edit-*
+   ============================================ */
+
+  /* ===== 通用：可编辑字段样式 ===== */
+  .edit-field, .edit-inline-value, .edit-block, .edit-tag {
+    outline: none;
+    border-radius: 4px;
+    transition: var(--transition);
+    cursor: text;
+    display: inline-block;
+    min-width: 20px;
+    word-break: break-word;
+  }
+  .edit-inline-value {
+    padding: 2px 6px;
+    margin: -2px -6px;
+    border: 1px dashed transparent;
+  }
+  .edit-inline-value:hover {
+    background: #f5f3ff;
+    border-color: #ddd6fe;
+  }
+  .edit-inline-value.editing {
+    background: white;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+  }
+  .edit-block {
+    display: block;
+    padding: 4px 6px;
+    margin: -4px -6px;
+    border: 1px dashed transparent;
+    border-radius: 4px;
+    width: calc(100% + 12px);
+    line-height: 1.7;
+  }
+  .edit-block:hover { background: white; border-color: #ddd6fe; }
+  .edit-block.editing {
+    background: white;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+  }
+  .edit-tag { padding: 0 2px; }
+

@@ -1,0 +1,2734 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>产品营销智能助手系统</title>
+<style>
+  /* ===== 全局变量 ===== */
+  :root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --primary-light: #e0e7ff;
+    --secondary: #8b5cf6;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --text-light: #94a3b8;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --transition: all 0.2s ease;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ===== 页面系统 ===== */
+  .page { display: none; min-height: 100vh; }
+  .page.active { display: flex; }
+
+  /* ===== 通用组件 ===== */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 18px; border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 500; cursor: pointer;
+    border: 1px solid transparent; transition: var(--transition);
+    text-decoration: none; white-space: nowrap;
+  }
+  .btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
+  .btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+  .btn-secondary { background: white; color: var(--text); border-color: var(--border); }
+  .btn-secondary:hover { background: var(--bg); border-color: #cbd5e1; }
+  .btn-success { background: var(--success); color: white; }
+  .btn-success:hover { background: #059669; transform: translateY(-1px); }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-danger:hover { background: #dc2626; transform: translateY(-1px); }
+  .btn-warning { background: var(--warning); color: white; }
+  .btn-warning:hover { background: #d97706; }
+  .btn-ghost { background: transparent; color: var(--primary); border-color: var(--primary-light); }
+  .btn-ghost:hover { background: var(--primary-light); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-lg { padding: 12px 24px; font-size: 15px; }
+  .btn-block { width: 100%; justify-content: center; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px; border-radius: 20px;
+    font-size: 12px; font-weight: 500;
+  }
+  .badge-primary { background: var(--primary-light); color: var(--primary); }
+  .badge-success { background: #d1fae5; color: #065f46; }
+  .badge-warning { background: #fef3c7; color: #92400e; }
+  .badge-danger { background: #fee2e2; color: #991b1b; }
+  .badge-info { background: #dbeafe; color: #1e40af; }
+  .badge-purple { background: #ede9fe; color: #5b21b6; }
+  .badge-gray { background: #f1f5f9; color: #475569; }
+
+  .tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px; font-size: 12px;
+    background: var(--primary-light); color: var(--primary);
+  }
+
+  .card {
+    background: var(--card); border-radius: var(--radius);
+    border: 1px solid var(--border); box-shadow: var(--shadow);
+  }
+
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 14px; color: white; flex-shrink: 0;
+  }
+
+  .form-group { margin-bottom: 20px; }
+  .form-label {
+    display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: var(--text);
+  }
+  .form-label .required { color: var(--danger); margin-left: 2px; }
+  .form-label .optional { color: var(--text-light); font-size: 12px; font-weight: 400; margin-left: 4px; }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; padding: 10px 14px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: white; color: var(--text);
+    font-size: 14px; transition: var(--transition); font-family: inherit;
+    outline: none;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+  }
+  .form-textarea { resize: vertical; min-height: 100px; }
+  .form-hint { margin-top: 4px; font-size: 12px; color: var(--text-light); }
+
+  /* ===== 登录页 ===== */
+  #page-login {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #6366f1 100%);
+    align-items: center; justify-content: center; flex-direction: column;
+    position: relative; overflow: hidden;
+  }
+  #page-login::before {
+    content: ''; position: absolute; top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 20%, rgba(255,255,255,0.08) 0%, transparent 40%);
+  }
+  .login-card {
+    background: white; border-radius: 20px; padding: 48px 40px;
+    width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    position: relative; z-index: 1;
+  }
+  .login-logo {
+    text-align: center; margin-bottom: 32px;
+  }
+  .login-logo .logo-icon {
+    width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 16px; display: flex; align-items: center; justify-content: center;
+    font-size: 28px; margin: 0 auto 12px;
+  }
+  .login-logo h1 { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .login-logo p { color: var(--text-muted); font-size: 13px; }
+  .role-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 24px 0; }
+  .role-card {
+    border: 2px solid var(--border); border-radius: var(--radius); padding: 16px 12px;
+    text-align: center; cursor: pointer; transition: var(--transition);
+  }
+  .role-card:hover { border-color: var(--primary); background: var(--primary-light); }
+  .role-card.selected { border-color: var(--primary); background: var(--primary-light); }
+  .role-card .role-icon { font-size: 28px; margin-bottom: 8px; }
+  .role-card .role-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .role-card .role-desc { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+  .demo-accounts { background: var(--bg); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 20px; }
+  .demo-accounts h4 { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+  .demo-account { display: flex; justify-content: space-between; font-size: 12px; padding: 2px 0; }
+  .demo-account span:first-child { color: var(--text); }
+  .demo-account span:last-child { color: var(--primary); font-weight: 500; }
+
+  /* ===== 主布局 ===== */
+  .app-layout { display: flex; width: 100%; min-height: 100vh; }
+
+  /* ===== 侧边导航 ===== */
+  .sidebar {
+    width: 240px; background: white; border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; flex-shrink: 0;
+    position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
+    transition: transform 0.25s ease;
+  }
+  .main-content { transition: margin-left 0.25s ease; }
+  .sidebar-logo {
+    padding: 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sidebar-logo .logo { width: 36px; height: 36px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .sidebar-logo .logo-text h3 { font-size: 14px; font-weight: 700; color: var(--text); }
+  .sidebar-logo .logo-text p { font-size: 11px; color: var(--text-muted); }
+  .sidebar-nav { flex: 1; padding: 12px 0; overflow-y: auto; }
+  .nav-section { margin-bottom: 4px; }
+  .nav-section-title { padding: 6px 20px; font-size: 11px; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 20px; cursor: pointer; transition: var(--transition);
+    border-radius: 0; position: relative; color: var(--text-muted);
+    font-size: 14px; font-weight: 500;
+  }
+  .nav-item:hover { background: var(--bg); color: var(--text); }
+  .nav-item.active { background: var(--primary-light); color: var(--primary); }
+  .nav-item.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--primary); border-radius: 0 2px 2px 0; }
+  .nav-item .nav-icon { width: 20px; text-align: center; font-size: 16px; }
+  .nav-item .nav-badge {
+    margin-left: auto; min-width: 20px; height: 20px; border-radius: 10px;
+    background: var(--danger); color: white; font-size: 11px;
+    display: flex; align-items: center; justify-content: center; padding: 0 6px;
+  }
+  .sidebar-user {
+    padding: 16px 20px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sidebar-user .user-info { flex: 1; min-width: 0; }
+  .sidebar-user .user-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .sidebar-user .user-role { font-size: 12px; color: var(--text-muted); }
+  .sidebar-user .logout-btn { cursor: pointer; color: var(--text-light); font-size: 16px; padding: 4px; border-radius: 6px; }
+  .sidebar-user .logout-btn:hover { color: var(--danger); background: #fee2e2; }
+
+  /* ===== 主内容区 ===== */
+  .main-content { margin-left: 240px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .page-header {
+    background: white; border-bottom: 1px solid var(--border);
+    padding: 16px 28px; display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .page-title h2 { font-size: 18px; font-weight: 700; color: var(--text); }
+  .page-title p { font-size: 13px; color: var(--text-muted); margin-top: 1px; }
+  .page-body { flex: 1; padding: 24px 28px; }
+
+  /* ===== 仪表盘 ===== */
+  /* ===== 场景选择卡片 ===== */
+  .scene-select-card {
+    border: 2px solid var(--border); border-radius: var(--radius); padding: 16px;
+    cursor: pointer; transition: var(--transition); position: relative;
+    background: white;
+  }
+  .scene-select-card:hover { border-color: var(--primary); background: var(--primary-light); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(99,102,241,0.12); }
+  .scene-select-card.selected { border-color: var(--primary); background: var(--primary-light); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+
+  /* 聊天侧边任务列表 */
+  .chat-todo-item {
+    padding: 12px 14px; border-bottom: 1px solid var(--border); cursor: pointer;
+    transition: background 0.15s; border-left: 3px solid transparent;
+  }
+  .chat-todo-item:hover { background: var(--bg); }
+  .chat-todo-item.active { background: var(--primary-light); border-left-color: var(--primary); }
+  .chat-todo-item .cti-title { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.4; margin-bottom: 2px; }
+  .chat-todo-item .cti-meta { font-size: 11px; color: var(--text-muted); }
+
+  /* ===== AI 创作入口 Banner ===== */
+  .ai-banner {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
+    border-radius: var(--radius); padding: 20px 24px;
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 20px; cursor: pointer; transition: var(--transition);
+    box-shadow: 0 4px 20px rgba(99,102,241,0.3);
+  }
+  .ai-banner:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(99,102,241,0.38); }
+  .ai-banner-icon { font-size: 32px; flex-shrink: 0; }
+  .ai-banner-info { flex: 1; color: white; }
+  .ai-banner-info h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .ai-banner-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(255,255,255,0.2); border-radius: 20px;
+    padding: 2px 10px; font-size: 12px; color: white; margin-right: 8px;
+  }
+  .ai-banner-tag .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; display: inline-block; animation: pulse 2s ease infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+  .ai-banner-actions { display: flex; gap: 10px; flex-shrink: 0; }
+  .ai-banner-btn {
+    padding: 9px 18px; border-radius: var(--radius-sm); font-size: 14px;
+    font-weight: 600; cursor: pointer; border: none; transition: var(--transition);
+  }
+  .ai-banner-btn-primary { background: white; color: var(--primary); }
+  .ai-banner-btn-primary:hover { background: #f0f0ff; transform: translateY(-1px); }
+
+  /* ===== AI 场景快捷入口 ===== */
+  .ai-scene-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .ai-scene-card {
+    background: white; border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px 14px; cursor: pointer; transition: var(--transition);
+    display: flex; flex-direction: column; gap: 8px; position: relative; overflow: hidden;
+  }
+  .ai-scene-card:hover { border-color: var(--primary); box-shadow: 0 4px 16px rgba(99,102,241,0.12); transform: translateY(-2px); }
+  .ai-scene-card .ai-scene-icon { font-size: 26px; }
+  .ai-scene-card .ai-scene-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; }
+  .ai-scene-card .ai-scene-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  .ai-scene-tag {
+    display: inline-flex; align-items: center; padding: 2px 8px;
+    border-radius: 20px; font-size: 11px; font-weight: 600; position: absolute; top: 10px; right: 10px;
+  }
+  .tag-hot { background: #fee2e2; color: #dc2626; }
+  .tag-new { background: #d1fae5; color: #059669; }
+  .tag-insight { background: #dbeafe; color: #2563eb; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card {
+    background: white; border-radius: var(--radius); padding: 20px;
+    border: 1px solid var(--border); display: flex; align-items: center; gap: 16px;
+  }
+  .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+  .stat-info .stat-value { font-size: 24px; font-weight: 700; color: var(--text); }
+  .stat-info .stat-label { font-size: 13px; color: var(--text-muted); }
+  .stat-info .stat-change { font-size: 12px; color: var(--success); }
+
+  .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-title { font-size: 15px; font-weight: 600; color: var(--text); }
+
+  .task-list { display: flex; flex-direction: column; gap: 12px; }
+  .task-item {
+    display: flex; align-items: center; gap: 14px; padding: 16px;
+    background: white; border-radius: var(--radius); border: 1px solid var(--border);
+    cursor: pointer; transition: var(--transition);
+  }
+  .task-item:hover { border-color: var(--primary); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .task-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .task-info { flex: 1; min-width: 0; }
+  .task-title { font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .task-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .task-actions { display: flex; align-items: center; gap: 8px; }
+
+  /* ===== 需求表单 ===== */
+  .form-card { background: white; border-radius: var(--radius); border: 1px solid var(--border); }
+  .form-card-header {
+    padding: 20px 24px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .form-card-body { padding: 24px; }
+  .form-card-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--bg); border-radius: 0 0 var(--radius) var(--radius); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .tag-input { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: white; min-height: 42px; cursor: text; }
+  .tag-input:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+  .tag-input input { border: none; outline: none; font-size: 14px; flex: 1; min-width: 100px; background: transparent; }
+  .upload-zone {
+    border: 2px dashed var(--border); border-radius: var(--radius);
+    padding: 32px; text-align: center; cursor: pointer; transition: var(--transition);
+  }
+  .upload-zone:hover { border-color: var(--primary); background: var(--primary-light); }
+  .upload-zone .upload-icon { font-size: 36px; margin-bottom: 8px; }
+  .upload-zone .upload-text { font-size: 14px; color: var(--text-muted); }
+  .step-indicator { display: flex; align-items: center; gap: 0; margin-bottom: 28px; }
+  .step { display: flex; align-items: center; flex: 1; }
+  .step-dot {
+    width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; flex-shrink: 0; border: 2px solid var(--border); color: var(--text-light); background: white;
+  }
+  .step.active .step-dot { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+  .step.done .step-dot { border-color: var(--success); background: var(--success); color: white; }
+  .step-label { margin-left: 8px; font-size: 13px; color: var(--text-muted); font-weight: 500; }
+  .step.active .step-label, .step.done .step-label { color: var(--text); }
+  .step-line { flex: 1; height: 1px; background: var(--border); margin: 0 4px; }
+  .step.done .step-line { background: var(--success); }
+  .range-slider { width: 100%; }
+  .slider-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  /* ===== AI对话界面 ===== */
+  #view-chat { display: none; }
+  #view-chat.active { display: flex; }
+
+  /* 全局：进入chat时隐藏侧边栏实现全屏 */
+  .chat-fullscreen .sidebar { transform: translateX(-240px); transition: transform 0.25s ease; }
+  .chat-fullscreen .main-content { margin-left: 0; transition: margin-left 0.25s ease; }
+
+  /* 两栏布局：左任务 + 右对话 */
+  .chat-layout, .chat-2col {
+    display: flex; flex: 1;
+    height: calc(100vh - 65px); /* 页头高度 65px */
+    overflow: hidden;
+  }
+
+  /* 左侧：任务列表 */
+  .chat-sidebar, .chat-tasks-panel {
+    width: 240px; border-right: 1px solid var(--border); background: white;
+    display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden;
+  }
+  .chat-sidebar-header, .panel-hd {
+    padding: 13px 16px; border-bottom: 1px solid var(--border);
+    font-size: 13px; font-weight: 600; color: var(--text);
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .chat-sidebar-header h3 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .chat-sidebar-header p { font-size: 12px; color: var(--text-muted); }
+  .demand-card-mini { padding: 16px; overflow-y: auto; flex: 1; }
+  .demand-field { margin-bottom: 14px; }
+  .demand-field-label { font-size: 11px; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 4px; }
+  .demand-field-value { font-size: 13px; color: var(--text); }
+  .demand-field-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .view-full-btn { margin: 12px 16px; }
+
+  /* 任务列表项 */
+  .task-item-mini {
+    padding: 10px 14px; border-bottom: 1px solid var(--border); cursor: pointer;
+    transition: background 0.15s; border-left: 3px solid transparent;
+  }
+  .task-item-mini:hover { background: var(--bg); }
+  .task-item-mini.active { background: var(--primary-light); border-left-color: var(--primary); }
+  .task-item-mini .tim-title { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.4; }
+  .task-item-mini .tim-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .task-item-mini .tim-badge { margin-top: 4px; }
+
+  /* 右侧对话主区 */
+  .chat-main, .chat-main-panel {
+    flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #f8f9fc;
+  }
+
+  /* 工具栏 */
+  .chat-toolbar, .chat-main-toolbar {
+    padding: 10px 20px; border-bottom: 1px solid var(--border); background: white;
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .chat-toolbar-left { display: flex; align-items: center; gap: 10px; }
+  .chat-toolbar-right { display: flex; align-items: center; gap: 8px; }
+  .version-selector {
+    display: flex; align-items: center; gap: 6px; padding: 6px 12px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer;
+    font-size: 13px; color: var(--text); background: white;
+  }
+  .version-selector:hover { border-color: var(--primary); }
+
+  /* 消息滚动区：flex:1 撑满，消息从底部往上堆叠 */
+  .messages, .chat-msgs {
+    flex: 1; overflow-y: auto; padding: 20px;
+    display: flex; flex-direction: column; gap: 14px;
+    min-height: 0; /* 关键：允许 flex 子元素收缩 */
+  }
+  /* 顶部弹性空白，将消息推到底部 */
+  .messages::before, .chat-msgs::before {
+    content: ''; flex: 1; min-height: 0;
+  }
+
+  /* 消息气泡 */
+  .message { display: flex; gap: 12px; max-width: 86%; }
+  .message.user { align-self: flex-end; flex-direction: row-reverse; }
+  .message.ai { align-self: flex-start; }
+  .message-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+  .message-content {
+    background: white; border: 1px solid var(--border); border-radius: 14px; padding: 12px 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .message.user .message-content { background: var(--primary); color: white; border-color: var(--primary); border-radius: 14px 4px 14px 14px; }
+  .message.ai .message-content { border-radius: 4px 14px 14px 14px; }
+  .message-text { font-size: 14px; line-height: 1.7; }
+  .message-meta { font-size: 11px; color: var(--text-light); margin-top: 6px; display: flex; align-items: center; gap: 8px; }
+  .message.user .message-meta { color: rgba(255,255,255,0.6); justify-content: flex-end; }
+  .copy-btn-inline { cursor: pointer; font-size: 11px; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); background: white; color: var(--text-muted); }
+  .copy-btn-inline:hover { border-color: var(--primary); color: var(--primary); }
+
+  /* AI 生成结果块 */
+  .ai-result-block {
+    background: var(--bg); border-radius: 10px; padding: 14px; margin-top: 10px;
+    border: 1px solid var(--border); position: relative;
+  }
+  .ai-result-block .result-title { font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+  .ai-result-block .result-content { font-size: 14px; line-height: 1.8; color: var(--text); white-space: pre-line; }
+  .ai-result-block .result-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+
+  /* 思考动画 */
+  .thinking-indicator { display: flex; gap: 4px; align-items: center; padding: 8px 0; }
+  .thinking-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-light); animation: thinking 1.4s ease infinite; }
+  .thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+  .thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes thinking { 0%,60%,100% { transform: translateY(0); opacity: 0.3; } 30% { transform: translateY(-6px); opacity: 1; } }
+
+  /* 输入区：始终在底部 */
+  .chat-input-area {
+    padding: 14px 20px 16px; border-top: 1px solid var(--border); background: white; flex-shrink: 0;
+  }
+  .quick-prompts { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+  .quick-prompt {
+    padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border);
+    font-size: 12px; cursor: pointer; color: var(--text-muted); transition: var(--transition);
+    white-space: nowrap; background: white;
+  }
+  .quick-prompt:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+  .input-wrapper {
+    display: flex; align-items: flex-end; gap: 10px;
+    background: var(--bg); border-radius: var(--radius); border: 1.5px solid var(--border); padding: 10px 14px;
+  }
+  .input-wrapper:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,0.1); background: white; }
+  .chat-input {
+    flex: 1; border: none; background: transparent; outline: none;
+    font-size: 14px; resize: none; max-height: 120px; line-height: 1.6;
+    font-family: inherit; color: var(--text);
+  }
+  .chat-input::placeholder { color: var(--text-light); }
+  .send-btn {
+    width: 38px; height: 38px; border-radius: 10px; background: var(--primary); border: none;
+    color: white; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: var(--transition);
+  }
+  .send-btn:hover { background: var(--primary-dark); transform: scale(1.05); }
+  .shortcut-hint {
+    display: inline-block; padding: 1px 5px; border: 1px solid var(--border);
+    border-radius: 4px; font-size: 10px; color: var(--text-muted); background: var(--bg);
+  }
+
+  /* ===== 审核界面 ===== */
+  .review-layout { display: flex; gap: 20px; height: calc(100vh - 130px); overflow: hidden; }
+  .review-left { flex: 1; overflow-y: auto; }
+  .review-right { width: 360px; flex-shrink: 0; overflow-y: auto; }
+  .copy-view {
+    background: white; border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 24px; margin-bottom: 16px;
+  }
+  .copy-view h3 { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: var(--text); }
+  .copy-content {
+    background: var(--bg); border-radius: var(--radius-sm); padding: 16px;
+    font-size: 14px; line-height: 1.9; color: var(--text); border: 1px solid var(--border);
+    position: relative; white-space: pre-line;
+  }
+  .annotation-mark {
+    background: #fef9c3; border-bottom: 2px solid var(--warning);
+    cursor: pointer; border-radius: 2px; padding: 0 1px;
+  }
+  .copy-versions { display: flex; gap: 8px; margin-bottom: 12px; }
+  .version-tab {
+    padding: 6px 14px; border-radius: 20px; font-size: 13px; cursor: pointer;
+    border: 1px solid var(--border); color: var(--text-muted); transition: var(--transition);
+  }
+  .version-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+  .review-form-card { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .review-form-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 16px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .risk-selector { display: flex; gap: 8px; }
+  .risk-option {
+    flex: 1; padding: 8px 12px; border-radius: var(--radius-sm); border: 2px solid var(--border);
+    cursor: pointer; text-align: center; font-size: 13px; font-weight: 500; transition: var(--transition);
+  }
+  .risk-option.low { color: var(--success); }
+  .risk-option.low.selected { border-color: var(--success); background: #d1fae5; }
+  .risk-option.mid { color: var(--warning); }
+  .risk-option.mid.selected { border-color: var(--warning); background: #fef3c7; }
+  .risk-option.high { color: var(--danger); }
+  .risk-option.high.selected { border-color: var(--danger); background: #fee2e2; }
+  .review-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+
+  /* ===== 需求列表 ===== */
+  .demand-table { background: white; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+  .table-header { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 120px; padding: 12px 20px; background: var(--bg); border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+  .table-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 120px; padding: 14px 20px; border-bottom: 1px solid var(--border); align-items: center; transition: var(--transition); cursor: pointer; }
+  .table-row:last-child { border-bottom: none; }
+  .table-row:hover { background: var(--bg); }
+  .table-row .demand-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .table-row .demand-name-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ===== 流程进度追踪 ===== */
+  .workflow-tracker {
+    background: white; border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; margin-bottom: 20px;
+  }
+  .workflow-steps { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; position: relative; }
+  .workflow-steps::before {
+    content: ''; position: absolute; top: 20px; left: 40px; right: 40px;
+    height: 2px; background: var(--border);
+  }
+  .workflow-line { position: absolute; top: 20px; left: 40px; height: 2px; background: var(--primary); transition: width 0.5s ease; }
+  .wf-step { display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; z-index: 1; }
+  .wf-dot {
+    width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--border);
+    background: white; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; transition: var(--transition);
+  }
+  .wf-step.done .wf-dot { border-color: var(--success); background: var(--success); }
+  .wf-step.active .wf-dot { border-color: var(--primary); background: var(--primary-light); }
+  .wf-step.done .wf-dot::after { content: '✓'; color: white; font-size: 14px; font-weight: 700; }
+  .wf-step-label { font-size: 11px; color: var(--text-muted); text-align: center; font-weight: 500; }
+  .wf-step.active .wf-step-label { color: var(--primary); font-weight: 600; }
+  .wf-step.done .wf-step-label { color: var(--success); }
+
+  /* ===== 模态框 ===== */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4); z-index: 1000; backdrop-filter: blur(2px);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white; border-radius: 16px; padding: 28px;
+    width: 520px; max-width: 90vw; max-height: 85vh; overflow-y: auto;
+    box-shadow: var(--shadow-lg); animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .modal-title { font-size: 18px; font-weight: 700; color: var(--text); }
+  .modal-close { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; color: var(--text-muted); transition: var(--transition); border: none; background: transparent; }
+  .modal-close:hover { background: var(--bg); color: var(--text); }
+
+  /* ===== 通知 ===== */
+  .toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    display: flex; align-items: center; gap: 10px;
+    background: white; border-radius: var(--radius); padding: 12px 16px;
+    box-shadow: var(--shadow-lg); border: 1px solid var(--border);
+    font-size: 14px; color: var(--text); min-width: 280px;
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  .toast-icon { font-size: 18px; }
+  .toast-success { border-left: 4px solid var(--success); }
+  .toast-error { border-left: 4px solid var(--danger); }
+  .toast-info { border-left: 4px solid var(--info); }
+  .toast-warning { border-left: 4px solid var(--warning); }
+
+  /* ===== 空状态 ===== */
+  .empty-state { text-align: center; padding: 60px 20px; }
+  .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+  .empty-state h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .empty-state p { font-size: 14px; color: var(--text-muted); }
+
+  /* ===== 需求详情侧边栏 ===== */
+  .drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 500; }
+  .drawer-overlay.open { display: block; }
+  .drawer { position: fixed; right: 0; top: 0; bottom: 0; width: 560px; background: white; box-shadow: -4px 0 20px rgba(0,0,0,0.1); z-index: 501; transform: translateX(100%); transition: transform 0.3s ease; overflow-y: auto; }
+  .drawer.open { transform: translateX(0); }
+  .drawer-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: white; z-index: 1; }
+  .drawer-body { padding: 24px; }
+
+  /* ===== 文案对比 ===== */
+  .compare-view { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+  .compare-panel { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .compare-panel h4 { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+  .compare-panel .content { font-size: 14px; line-height: 1.8; color: var(--text); white-space: pre-line; }
+  .compare-panel.rejected { border-color: var(--danger); background: #fff5f5; }
+  .compare-panel.new { border-color: var(--success); background: #f0fdf4; }
+
+  /* ===== 筛选栏 ===== */
+  .filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-tabs { display: flex; background: white; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+  .filter-tab { padding: 8px 16px; font-size: 13px; cursor: pointer; color: var(--text-muted); border-right: 1px solid var(--border); transition: var(--transition); }
+  .filter-tab:last-child { border-right: none; }
+  .filter-tab.active { background: var(--primary); color: white; }
+  .filter-tab:hover:not(.active) { background: var(--bg); }
+  .search-input-wrap { position: relative; flex: 1; max-width: 280px; }
+  .search-input-wrap input { padding: 8px 14px 8px 36px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; outline: none; width: 100%; background: white; }
+  .search-input-wrap input:focus { border-color: var(--primary); }
+  .search-input-wrap::before { content: '🔍'; position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; }
+
+  /* ===== 进度条 ===== */
+  .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width 0.5s ease; }
+
+  /* ===== 滚动 ===== */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+  /* ===== 高亮动画 ===== */
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+  .pulse { animation: pulse 2s infinite; }
+
+  /* ===== 徽章数字 ===== */
+  .notification-dot { width: 8px; height: 8px; background: var(--danger); border-radius: 50%; }
+
+  /* ===== 快捷提示 ===== */
+  .shortcut-hint { font-size: 11px; color: var(--text-light); background: var(--bg); border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+
+  /* ===== 信息行 ===== */
+  .info-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--bg); }
+  .info-row:last-child { border-bottom: none; }
+  .info-row .info-label { width: 100px; font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+  .info-row .info-value { font-size: 13px; color: var(--text); }
+
+  /* ===== 加载状态 ===== */
+  .skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200%; animation: shimmer 1.5s infinite; border-radius: 6px; }
+  @keyframes shimmer { 0% { background-position: 200%; } 100% { background-position: -200%; } }
+
+  /* ===== 响应式 ===== */
+  @media (max-width: 1200px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .dashboard-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .main-content { margin-left: 0; }
+    .chat-sidebar { display: none; }
+    .review-layout { flex-direction: column; height: auto; }
+    .review-right { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== 通知容器 ===== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ===== 登录页 ===== -->
+<div id="page-login" class="page active">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-icon">✨</div>
+      <h1>产品营销智能助手</h1>
+      <p>多角色协作 · AI驱动 · 全流程管理</p>
+    </div>
+    
+    <p style="font-size:14px;color:var(--text-muted);margin-bottom:12px;font-weight:500;">选择您的角色</p>
+    <div class="role-grid">
+      <div class="role-card" onclick="selectRole('sales', this)">
+        <div class="role-icon">📋</div>
+        <div class="role-name">需求方</div>
+        <div class="role-desc">销售 / 运营</div>
+      </div>
+      <div class="role-card" onclick="selectRole('writer', this)">
+        <div class="role-icon">✍️</div>
+        <div class="role-name">文案方</div>
+        <div class="role-desc">创作 / AI协同</div>
+      </div>
+      <div class="role-card" onclick="selectRole('reviewer', this)">
+        <div class="role-icon">🔍</div>
+        <div class="role-name">审核方</div>
+        <div class="role-desc">法务 / 品牌</div>
+      </div>
+    </div>
+
+    <div class="demo-accounts">
+      <h4>🎯 演示账号</h4>
+      <div class="demo-account"><span>需求方 / 王晓明</span><span>销售总监</span></div>
+      <div class="demo-account"><span>文案方 / 李雅文</span><span>高级文案</span></div>
+      <div class="demo-account"><span>审核方 / 张品牌</span><span>品牌主管</span></div>
+    </div>
+
+    <button class="btn btn-primary btn-block btn-lg" onclick="doLogin()" id="loginBtn" disabled>
+      🚀 进入系统
+    </button>
+    <p style="text-align:center;margin-top:12px;font-size:12px;color:var(--text-light);">选择角色后即可进入完整演示流程</p>
+  </div>
+</div>
+
+<!-- ===== 主应用 ===== -->
+<div id="page-app" class="page" style="flex-direction:row;">
+  
+  <!-- 侧边导航 -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo">✨</div>
+      <div class="logo-text">
+        <h3>营销智能助手</h3>
+        <p id="sidebar-role-label">--</p>
+      </div>
+    </div>
+    <div class="sidebar-nav" id="sidebarNav">
+      <!-- 导航项由JS动态生成 -->
+    </div>
+    <div class="sidebar-user">
+      <div class="avatar" id="sidebar-avatar" style="background:var(--primary);">王</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebar-username">--</div>
+        <div class="user-role" id="sidebar-user-role">--</div>
+      </div>
+      <div class="logout-btn" onclick="logout()" title="退出登录">⬅️</div>
+    </div>
+  </nav>
+
+  <!-- 主内容 -->
+  <div class="main-content">
+    
+    <!-- 仪表盘 -->
+    <div id="view-dashboard" class="view">
+      <div class="page-header">
+        <div class="page-title">
+          <h2 id="dash-greeting">早上好，王晓明 👋</h2>
+          <p id="dash-subtitle">今日有 3 项待办任务需要处理</p>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <span style="font-size:13px;color:var(--text-muted);background:var(--bg);padding:8px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);">📅 2026年4月14日 周二</span>
+        </div>
+      </div>
+      <div class="page-body">
+
+        <!-- AI 智能助手入口 Banner -->
+        <div class="ai-banner" onclick="openSceneSelector()">
+          <div class="ai-banner-icon">🤖</div>
+          <div class="ai-banner-info">
+            <h3>AI 智能营销助手</h3>
+            <div style="display:flex;align-items:center;flex-wrap:wrap;margin-top:4px;">
+              <span class="ai-banner-tag"><span class="dot"></span>在线</span>
+              <span style="font-size:12px;color:rgba(255,255,255,0.8);">4大场景一键生成 · Title TD · Listing 7张图卖点 · 视频脚本 · FAQ</span>
+            </div>
+          </div>
+          <div class="ai-banner-actions" onclick="event.stopPropagation()">
+            <button class="ai-banner-btn ai-banner-btn-primary" onclick="openSceneSelector()">立即开始创作 →</button>
+          </div>
+        </div>
+
+        <!-- AI 场景快捷入口 -->
+        <div class="section-header" style="margin-bottom:12px;">
+          <span class="section-title">⚡ AI 场景快捷入口</span>
+        </div>
+        <div class="ai-scene-grid">
+          <div class="ai-scene-card" onclick="enterScene('title_td')">
+            <div class="ai-scene-icon">🏷️</div>
+            <div class="ai-scene-name">Title TD</div>
+            <div class="ai-scene-desc">平台标题优化，关键词密度分析</div>
+            <span class="ai-scene-tag tag-hot">🔥 最热</span>
+          </div>
+          <div class="ai-scene-card" onclick="enterScene('listing')">
+            <div class="ai-scene-icon">🖼️</div>
+            <div class="ai-scene-name">Listing 7张图卖点</div>
+            <div class="ai-scene-desc">电商图位结构化卖点文案</div>
+            <span class="ai-scene-tag tag-hot">🔥 热门</span>
+          </div>
+          <div class="ai-scene-card" onclick="enterScene('video')">
+            <div class="ai-scene-icon">🎬</div>
+            <div class="ai-scene-name">视频脚本</div>
+            <div class="ai-scene-desc">分镜脚本 + 口播稿全文</div>
+            <span class="ai-scene-tag tag-new">✨ 新</span>
+          </div>
+          <div class="ai-scene-card" onclick="enterScene('faq')">
+            <div class="ai-scene-icon">❓</div>
+            <div class="ai-scene-name">FAQ</div>
+            <div class="ai-scene-desc">产品问答库，覆盖全场景疑问</div>
+            <span class="ai-scene-tag tag-new">✨ 新</span>
+          </div>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="stats-grid" id="statsGrid">
+          <!-- JS动态生成 -->
+        </div>
+
+        <!-- 工作流追踪 -->
+        <div class="workflow-tracker">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-size:15px;font-weight:600;color:var(--text);">📌 当前演示流程：双十一促销活动文案</div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">完整演示：需求提交 → BU长审核 → AI生成 → 审核 → 驳回 → 修改 → 通过</div>
+            </div>
+            <span class="badge badge-primary">进行中</span>
+          </div>
+          <div class="workflow-steps" style="margin-top:20px;">
+            <div class="workflow-line" id="workflowLine" style="width:0%"></div>
+            <div class="wf-step done" id="wf-1">
+              <div class="wf-dot"></div>
+              <div class="wf-step-label">需求提交</div>
+            </div>
+            <div class="wf-step done" id="wf-2">
+              <div class="wf-dot"></div>
+              <div class="wf-step-label">BU长审核</div>
+            </div>
+            <div class="wf-step done" id="wf-3">
+              <div class="wf-dot"></div>
+              <div class="wf-step-label">AI生成</div>
+            </div>
+            <div class="wf-step active" id="wf-4">
+              <div class="wf-dot">🔍</div>
+              <div class="wf-step-label">品牌审核</div>
+            </div>
+            <div class="wf-step" id="wf-5">
+              <div class="wf-dot">🔄</div>
+              <div class="wf-step-label">修改中</div>
+            </div>
+            <div class="wf-step" id="wf-6">
+              <div class="wf-dot">✅</div>
+              <div class="wf-step-label">已发布</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <!-- 待办任务 -->
+          <div>
+            <div class="section-header">
+              <span class="section-title">📋 待办任务</span>
+              <a class="btn btn-ghost btn-sm" onclick="navigateTo('demands')">查看全部</a>
+            </div>
+            <div class="task-list" id="todoList">
+              <!-- JS动态生成 -->
+            </div>
+          </div>
+          <!-- 最近动态 -->
+          <div>
+            <div class="section-header">
+              <span class="section-title">🔔 最近动态</span>
+            </div>
+            <div class="card" style="padding:0;overflow:hidden;">
+              <div id="activityFeed" style="padding:0;">
+                <!-- JS动态生成 -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 需求管理 -->
+    <div id="view-demands" class="view" style="display:none;">
+      <div class="page-header">
+        <div class="page-title">
+          <h2>需求管理</h2>
+          <p>管理所有文案需求，追踪进度状态</p>
+        </div>
+        <button class="btn btn-primary" onclick="navigateTo('new-demand')">+ 新建需求</button>
+      </div>
+      <div class="page-body">
+        <div class="filter-bar">
+          <div class="filter-tabs">
+            <div class="filter-tab active" onclick="filterDemands('all',this)">全部 <span style="font-size:11px;background:#e2e8f0;padding:1px 6px;border-radius:10px;margin-left:4px;">5</span></div>
+            <div class="filter-tab" onclick="filterDemands('pending',this)">待处理</div>
+            <div class="filter-tab" onclick="filterDemands('writing',this)">创作中</div>
+            <div class="filter-tab" onclick="filterDemands('reviewing',this)">审核中</div>
+            <div class="filter-tab" onclick="filterDemands('done',this)">已完成</div>
+          </div>
+          <div class="search-input-wrap">
+            <input type="text" placeholder="搜索需求...">
+          </div>
+          <div style="margin-left:auto;display:flex;gap:8px;">
+            <select class="form-select" style="width:auto;padding:8px 12px;font-size:13px;">
+              <option>全部类型</option>
+              <option>促销活动</option>
+              <option>品牌推广</option>
+              <option>产品上新</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="demand-table">
+          <div class="table-header">
+            <div>需求名称</div>
+            <div>类型</div>
+            <div>优先级</div>
+            <div>状态</div>
+            <div>操作</div>
+          </div>
+          <div id="demandTableBody">
+            <!-- JS动态生成 -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 新建需求表单 -->
+    <div id="view-new-demand" class="view" style="display:none;">
+      <div class="page-header">
+        <div class="page-title">
+          <h2>📝 新建文案需求</h2>
+          <p>填写详细需求信息，提交后将自动流转至文案创作</p>
+        </div>
+        <button class="btn btn-secondary" onclick="navigateTo('demands')">← 返回列表</button>
+      </div>
+      <div class="page-body">
+        <div style="max-width:820px;">
+          <!-- 步骤指示器 -->
+          <div class="step-indicator" id="demandSteps">
+            <div class="step active" id="form-step-1">
+              <div class="step-dot">1</div>
+              <div class="step-label">基本信息</div>
+              <div class="step-line"></div>
+            </div>
+            <div class="step" id="form-step-2">
+              <div class="step-dot">2</div>
+              <div class="step-label">内容要求</div>
+              <div class="step-line"></div>
+            </div>
+            <div class="step" id="form-step-3">
+              <div class="step-dot">3</div>
+              <div class="step-label">附件与提交</div>
+            </div>
+          </div>
+
+          <!-- 步骤1：基本信息 -->
+          <div class="form-card" id="form-panel-1">
+            <div class="form-card-header">
+              <div style="width:32px;height:32px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">1</div>
+              <div>
+                <div style="font-size:15px;font-weight:600;">基本信息</div>
+                <div style="font-size:12px;color:var(--text-muted);">填写活动基本信息和目标受众</div>
+              </div>
+            </div>
+            <div class="form-card-body">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">活动名称 <span class="required">*</span></label>
+                  <input type="text" class="form-input" id="f-name" placeholder="例：双十一全场五折促销活动" value="双十一全场五折限时促销">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">活动类型 <span class="required">*</span></label>
+                  <select class="form-select" id="f-type">
+                    <option value="">请选择...</option>
+                    <option selected>促销活动</option>
+                    <option>品牌推广</option>
+                    <option>产品上新</option>
+                    <option>节日营销</option>
+                    <option>会员专属</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">活动时间 <span class="required">*</span></label>
+                  <input type="text" class="form-input" id="f-time" value="2026年11月1日 - 11月11日">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">投放渠道 <span class="required">*</span></label>
+                  <select class="form-select" id="f-channel">
+                    <option>微信公众号 + 朋友圈</option>
+                    <option>微博</option>
+                    <option>抖音</option>
+                    <option>全渠道</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">目标人群 <span class="required">*</span></label>
+                <div class="tag-input" id="audienceTags" onclick="document.getElementById('audienceInput').focus()">
+                  <span class="tag">25-35岁女性 <span onclick="removeTag(this)" style="cursor:pointer;margin-left:4px;opacity:0.6;">×</span></span>
+                  <span class="tag">一二线城市 <span onclick="removeTag(this)" style="cursor:pointer;margin-left:4px;opacity:0.6;">×</span></span>
+                  <span class="tag">月收入1万+ <span onclick="removeTag(this)" style="cursor:pointer;margin-left:4px;opacity:0.6;">×</span></span>
+                  <input type="text" id="audienceInput" placeholder="输入后按Enter添加..." onkeydown="addTag(event, 'audienceTags', this)">
+                </div>
+                <div class="form-hint">按 Enter 添加标签</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">优先级</label>
+                <div style="display:flex;gap:8px;">
+                  <div class="risk-option high selected" onclick="selectPriority(this,'high')" style="flex:1;">🔴 紧急</div>
+                  <div class="risk-option mid" onclick="selectPriority(this,'mid')" style="color:var(--warning);flex:1;" id="pri-mid">🟡 高优</div>
+                  <div class="risk-option low" onclick="selectPriority(this,'normal')" style="color:var(--success);flex:1;" id="pri-normal">🟢 普通</div>
+                </div>
+              </div>
+            </div>
+            <div class="form-card-footer">
+              <span style="font-size:12px;color:var(--text-muted);">* 为必填项</span>
+              <button class="btn btn-primary" onclick="goFormStep(2)">下一步：内容要求 →</button>
+            </div>
+          </div>
+
+          <!-- 步骤2：内容要求 -->
+          <div class="form-card" id="form-panel-2" style="display:none;">
+            <div class="form-card-header">
+              <div style="width:32px;height:32px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">2</div>
+              <div>
+                <div style="font-size:15px;font-weight:600;">内容要求</div>
+                <div style="font-size:12px;color:var(--text-muted);">描述文案内容需求、风格和限制</div>
+              </div>
+            </div>
+            <div class="form-card-body">
+              <div class="form-group">
+                <label class="form-label">产品卖点 <span class="required">*</span></label>
+                <div class="tag-input" id="sellingPoints" onclick="document.getElementById('sellInput').focus()">
+                  <span class="tag">全场五折 <span onclick="removeTag(this)" style="cursor:pointer;margin-left:4px;opacity:0.6;">×</span></span>
+                  <span class="tag">限时72小时 <span onclick="removeTag(this)" style="cursor:pointer;margin-left:4px;opacity:0.6;">×</span></span>
+                  <span class="tag">满200减50 <span onclick="removeTag(this)" style="cursor:pointer;margin-left:4px;opacity:0.6;">×</span></span>
+                  <span class="tag">免费包邮 <span onclick="removeTag(this)" style="cursor:pointer;margin-left:4px;opacity:0.6;">×</span></span>
+                  <input type="text" id="sellInput" placeholder="输入卖点后按Enter..." onkeydown="addTag(event, 'sellingPoints', this)">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">文案类型 <span class="required">*</span></label>
+                  <select class="form-select">
+                    <option>标题+正文（完整版）</option>
+                    <option>仅标题（多版本）</option>
+                    <option>朋友圈文案</option>
+                    <option>Banner文案</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">字数要求</label>
+                  <select class="form-select" id="f-wordcount">
+                    <option>100-200字</option>
+                    <option selected>200-300字</option>
+                    <option>300-500字</option>
+                    <option>500字以上</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">语气风格 <span class="required">*</span></label>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;">
+                  <div class="risk-option mid selected" onclick="toggleStyle(this)" style="color:var(--warning);">💫 活泼热情</div>
+                  <div class="risk-option" onclick="toggleStyle(this)" style="color:var(--text);">🎯 专业权威</div>
+                  <div class="risk-option" onclick="toggleStyle(this)" style="color:var(--text);">🌸 温柔细腻</div>
+                  <div class="risk-option mid selected" onclick="toggleStyle(this)" style="color:var(--warning);">⚡ 简洁有力</div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">生成版本数量</label>
+                <input type="range" class="range-slider" min="1" max="5" value="3" id="versionCount" oninput="document.getElementById('versionCountLabel').textContent=this.value+'个版本'">
+                <div class="slider-labels">
+                  <span>1个版本</span>
+                  <span id="versionCountLabel" style="color:var(--primary);font-weight:600;">3个版本</span>
+                  <span>5个版本</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">禁止词/敏感词 <span class="optional">（选填）</span></label>
+                <input type="text" class="form-input" placeholder="例：绝对、最好、第一、保证..." value="绝对第一、完美无瑕、100%">
+              </div>
+              <div class="form-group">
+                <label class="form-label">参考案例 / 背景说明 <span class="optional">（选填）</span></label>
+                <textarea class="form-textarea" placeholder="可粘贴参考文案、活动详情或补充说明..." style="min-height:80px;">去年双十一同类活动文案风格偏向年轻化、活泼，受众反馈很好，本次希望延续该风格并突出限时感。</textarea>
+              </div>
+            </div>
+            <div class="form-card-footer">
+              <button class="btn btn-secondary" onclick="goFormStep(1)">← 上一步</button>
+              <button class="btn btn-primary" onclick="goFormStep(3)">下一步：附件与提交 →</button>
+            </div>
+          </div>
+
+          <!-- 步骤3：附件与提交 -->
+          <div class="form-card" id="form-panel-3" style="display:none;">
+            <div class="form-card-header">
+              <div style="width:32px;height:32px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">3</div>
+              <div>
+                <div style="font-size:15px;font-weight:600;">附件与提交</div>
+                <div style="font-size:12px;color:var(--text-muted);">上传参考素材，确认提交</div>
+              </div>
+            </div>
+            <div class="form-card-body">
+              <div class="form-group">
+                <label class="form-label">参考素材上传 <span class="optional">（选填）</span></label>
+                <div class="upload-zone" onclick="simulateUpload()">
+                  <div class="upload-icon">📁</div>
+                  <div class="upload-text">
+                    <strong>点击上传</strong> 或拖拽文件到此处
+                    <div style="font-size:12px;margin-top:4px;">支持 JPG、PNG、PDF、DOC，单文件不超过10MB</div>
+                  </div>
+                </div>
+                <div id="uploadedFiles" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;"></div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">截止时间 <span class="required">*</span></label>
+                <input type="datetime-local" class="form-input" value="2026-10-25T17:00">
+              </div>
+              <div class="form-group">
+                <label class="form-label">指派文案人员 <span class="optional">（选填）</span></label>
+                <select class="form-select">
+                  <option value="">系统自动分配</option>
+                  <option selected>李雅文（高级文案）</option>
+                  <option>赵小明（中级文案）</option>
+                </select>
+              </div>
+              <!-- 需求摘要预览 -->
+              <div style="background:var(--primary-light);border:1px solid var(--primary);border-radius:var(--radius);padding:16px;margin-top:8px;">
+                <div style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:10px;">📋 需求摘要预览</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px;">
+                  <div><span style="color:var(--text-muted);">活动：</span><span>双十一全场五折限时促销</span></div>
+                  <div><span style="color:var(--text-muted);">类型：</span><span>促销活动</span></div>
+                  <div><span style="color:var(--text-muted);">目标：</span><span>25-35岁女性，一二线城市</span></div>
+                  <div><span style="color:var(--text-muted);">字数：</span><span>200-300字</span></div>
+                  <div><span style="color:var(--text-muted);">风格：</span><span>活泼热情、简洁有力</span></div>
+                  <div><span style="color:var(--text-muted);">版本：</span><span>3个版本</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="form-card-footer">
+              <button class="btn btn-secondary" onclick="goFormStep(2)">← 上一步</button>
+              <button class="btn btn-primary btn-lg" onclick="submitDemand()">🚀 提交需求</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI文案生成 -->
+    <div id="view-chat" class="view" style="display:none;flex-direction:column;">
+      <!-- 页头 -->
+      <div class="page-header" style="background:white;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button class="btn btn-secondary btn-sm" onclick="exitChat()" style="padding:6px 14px;gap:5px;">← 返回</button>
+          <div class="page-title">
+            <h2 id="chatPageTitle">🤖 AI 智能营销助手</h2>
+            <p id="chatPageSubtitle">选择场景，与AI协同创作高质量营销内容</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="badge badge-success" style="display:flex;align-items:center;gap:4px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:#10b981;display:inline-block;"></span>AI在线
+          </span>
+          <span id="chatSceneBadge" class="badge badge-primary" style="display:none;"></span>
+          <button class="btn btn-ghost btn-sm" onclick="openSceneSelector()">🎯 切换场景</button>
+          <button class="btn btn-secondary btn-sm" onclick="openCompare()" id="btnCompare" style="display:none;">🔍 对比版本</button>
+          <button class="btn btn-success btn-sm" onclick="submitForReview()" id="btnSubmit" style="display:none;">📤 提交审核</button>
+        </div>
+      </div>
+      <div class="chat-layout">
+        <!-- 左侧：待处理任务 -->
+        <div class="chat-sidebar">
+          <div class="chat-sidebar-header" style="padding:13px 16px;">
+            <h3 style="margin:0;font-size:13px;font-weight:600;color:var(--text);">📋 待处理任务</h3>
+            <span class="badge badge-danger" id="chatTodoBadge" style="font-size:10px;"></span>
+          </div>
+          <div id="chatTodoList" style="flex:1;overflow-y:auto;">
+            <!-- JS 动态生成 -->
+          </div>
+        </div>
+
+        <!-- 右侧：对话主区域 -->
+        <div class="chat-main">
+          <div class="messages" id="chatMessages">
+            <!-- 对话消息由JS生成 -->
+          </div>
+
+          <div class="chat-input-area">
+            <div class="quick-prompts" id="quickPrompts"></div>
+            <div class="input-wrapper">
+              <textarea class="chat-input" id="chatInput" placeholder="选择左侧任务，或直接描述您的创作需求..." rows="1" onkeydown="handleChatKeydown(event)" oninput="autoResize(this)"></textarea>
+              <button class="send-btn" onclick="sendChatMessage()">➤</button>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
+              <span style="font-size:11px;color:var(--text-light);">Enter 发送 · Shift+Enter 换行</span>
+              <span style="font-size:11px;color:var(--text-muted);" id="chatRoundInfo">AI模型：GPT-4o</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 审核管理 -->
+    <div id="view-review" class="view" style="display:none;">
+      <div class="page-header">
+        <div class="page-title">
+          <h2>🔍 审核管理</h2>
+          <p>审查文案内容，确保合规与质量</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="badge badge-warning">待审核 2</span>
+          <select class="form-select" style="width:auto;font-size:13px;padding:8px 12px;">
+            <option>全部审核任务</option>
+            <option>待我审核</option>
+            <option>已审核</option>
+          </select>
+        </div>
+      </div>
+      <div class="page-body" style="padding-top:16px;">
+        <!-- 审核任务列表 -->
+        <div id="reviewList">
+          <!-- JS动态生成 -->
+        </div>
+        <!-- 审核详情 -->
+        <div id="reviewDetail" style="display:none;">
+          <button class="btn btn-secondary btn-sm" onclick="backToReviewList()" style="margin-bottom:16px;">← 返回列表</button>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+            <h3 style="font-size:16px;font-weight:700;">双十一全场五折限时促销 · 版本A</h3>
+            <span class="badge badge-warning">待审核</span>
+            <span style="margin-left:auto;font-size:13px;color:var(--text-muted);">提交人：李雅文 · 2小时前</span>
+          </div>
+          <div class="review-layout">
+            <!-- 左：文案内容 -->
+            <div class="review-left">
+              <div class="copy-view">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                  <h3>📄 文案内容</h3>
+                  <div class="copy-versions">
+                    <div class="version-tab active" onclick="switchReviewVersion(this,'A')">版本A</div>
+                    <div class="version-tab" onclick="switchReviewVersion(this,'B')">版本B</div>
+                    <div class="version-tab" onclick="switchReviewVersion(this,'C')">版本C</div>
+                  </div>
+                </div>
+                <div class="copy-content" id="reviewCopyContent">
+【标题】五折！72小时限时抢！双十一年度最大折扣来了
+
+亲爱的你，等这一天等了多久？
+
+双十一，我们给你最真实的诚意——<span class="annotation-mark" title="法务注意：勿使用绝对化表述" onclick="showAnnotation(this)">全场商品五折起</span>，不玩套路，不设门槛！
+
+🔥 三重福利叠加：
+✅ 全场5折，买就是赚
+✅ 满200立减50，直接到手价
+✅ 全场包邮，省心省力
+
+⏰ 重要：活动仅限72小时！
+
+11月1日0点准时开抢，11月11日23:59结束。错过这波，再等一年！
+
+📱 立即打开App，提前加购，<span class="annotation-mark" title="建议改为：早点加购更划算" onclick="showAnnotation(this)">一键抢购不手软</span>！
+
+你喜欢的，都在这里。你期待的，都打五折。
+
+现在加购物车，11月1日0点自动付款，省心又省钱 💖
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;">
+                  <div style="display:flex;gap:8px;">
+                    <span style="font-size:12px;color:var(--text-muted);">📊 字数：218字</span>
+                    <span style="font-size:12px;color:var(--text-muted);">|</span>
+                    <span style="font-size:12px;color:var(--text-muted);">🎯 风格：活泼热情</span>
+                  </div>
+                  <button class="btn btn-secondary btn-sm" onclick="addAnnotation()">+ 添加批注</button>
+                </div>
+              </div>
+
+              <!-- 原始需求摘要 -->
+              <div class="copy-view">
+                <h3 style="margin-bottom:12px;">📋 原始需求摘要</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                  <div class="info-row">
+                    <span class="info-label">活动名称</span>
+                    <span class="info-value">双十一全场五折限时促销</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">目标人群</span>
+                    <span class="info-value">25-35岁女性，一二线城市</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">核心卖点</span>
+                    <span class="info-value">全场五折、限时72小时</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">禁止词</span>
+                    <span class="info-value" style="color:var(--danger);">绝对第一等绝对化词</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 批注列表 -->
+              <div class="copy-view" id="annotationPanel">
+                <h3 style="margin-bottom:12px;">💬 批注与意见</h3>
+                <div style="display:flex;flex-direction:column;gap:10px;" id="annotationList">
+                  <div style="background:var(--bg);border-radius:var(--radius-sm);padding:12px;border-left:3px solid var(--warning);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                      <span style="font-size:13px;font-weight:600;">法务风险提示</span>
+                      <span class="badge badge-warning">风险</span>
+                    </div>
+                    <div style="font-size:13px;color:var(--text);">"全场商品五折起"中"起"字可保留，但需确认确实是五折起，非所有商品均五折。</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">张品牌 · 刚刚</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 右：审核表单 -->
+            <div class="review-right">
+              <div class="review-form-card">
+                <h3>⚖️ 审核决策</h3>
+                
+                <div class="form-group">
+                  <label class="form-label">风险等级评估</label>
+                  <div class="risk-selector">
+                    <div class="risk-option low" onclick="selectRisk(this,'low')">🟢 低风险</div>
+                    <div class="risk-option mid selected" onclick="selectRisk(this,'mid')">🟡 中风险</div>
+                    <div class="risk-option high" onclick="selectRisk(this,'high')">🔴 高风险</div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">审核维度评分</label>
+                  <div style="display:flex;flex-direction:column;gap:8px;">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <span style="font-size:12px;color:var(--text-muted);width:60px;">合规性</span>
+                      <div class="progress-bar" style="flex:1;">
+                        <div class="progress-fill" style="width:70%;background:var(--warning);"></div>
+                      </div>
+                      <span style="font-size:12px;font-weight:600;color:var(--warning);">70</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <span style="font-size:12px;color:var(--text-muted);width:60px;">创意度</span>
+                      <div class="progress-bar" style="flex:1;">
+                        <div class="progress-fill" style="width:88%;"></div>
+                      </div>
+                      <span style="font-size:12px;font-weight:600;color:var(--primary);">88</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <span style="font-size:12px;color:var(--text-muted);width:60px;">符合度</span>
+                      <div class="progress-bar" style="flex:1;">
+                        <div class="progress-fill" style="width:92%;"></div>
+                      </div>
+                      <span style="font-size:12px;font-weight:600;color:var(--primary);">92</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <span style="font-size:12px;color:var(--text-muted);width:60px;">吸引力</span>
+                      <div class="progress-bar" style="flex:1;">
+                        <div class="progress-fill" style="width:85%;"></div>
+                      </div>
+                      <span style="font-size:12px;font-weight:600;color:var(--primary);">85</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">审核意见 <span class="required">*</span></label>
+                  <textarea class="form-textarea" id="reviewComment" style="min-height:90px;" placeholder="填写详细审核意见...">文案整体风格活泼、符合目标用户定位，限时感强。
+
+主要问题：
+1. "全场商品五折起"需法务确认活动范围，避免引发客诉
+2. "一键抢购不手软"表述过于口语化，建议优化为更品牌化的表述</textarea>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">修改截止时间</label>
+                  <input type="datetime-local" class="form-input" value="2026-10-26T12:00">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">抄送人员 <span class="optional">（选填）</span></label>
+                  <input type="text" class="form-input" placeholder="输入人员姓名..." value="王晓明（需求方）">
+                </div>
+
+                <div class="review-actions">
+                  <button class="btn btn-success btn-block" onclick="approveReview()">✅ 审核通过</button>
+                  <button class="btn btn-danger btn-block" onclick="rejectReview()">❌ 驳回修改</button>
+                  <button class="btn btn-secondary btn-block" onclick="requestInfo()">❓ 追加信息</button>
+                </div>
+              </div>
+
+              <!-- 审核历史 -->
+              <div style="background:white;border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-top:16px;">
+                <h3 style="font-size:14px;font-weight:600;margin-bottom:12px;">📌 审核历史</h3>
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                  <div style="display:flex;gap:10px;align-items:flex-start;">
+                    <div class="avatar" style="background:#10b981;width:28px;height:28px;font-size:11px;">李</div>
+                    <div>
+                      <div style="font-size:12px;font-weight:600;">李雅文 提交文案</div>
+                      <div style="font-size:11px;color:var(--text-muted);">2小时前</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:10px;align-items:flex-start;">
+                    <div class="avatar" style="background:var(--primary);width:28px;height:28px;font-size:11px;">王</div>
+                    <div>
+                      <div style="font-size:12px;font-weight:600;">王晓明 确认需求</div>
+                      <div style="font-size:11px;color:var(--text-muted);">4小时前</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 归档/发布 -->
+    <div id="view-archive" class="view" style="display:none;">
+      <div class="page-header">
+        <div class="page-title"><h2>📦 已发布文案库</h2><p>已审核通过并发布的文案存档</p></div>
+        <button class="btn btn-secondary">📥 导出</button>
+      </div>
+      <div class="page-body">
+        <div class="demand-table">
+          <div class="table-header" style="grid-template-columns:2fr 1fr 1fr 1fr 100px;">
+            <div>文案标题</div><div>活动类型</div><div>发布时间</div><div>效果评分</div><div>操作</div>
+          </div>
+          <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 100px;">
+            <div><div class="demand-name">618购物节年中大促</div><div class="demand-name-sub">微信公众号 + 朋友圈</div></div>
+            <div><span class="badge badge-primary">促销活动</span></div>
+            <div style="font-size:13px;color:var(--text-muted);">2026-06-01</div>
+            <div><span style="color:var(--success);font-weight:600;">⭐ 4.8</span></div>
+            <div><button class="btn btn-ghost btn-sm">查看</button></div>
+          </div>
+          <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 100px;">
+            <div><div class="demand-name">品牌焕新春季主题</div><div class="demand-name-sub">微博 + 抖音</div></div>
+            <div><span class="badge badge-purple">品牌推广</span></div>
+            <div style="font-size:13px;color:var(--text-muted);">2026-03-15</div>
+            <div><span style="color:var(--success);font-weight:600;">⭐ 4.6</span></div>
+            <div><button class="btn btn-ghost btn-sm">查看</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /page-app -->
+
+<!-- ===== 需求详情抽屉 ===== -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <h3 style="font-size:16px;font-weight:700;" id="drawerTitle">需求详情</h3>
+    <button class="modal-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawerBody">
+    <!-- 动态填充 -->
+  </div>
+</div>
+
+<!-- ===== BU长审核弹窗 ===== -->
+<!-- ===== 场景选择弹窗 ===== -->
+<div class="modal-overlay" id="modal-scene-select">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-header">
+      <div class="modal-title">🎯 选择创作场景</div>
+      <button class="modal-close" onclick="closeModal('modal-scene-select')">✕</button>
+    </div>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">选择您要创作的营销场景，AI将根据场景精准生成内容，支持多轮迭代优化</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;" id="sceneSelectGrid">
+      <div class="scene-select-card" id="ssc-title_td" onclick="selectScene('title_td')">
+        <div style="font-size:28px;margin-bottom:8px;">🏷️</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">Title TD</div>
+        <div style="font-size:12px;color:var(--text-muted);">平台标题优化，关键词分析，字符数检查</div>
+        <span class="badge badge-danger" style="position:absolute;top:10px;right:10px;font-size:10px;">🔥 最热</span>
+      </div>
+      <div class="scene-select-card" id="ssc-listing" onclick="selectScene('listing')">
+        <div style="font-size:28px;margin-bottom:8px;">🖼️</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">Listing 7张图卖点</div>
+        <div style="font-size:12px;color:var(--text-muted);">按图位结构输出主标题+卖点支撑文案</div>
+        <span class="badge badge-warning" style="position:absolute;top:10px;right:10px;font-size:10px;">🔥 热门</span>
+      </div>
+      <div class="scene-select-card" id="ssc-video" onclick="selectScene('video')">
+        <div style="font-size:28px;margin-bottom:8px;">🎬</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">视频脚本</div>
+        <div style="font-size:12px;color:var(--text-muted);">分镜脚本+口播稿全文+发布标题备选</div>
+        <span class="badge badge-success" style="position:absolute;top:10px;right:10px;font-size:10px;">✨ 新</span>
+      </div>
+      <div class="scene-select-card" id="ssc-faq" onclick="selectScene('faq')">
+        <div style="font-size:28px;margin-bottom:8px;">❓</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">FAQ</div>
+        <div style="font-size:12px;color:var(--text-muted);">产品问答库，覆盖使用/售后/对比等疑问</div>
+        <span class="badge badge-success" style="position:absolute;top:10px;right:10px;font-size:10px;">✨ 新</span>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid var(--border);">
+      <span id="sceneSelectHint" style="font-size:13px;color:var(--text-muted);">请选择一个场景</span>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-scene-select')">取消</button>
+        <button class="btn btn-primary" id="btnConfirmScene" onclick="confirmScene()" disabled>开始创作 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-bu-review">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">👔 BU长需求审核</div>
+      <button class="modal-close" onclick="closeModal('modal-bu-review')">✕</button>
+    </div>
+    <div style="background:var(--primary-light);border:1px solid var(--primary);border-radius:var(--radius);padding:14px;margin-bottom:18px;">
+      <div style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:6px;">📋 需求方已提交新需求，等待您的审核</div>
+      <div style="font-size:12px;color:var(--text-muted);">审核通过后需求将流转至文案方，AI自动初始化创作会话</div>
+    </div>
+    <div style="background:var(--bg);border-radius:var(--radius);padding:16px;margin-bottom:18px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px;">需求摘要</div>
+      <div class="info-row"><span class="info-label">活动名称</span><span class="info-value" style="font-weight:600;">双十一全场五折限时促销</span></div>
+      <div class="info-row"><span class="info-label">活动类型</span><span class="info-value"><span class="badge badge-primary">促销活动</span></span></div>
+      <div class="info-row"><span class="info-label">目标人群</span><span class="info-value">25-35岁女性，一二线城市，月收入1万+</span></div>
+      <div class="info-row"><span class="info-label">投放渠道</span><span class="info-value">微信公众号 + 朋友圈</span></div>
+      <div class="info-row"><span class="info-label">需求方</span><span class="info-value">王晓明（销售总监）</span></div>
+      <div class="info-row"><span class="info-label">截止时间</span><span class="info-value" style="color:var(--danger);">⏰ 2026-10-25 17:00</span></div>
+      <div class="info-row"><span class="info-label">优先级</span><span class="info-value"><span class="badge badge-danger">🔴 紧急</span></span></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">BU长审核意见 <span class="optional">（选填）</span></label>
+      <textarea class="form-textarea" id="buReviewComment" style="min-height:70px;" placeholder="可填写建议或备注，通过后将同步给文案方...">需求方向清晰，卖点明确，同意立项。请文案方注意禁止词使用，突出限时感。</textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">指定文案负责人</label>
+      <select class="form-select">
+        <option selected>李雅文（高级文案）</option>
+        <option>赵小明（中级文案）</option>
+        <option>系统自动分配</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-secondary" onclick="closeModal('modal-bu-review')">稍后处理</button>
+      <button class="btn btn-danger" onclick="rejectBU()">❌ 驳回需求</button>
+      <button class="btn btn-success" onclick="approveBU()">✅ 审核通过</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 提交审核确认弹窗 ===== -->
+<div class="modal-overlay" id="modal-submit-review">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📤 提交审核</div>
+      <button class="modal-close" onclick="closeModal('modal-submit-review')">✕</button>
+    </div>
+    <div style="margin-bottom:20px;">
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px;">即将将以下文案提交至审核流程，请确认：</p>
+      <div style="background:var(--bg);border-radius:var(--radius);padding:16px;border:1px solid var(--border);">
+        <div style="font-size:14px;font-weight:600;margin-bottom:8px;">双十一全场五折限时促销 · 版本A</div>
+        <div style="font-size:13px;color:var(--text-muted);">字数：218字 · 风格：活泼热情 · 版本：A（已选定）</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">指定审核人</label>
+      <select class="form-select">
+        <option>张品牌（品牌主管）</option>
+        <option>刘法务（法务专员）</option>
+        <option>全体审核组</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">备注说明 <span class="optional">（选填）</span></label>
+      <textarea class="form-textarea" style="min-height:70px;" placeholder="向审核方说明创作思路...">按需求方要求，文案整体风格活泼、突出限时感与优惠力度。版本A为推荐版本，请优先审核。</textarea>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-secondary" onclick="closeModal('modal-submit-review')">取消</button>
+      <button class="btn btn-success" onclick="confirmSubmitReview()">✅ 确认提交</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 驳回弹窗 ===== -->
+<div class="modal-overlay" id="modal-reject">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">❌ 驳回并要求修改</div>
+      <button class="modal-close" onclick="closeModal('modal-reject')">✕</button>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="background:#fff5f5;border:1px solid var(--danger);border-radius:var(--radius);padding:14px;">
+        <div style="font-size:13px;font-weight:600;color:var(--danger);margin-bottom:6px;">⚠️ 驳回原因将自动发送给文案方，AI将据此辅助修改</div>
+        <div style="font-size:12px;color:var(--text-muted);">驳回后，文案方可在AI对话界面查看驳回意见并一键继续修改</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">主要驳回原因 <span class="required">*</span></label>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+          <input type="checkbox" checked> 合规风险：存在可能违规的表述
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+          <input type="checkbox" checked> 表述优化：部分措辞需要调整
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+          <input type="checkbox"> 与需求不符：偏离原始需求
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+          <input type="checkbox"> 品牌调性：不符合品牌声音
+        </label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">详细修改要求 <span class="required">*</span></label>
+      <textarea class="form-textarea" id="rejectComment" style="min-height:100px;">1. "全场商品五折起"需法务确认活动范围
+2. "一键抢购不手软"改为更品牌化的表述，如"一键加购，轻松拥有"
+3. 整体合规，创意优秀，小改即可通过</textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">修改截止时间</label>
+      <input type="datetime-local" class="form-input" value="2026-10-26T12:00">
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-secondary" onclick="closeModal('modal-reject')">取消</button>
+      <button class="btn btn-danger" onclick="confirmReject()">❌ 确认驳回</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 版本对比弹窗 ===== -->
+<div class="modal-overlay" id="modal-compare">
+  <div class="modal" style="width:800px;max-width:95vw;">
+    <div class="modal-header">
+      <div class="modal-title">🔍 文案版本对比</div>
+      <button class="modal-close" onclick="closeModal('modal-compare')">✕</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+      <span class="badge badge-primary">版本A（推荐）</span>
+      <span class="badge badge-gray">vs</span>
+      <span class="badge badge-gray">版本B</span>
+    </div>
+    <div class="compare-view">
+      <div class="compare-panel">
+        <h4>📄 版本 A <span class="badge badge-primary" style="font-size:10px;">当前选定</span></h4>
+        <div class="content">【标题】五折！72小时限时抢！
+
+亲爱的你，等这一天等了多久？
+
+双十一，全场商品五折起，不玩套路，不设门槛！
+
+🔥 三重福利叠加：
+✅ 全场5折，买就是赚
+✅ 满200立减50
+✅ 全场包邮
+
+⏰ 仅限72小时！立即加购！</div>
+        <div style="margin-top:10px;display:flex;gap:8px;">
+          <span class="badge badge-success">218字</span>
+          <span class="badge badge-primary">活泼热情</span>
+        </div>
+      </div>
+      <div class="compare-panel">
+        <h4>📄 版本 B</h4>
+        <div class="content">【标题】双十一来了！全场五折，心动不如行动
+
+一年一度双十一，我们以最大的诚意回馈每一位用户。
+
+全场五折起，满200减50，全程包邮，无需凑单。
+
+活动时间：11月1日-11日，共72小时。
+
+别等了，现在就加入购物车，0点见！</div>
+        <div style="margin-top:10px;display:flex;gap:8px;">
+          <span class="badge badge-success">102字</span>
+          <span class="badge badge-gray">简洁直接</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+      <button class="btn btn-secondary" onclick="closeModal('modal-compare')">关闭</button>
+      <button class="btn btn-primary" onclick="selectVersionA()">选用版本 A</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 审核通过弹窗 ===== -->
+<div class="modal-overlay" id="modal-approve">
+  <div class="modal" style="text-align:center;padding:40px;">
+    <div style="font-size:64px;margin-bottom:16px;">🎉</div>
+    <h2 style="font-size:20px;font-weight:700;margin-bottom:8px;">审核通过！</h2>
+    <p style="color:var(--text-muted);margin-bottom:24px;">文案已审核通过，即将自动归档至文案库并通知相关人员。</p>
+    <div style="background:var(--bg);border-radius:var(--radius);padding:16px;text-align:left;margin-bottom:24px;">
+      <div class="info-row"><span class="info-label">文案名称</span><span class="info-value">双十一全场五折限时促销 · 版本A</span></div>
+      <div class="info-row"><span class="info-label">审核人</span><span class="info-value">张品牌</span></div>
+      <div class="info-row"><span class="info-label">通知人员</span><span class="info-value">李雅文、王晓明</span></div>
+      <div class="info-row"><span class="info-label">下一步</span><span class="info-value" style="color:var(--success);">自动归档，发布上线</span></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button class="btn btn-secondary" onclick="closeModal('modal-approve')">关闭</button>
+      <button class="btn btn-success" onclick="finalApprove()">📦 确认归档发布</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 驳回后回到对话弹窗 ===== -->
+<div class="modal-overlay" id="modal-rejected-back">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🔄 收到驳回意见，继续修改</div>
+      <button class="modal-close" onclick="closeModal('modal-rejected-back')">✕</button>
+    </div>
+    <div style="background:#fff5f5;border:1px solid var(--danger);border-radius:var(--radius);padding:16px;margin-bottom:20px;">
+      <div style="font-size:13px;font-weight:600;color:var(--danger);margin-bottom:8px;">📌 审核驳回意见</div>
+      <div style="font-size:13px;color:var(--text);line-height:1.7;">
+        1. "全场商品五折起"需法务确认活动范围<br>
+        2. "一键抢购不手软"改为更品牌化的表述<br>
+        3. 整体合规，创意优秀，小改即可通过
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">审核人：张品牌 · 2026-10-26 09:30</div>
+    </div>
+    <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px;">AI将自动加载驳回意见，辅助您快速完成修改。是否立即进入对话界面？</p>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-secondary" onclick="closeModal('modal-rejected-back')">稍后处理</button>
+      <button class="btn btn-primary" onclick="goToAIRevise()">🤖 AI辅助修改 →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== 全局状态 =====
+const APP = {
+  role: null,
+  currentView: 'dashboard',
+  chatMessages: [],
+  formStep: 1,
+  workflowStep: 4,
+  hasRejection: false,
+  
+  users: {
+    sales: { name: '王晓明', role: '销售总监', avatar: '王', color: '#6366f1' },
+    writer: { name: '李雅文', role: '高级文案', avatar: '李', color: '#10b981' },
+    reviewer: { name: '张品牌', role: '品牌主管', avatar: '张', color: '#f59e0b' }
+  },
+  
+  navConfig: {
+    sales: [
+      { id: 'dashboard', icon: '🏠', label: '工作台', badge: 0 },
+      { id: 'demands', icon: '📋', label: '需求管理', badge: 2 },
+      { id: 'new-demand', icon: '➕', label: '新建需求', badge: 0 },
+      { id: 'archive', icon: '📦', label: '文案库', badge: 0 },
+    ],
+    writer: [
+      { id: 'dashboard', icon: '🏠', label: '工作台', badge: 0 },
+      { id: 'demands', icon: '📋', label: '需求池', badge: 3 },
+      { id: 'chat', icon: '✍️', label: 'AI文案创作', badge: 1 },
+      { id: 'archive', icon: '📦', label: '文案库', badge: 0 },
+    ],
+    reviewer: [
+      { id: 'dashboard', icon: '🏠', label: '工作台', badge: 0 },
+      { id: 'review', icon: '🔍', label: '审核管理', badge: 2 },
+      { id: 'archive', icon: '📦', label: '已发布', badge: 0 },
+    ]
+  },
+  
+  statsConfig: {
+    sales: [
+      { icon: '📋', color: '#e0e7ff', label: '进行中需求', value: '5', change: '+2 本周' },
+      { icon: '👔', color: '#ede9fe', label: 'BU长审核中', value: '1', change: '30分钟前提交' },
+      { icon: '🔍', color: '#fef3c7', label: '品牌审核中', value: '1', change: '2小时前提交' },
+      { icon: '✅', color: '#f0fdf4', label: '本月完成', value: '12', change: '↑3 vs上月' },
+    ],
+    writer: [
+      { icon: '📥', color: '#e0e7ff', label: '待处理需求', value: '3', change: '2个今日新增' },
+      { icon: '✍️', color: '#d1fae5', label: '创作中', value: '2', change: '1个待提审' },
+      { icon: '🔄', color: '#fef3c7', label: '驳回待改', value: '1', change: '需今日处理' },
+      { icon: '✅', color: '#f0fdf4', label: '本月完成', value: '8', change: '↑2 vs上月' },
+    ],
+    reviewer: [
+      { icon: '⏳', color: '#fef3c7', label: '待审核', value: '2', change: '1个紧急' },
+      { icon: '✅', color: '#d1fae5', label: '今日已审', value: '3', change: '通过率 100%' },
+      { icon: '❌', color: '#fee2e2', label: '本周驳回', value: '2', change: '优化率 85%' },
+      { icon: '📦', color: '#e0e7ff', label: '已发布', value: '24', change: '↑5 本月' },
+    ]
+  },
+  
+  todoConfig: {
+    sales: [
+      { icon: '👔', color: '#ede9fe', title: '双十一全场五折限时促销', meta: 'BU长审核中 · 30分钟前提交', badge: 'BU审核中', badgeClass: 'badge-purple', action: () => openModal('modal-bu-review') },
+      { icon: '🔍', color: '#fef3c7', title: '品牌焕新秋季主题文案', meta: '品牌审核中 · 2小时前提交', badge: '审核中', badgeClass: 'badge-warning', action: () => APP.navigateToView('review') },
+      { icon: '✍️', color: '#d1fae5', title: '年终奖励活动文案', meta: 'AI创作中 · 李雅文操作', badge: '创作中', badgeClass: 'badge-info', action: () => APP.navigateToView('chat') },
+      { icon: '❗', color: '#fee2e2', title: '圣诞节礼品套装推广', meta: '需求待提交 · 截止 10月30日', badge: '待提交', badgeClass: 'badge-danger', action: () => APP.navigateToView('new-demand') },
+    ],
+    writer: [
+      { icon: '🔄', color: '#fee2e2', title: '双十一文案 · 收到驳回意见', meta: '审核驳回 · 请查看审核意见', badge: '待修改', badgeClass: 'badge-danger', action: () => openRejectedModal() },
+      { icon: '📥', color: '#e0e7ff', title: '品牌焕新秋季主题', meta: '新需求 · 3小时前分配', badge: '新需求', badgeClass: 'badge-primary', action: () => APP.navigateToView('chat') },
+      { icon: '⏰', color: '#fef3c7', title: '年终奖励活动文案', meta: '截止时间临近 · 2026-10-28', badge: '即将截止', badgeClass: 'badge-warning', action: () => {} },
+    ],
+    reviewer: [
+      { icon: '⚡', color: '#fee2e2', title: '双十一全场五折限时促销', meta: '待审核 · 2小时前提交 · 紧急', badge: '紧急', badgeClass: 'badge-danger', action: () => goToReviewDetail() },
+      { icon: '📋', color: '#fef3c7', title: '秋季品牌形象升级文案', meta: '待审核 · 普通优先级', badge: '待审', badgeClass: 'badge-warning', action: () => {} },
+    ]
+  }
+};
+
+// 登录
+let selectedRole = null;
+function selectRole(role, el) {
+  selectedRole = role;
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('loginBtn').disabled = false;
+}
+
+function doLogin() {
+  if (!selectedRole) return;
+  APP.role = selectedRole;
+  
+  const user = APP.users[selectedRole];
+  document.getElementById('sidebar-username').textContent = user.name;
+  document.getElementById('sidebar-user-role').textContent = user.role;
+  document.getElementById('sidebar-avatar').textContent = user.avatar;
+  document.getElementById('sidebar-avatar').style.background = user.color;
+  
+  const roleLabels = { sales: '需求方 · 销售', writer: '文案方 · 创作', reviewer: '审核方 · 品牌' };
+  document.getElementById('sidebar-role-label').textContent = roleLabels[selectedRole];
+  
+  document.getElementById('dash-greeting').textContent = `早上好，${user.name} 👋`;
+  
+  buildNav();
+  buildStats();
+  buildTodos();
+  buildActivityFeed();
+  buildDemandTable();
+  buildReviewList();
+  initChat();
+  updateWorkflowLine();
+  
+  document.getElementById('page-login').classList.remove('active');
+  document.getElementById('page-app').classList.add('active');
+  
+  navigateTo('dashboard');
+}
+
+function logout() {
+  document.getElementById('page-app').classList.remove('active');
+  document.getElementById('page-login').classList.add('active');
+  selectedRole = null;
+  APP.role = null;
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('loginBtn').disabled = true;
+}
+
+// 导航
+function buildNav() {
+  const nav = APP.navConfig[APP.role];
+  const sidebarNav = document.getElementById('sidebarNav');
+  sidebarNav.innerHTML = `
+    <div class="nav-section">
+      <div class="nav-section-title">主要功能</div>
+      ${nav.map(item => `
+        <div class="nav-item ${item.id === 'dashboard' ? 'active' : ''}" onclick="navigateTo('${item.id}')" id="nav-${item.id}">
+          <span class="nav-icon">${item.icon}</span>
+          <span>${item.label}</span>
+          ${item.badge > 0 ? `<span class="nav-badge">${item.badge}</span>` : ''}
+        </div>
+      `).join('')}
+    </div>
+    <div class="nav-section" style="margin-top:16px;">
+      <div class="nav-section-title">其他</div>
+      <div class="nav-item" onclick="showToast('功能开发中...','info')">
+        <span class="nav-icon">⚙️</span>
+        <span>系统设置</span>
+      </div>
+      <div class="nav-item" onclick="showToast('帮助文档即将上线','info')">
+        <span class="nav-icon">❓</span>
+        <span>帮助中心</span>
+      </div>
+    </div>
+  `;
+}
+
+function navigateTo(viewId) {
+  // 记录上一个非chat页面，供返回使用
+  if (APP.currentView && APP.currentView !== 'chat' && viewId === 'chat') {
+    APP._prevView = APP.currentView;
+  }
+
+  // 更新导航
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const navEl = document.getElementById(`nav-${viewId}`);
+  if (navEl) navEl.classList.add('active');
+  
+  // 切换视图
+  document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
+  const view = document.getElementById(`view-${viewId}`);
+  if (view) {
+    view.style.display = viewId === 'chat' ? 'flex' : 'block';
+    view.style.flexDirection = viewId === 'chat' ? 'column' : '';
+  }
+  
+  APP.currentView = viewId;
+
+  // 进入chat：全屏（隐藏左侧导航）并渲染任务列表
+  const pageApp = document.getElementById('page-app');
+  if (viewId === 'chat') {
+    pageApp.classList.add('chat-fullscreen');
+    buildChatTodoList();
+  } else {
+    pageApp.classList.remove('chat-fullscreen');
+  }
+  
+  // 特殊处理
+  if (viewId === 'review') {
+    document.getElementById('reviewList').style.display = 'block';
+    document.getElementById('reviewDetail').style.display = 'none';
+  }
+}
+
+APP.navigateToView = navigateTo;
+
+// ===== 场景选择 =====
+const SCENE_CONFIG = {
+  title_td: { name: 'Title TD', icon: '🏷️', welcome: '你好！已进入 <strong>Title TD</strong> 场景 🏷️<br><br>请告诉我：<br>① 产品名称和品类？<br>② 核心卖点关键词（3-5个）？<br>③ 目标平台（亚马逊/速卖通/Shopee）？<br><br>我会生成符合平台规范的<strong>主标题 + 2个备选标题</strong>，并提供关键词密度分析和字符数检查。', prompts: ['换成痛点型标题', '更突出核心卖点', '字符数精简至200内', '增加关键词密度', 'A+页面版本', '适配移动端展示'] },
+  listing:  { name: 'Listing 7张图卖点', icon: '🖼️', welcome: '你好！已进入 <strong>Listing 7张图卖点</strong> 场景 🖼️<br><br>请告诉我：<br>① 产品名称和类目？<br>② 目标平台（亚马逊/天猫/京东）？<br>③ 核心卖点（3-5个关键词）？<br><br>我会按7张图标准图位结构，逐图生成<strong>主标题 + 副标题 + 卖点支撑文案</strong>。', prompts: ['更换成情感化标题', '突出产品核心功能', '加入使用场景描述', '缩短文字更精炼', '增加权威背书', '适配亚马逊规范'] },
+  video:    { name: '视频脚本', icon: '🎬', welcome: '你好！已进入 <strong>视频脚本</strong> 场景 🎬<br><br>请告诉我：<br>① 视频时长（15s/30s/60s）？<br>② 视频类型（带货口播/测评/剧情种草）？<br>③ 产品名称和核心卖点？<br><br>我会输出完整的<strong>分镜脚本 + 口播稿全文 + 发布标题备选</strong>。', prompts: ['强化开场3秒钩子', '口播稿更口语化', '加入产品特写镜头', '增加情绪渲染', '缩短至30秒版本', '加入用户证言'] },
+  faq:      { name: 'FAQ', icon: '❓', welcome: '你好！已进入 <strong>FAQ</strong> 场景 ❓<br><br>请告诉我：<br>① 产品名称和类目？<br>② 已知的高频问题有哪些？（可直接粘贴）<br>③ 售后政策（质保期/退换政策）？<br><br>我会生成<strong>7-10条结构化Q&A</strong>，覆盖使用方法、功能疑问、售后保障等核心问题。', prompts: ['增加使用场景问题', '补充售后常见问题', '语气更友好亲切', '加入图文说明提示', '按频率排序问题', '精简答案至3句内'] },
+};
+
+let _selectedScene = null;
+
+function openSceneSelector() {
+  _selectedScene = null;
+  // 重置所有卡片
+  document.querySelectorAll('.scene-select-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('btnConfirmScene').disabled = true;
+  document.getElementById('sceneSelectHint').textContent = '请选择一个场景';
+  openModal('modal-scene-select');
+}
+
+function selectScene(key) {
+  _selectedScene = key;
+  document.querySelectorAll('.scene-select-card').forEach(c => c.classList.remove('selected'));
+  const card = document.getElementById('ssc-' + key);
+  if (card) card.classList.add('selected');
+  document.getElementById('btnConfirmScene').disabled = false;
+  const s = SCENE_CONFIG[key];
+  document.getElementById('sceneSelectHint').innerHTML = `已选：<strong>${s.icon} ${s.name}</strong>`;
+}
+
+function confirmScene() {
+  if (!_selectedScene) return;
+  closeModal('modal-scene-select');
+  enterScene(_selectedScene);
+}
+
+function enterScene(key) {
+  const s = SCENE_CONFIG[key];
+  if (!s) return;
+  navigateTo('chat');
+  // 更新页头场景信息
+  document.getElementById('chatPageTitle').innerHTML = `${s.icon} ${s.name}`;
+  document.getElementById('chatPageSubtitle').textContent = 'AI创作台 · 随时修改迭代，直到满意为止';
+  const badge = document.getElementById('chatSceneBadge');
+  if (badge) { badge.textContent = `${s.icon} ${s.name}`; badge.style.display = ''; }
+  // 更新快捷提示词
+  const qp = document.getElementById('quickPrompts');
+  if (qp) qp.innerHTML = s.prompts.map(p => `<span class="quick-prompt" onclick="sendQuickPrompt(this)">${p}</span>`).join('');
+  // 更新输入框提示
+  document.getElementById('chatInput').placeholder = `告诉AI您的${s.name}需求...`;
+  // 清空对话并发出欢迎语
+  const container = document.getElementById('chatMessages');
+  container.innerHTML = '';
+  appendWelcomeMsg(container, s.welcome);
+  scrollToBottom();
+  document.getElementById('chatInput').focus();
+}
+
+function appendWelcomeMsg(container, html) {
+  const div = document.createElement('div');
+  div.className = 'message ai';
+  div.innerHTML = `
+    <div class="message-avatar" style="background:linear-gradient(135deg,var(--primary),var(--secondary));">🤖</div>
+    <div class="message-content">
+      <div class="message-text">${html}</div>
+      <div class="message-meta">${new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})} · AI助手</div>
+    </div>`;
+  container.appendChild(div);
+}
+
+function exitChat() {
+  const prev = APP._prevView || 'dashboard';
+  navigateTo(prev);
+}
+
+// ===== 待处理任务列表（创作台左侧）=====
+function buildChatTodoList() {
+  const el = document.getElementById('chatTodoList');
+  if (!el || !APP.role) return;
+  const todos = APP.todoConfig[APP.role] || [];
+  const badge = document.getElementById('chatTodoBadge');
+  if (badge) badge.textContent = todos.length || '';
+  if (!todos.length) {
+    el.innerHTML = '<div style="padding:20px 14px;text-align:center;font-size:12px;color:var(--text-muted);">暂无待处理任务</div>';
+    return;
+  }
+  el.innerHTML = todos.map((t, i) => `
+    <div class="chat-todo-item" onclick="clickChatTodo(${i})" id="cti-${i}">
+      <div class="cti-title">${t.title}</div>
+      <div class="cti-meta">${t.meta}</div>
+      <div style="margin-top:4px;"><span class="badge ${t.badgeClass}" style="font-size:10px;">${t.badge}</span></div>
+    </div>
+  `).join('');
+}
+
+const TASK_PROMPT_MAP = {
+  '双十一': { scene: 'title_td', msg: '请为「双十一全场五折限时促销」生成 Title TD，核心卖点：全场五折、限时72小时、满200减50，目标平台：亚马逊。' },
+  '品牌':   { scene: 'listing',  msg: '请为「品牌焕新秋季主题」活动生成 Listing 7张图卖点，突出品牌升级、秋季新品上线。' },
+  '年终':   { scene: 'video',    msg: '请为「年终奖励活动文案」生成30秒带货口播视频脚本，突出年终福利和品质感。' },
+  '圣诞':   { scene: 'faq',      msg: '请为「圣诞节礼品套装」生成FAQ问答，覆盖礼品包装、配送时效、退换货政策等问题。' },
+  '驳回':   { scene: 'title_td', msg: '我收到审核驳回意见，请帮我修改文案。主要问题：语言需要更品牌化，避免绝对化表述。' },
+  '焕新':   { scene: 'listing',  msg: '请为「品牌焕新秋季主题」生成 Listing 7张图卖点文案，体现品牌升级和秋季新品。' },
+};
+
+function clickChatTodo(idx) {
+  document.querySelectorAll('.chat-todo-item').forEach((el, i) => el.classList.toggle('active', i === idx));
+  const todos = APP.todoConfig[APP.role] || [];
+  const task = todos[idx];
+  if (!task) return;
+  // 匹配场景和提示词
+  let matched = null;
+  for (const [kw, cfg] of Object.entries(TASK_PROMPT_MAP)) {
+    if (task.title.includes(kw) || task.meta.includes(kw)) { matched = cfg; break; }
+  }
+  if (!matched) matched = { scene: 'title_td', msg: `请为「${task.title}」生成对应的营销文案内容。` };
+  // 切换场景（如需要）
+  if (!SCENE_CONFIG[matched.scene]) return;
+  const s = SCENE_CONFIG[matched.scene];
+  document.getElementById('chatPageTitle').innerHTML = `${s.icon} ${s.name}`;
+  document.getElementById('chatPageSubtitle').textContent = 'AI创作台 · 随时修改迭代，直到满意为止';
+  const badge = document.getElementById('chatSceneBadge');
+  if (badge) { badge.textContent = `${s.icon} ${s.name}`; badge.style.display = ''; }
+  const qp = document.getElementById('quickPrompts');
+  if (qp) qp.innerHTML = s.prompts.map(p => `<span class="quick-prompt" onclick="sendQuickPrompt(this)">${p}</span>`).join('');
+  // 自动发送任务内容
+  document.getElementById('chatInput').value = matched.msg;
+  sendChatMessage();
+  showToast(`正在为「${task.title}」生成内容...`, 'info');
+}
+
+// 统计数据
+function buildStats() {
+  const stats = APP.statsConfig[APP.role];
+  document.getElementById('statsGrid').innerHTML = stats.map(s => `
+    <div class="stat-card">
+      <div class="stat-icon" style="background:${s.color}">${s.icon}</div>
+      <div class="stat-info">
+        <div class="stat-value">${s.value}</div>
+        <div class="stat-label">${s.label}</div>
+        <div class="stat-change">${s.change}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// 待办
+function buildTodos() {
+  const todos = APP.todoConfig[APP.role];
+  document.getElementById('todoList').innerHTML = todos.map((t, i) => `
+    <div class="task-item" onclick="(${t.action.toString()})()">
+      <div class="task-icon" style="background:${t.color}">${t.icon}</div>
+      <div class="task-info">
+        <div class="task-title">${t.title}</div>
+        <div class="task-meta">${t.meta}</div>
+      </div>
+      <div class="task-actions">
+        <span class="badge ${t.badgeClass}">${t.badge}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// 动态
+function buildActivityFeed() {
+  const activities = [
+    { icon: '✅', color: '#d1fae5', text: '张品牌 驳回了双十一文案，需修改', time: '30分钟前' },
+    { icon: '📤', color: '#e0e7ff', text: '李雅文 提交了双十一文案审核', time: '2小时前' },
+    { icon: '🤖', color: '#ede9fe', text: 'AI生成了3个版本的文案', time: '3小时前' },
+    { icon: '📋', color: '#fef3c7', text: '王晓明 提交了双十一需求单', time: '5小时前' },
+  ];
+  document.getElementById('activityFeed').innerHTML = activities.map((a, i) => `
+    <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:${i < activities.length-1 ? '1px solid var(--border)' : 'none'};">
+      <div style="width:36px;height:36px;border-radius:10px;background:${a.color};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">${a.icon}</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;color:var(--text);">${a.text}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${a.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// 需求表格
+function buildDemandTable() {
+  const demands = [
+    { name: '双十一全场五折限时促销', sub: '微信公众号 + 朋友圈', type: '促销活动', typeClass: 'badge-primary', priority: '🔴 紧急', priorityClass: 'badge-danger', status: 'BU长审核中', statusClass: 'badge-purple', action: 'dashboard' },
+    { name: '品牌焕新秋季主题', sub: '微博 + 抖音', type: '品牌推广', typeClass: 'badge-purple', priority: '🟡 高优', priorityClass: 'badge-warning', status: 'AI创作中', statusClass: 'badge-info', action: 'chat' },
+    { name: '年终奖励活动文案', sub: '全渠道', type: '促销活动', typeClass: 'badge-primary', priority: '🟡 高优', priorityClass: 'badge-warning', status: '待处理', statusClass: 'badge-gray', action: 'chat' },
+    { name: '新品上线推广', sub: '朋友圈', type: '产品上新', typeClass: 'badge-success', priority: '🟢 普通', priorityClass: 'badge-success', status: '待处理', statusClass: 'badge-gray', action: 'new-demand' },
+    { name: '圣诞节礼品套装推广', sub: '微信公众号', type: '节日营销', typeClass: 'badge-purple', priority: '🔴 紧急', priorityClass: 'badge-danger', status: '草稿', statusClass: 'badge-gray', action: 'new-demand' },
+  ];
+  document.getElementById('demandTableBody').innerHTML = demands.map(d => `
+    <div class="table-row" onclick="navigateTo('${d.action}')">
+      <div>
+        <div class="demand-name">${d.name}</div>
+        <div class="demand-name-sub">${d.sub}</div>
+      </div>
+      <div><span class="badge ${d.typeClass}">${d.type}</span></div>
+      <div><span class="badge ${d.priorityClass}">${d.priority}</span></div>
+      <div><span class="badge ${d.statusClass}">${d.status}</span></div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();navigateTo('${d.action}')">查看</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// 审核列表
+function buildReviewList() {
+  document.getElementById('reviewList').innerHTML = `
+    <div class="task-list">
+      <div class="task-item" onclick="goToReviewDetail()" style="border-left:4px solid var(--danger);">
+        <div class="task-icon" style="background:#fee2e2;">⚡</div>
+        <div class="task-info">
+          <div class="task-title">双十一全场五折限时促销 · 版本A</div>
+          <div class="task-meta">提交人：李雅文 · 2小时前 · 字数：218字</div>
+        </div>
+        <div class="task-actions">
+          <span class="badge badge-danger">紧急</span>
+          <span class="badge badge-warning">待审核</span>
+          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();goToReviewDetail()">立即审核</button>
+        </div>
+      </div>
+      <div class="task-item" onclick="showToast('该需求审核功能演示中','info')">
+        <div class="task-icon" style="background:#fef3c7;">📋</div>
+        <div class="task-info">
+          <div class="task-title">秋季品牌形象升级文案 · 版本B</div>
+          <div class="task-meta">提交人：赵小明 · 昨天 · 字数：156字</div>
+        </div>
+        <div class="task-actions">
+          <span class="badge badge-gray">普通</span>
+          <span class="badge badge-warning">待审核</span>
+          <button class="btn btn-secondary btn-sm">查看</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function goToReviewDetail() {
+  navigateTo('review');
+  document.getElementById('reviewList').style.display = 'none';
+  document.getElementById('reviewDetail').style.display = 'block';
+}
+
+function backToReviewList() {
+  document.getElementById('reviewList').style.display = 'block';
+  document.getElementById('reviewDetail').style.display = 'none';
+}
+
+// 工作流进度线
+function updateWorkflowLine() {
+  const step = APP.workflowStep;
+  const pcts = [0, 20, 40, 60, 80, 100];
+  document.getElementById('workflowLine').style.width = pcts[step-1] + '%';
+}
+
+// ===== 需求表单 =====
+function goFormStep(step) {
+  APP.formStep = step;
+  for (let i = 1; i <= 3; i++) {
+    document.getElementById(`form-panel-${i}`).style.display = i === step ? 'block' : 'none';
+    const stepEl = document.getElementById(`form-step-${i}`);
+    stepEl.classList.toggle('active', i === step);
+    stepEl.classList.toggle('done', i < step);
+  }
+  window.scrollTo(0, 0);
+}
+
+function addTag(event, containerId, input) {
+  if (event.key === 'Enter' && input.value.trim()) {
+    event.preventDefault();
+    const container = document.getElementById(containerId);
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.innerHTML = `${input.value.trim()} <span onclick="removeTag(this)" style="cursor:pointer;margin-left:4px;opacity:0.6;">×</span>`;
+    container.insertBefore(tag, input);
+    input.value = '';
+  }
+}
+
+function removeTag(el) {
+  el.parentElement.remove();
+}
+
+function selectPriority(el, val) {
+  document.querySelectorAll('.risk-option').forEach(e => {
+    if (e.parentElement === el.parentElement) {
+      e.classList.remove('selected');
+    }
+  });
+  el.classList.add('selected');
+}
+
+function toggleStyle(el) {
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) {
+    el.style.color = 'var(--warning)';
+  } else {
+    el.style.color = 'var(--text)';
+  }
+}
+
+function simulateUpload() {
+  const files = ['品牌规范手册v3.pdf', '去年双十一参考文案.docx'];
+  const container = document.getElementById('uploadedFiles');
+  const fileName = files[container.children.length % files.length];
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border);';
+  div.innerHTML = `<span style="font-size:20px;">${fileName.endsWith('.pdf') ? '📄' : '📝'}</span><span style="flex:1;font-size:13px;">${fileName}</span><span style="font-size:12px;color:var(--text-muted);">2.4MB</span><span style="cursor:pointer;color:var(--danger);font-size:16px;" onclick="this.parentElement.remove()">×</span>`;
+  container.appendChild(div);
+  showToast(`已上传：${fileName}`, 'success');
+}
+
+function submitDemand() {
+  showToast('需求已提交！等待BU长审核...', 'success');
+  setTimeout(() => {
+    APP.workflowStep = 2;
+    updateWorkflowLine();
+    document.getElementById('wf-1').className = 'wf-step done';
+    document.getElementById('wf-2').className = 'wf-step active';
+    document.getElementById('wf-3').className = 'wf-step';
+    document.getElementById('wf-4').className = 'wf-step';
+    navigateTo('dashboard');
+    openModal('modal-bu-review');
+  }, 1200);
+}
+
+function approveBU() {
+  closeModal('modal-bu-review');
+  showToast('BU长已审核通过！已自动分配给文案方李雅文', 'success');
+  setTimeout(() => {
+    APP.workflowStep = 3;
+    updateWorkflowLine();
+    document.getElementById('wf-2').className = 'wf-step done';
+    document.getElementById('wf-3').className = 'wf-step active';
+    showToast('AI对话已初始化，可开始文案创作', 'info');
+    navigateTo('chat');
+  }, 1000);
+}
+
+function rejectBU() {
+  closeModal('modal-bu-review');
+  showToast('BU长已驳回，驳回意见已发送给需求方', 'warning');
+  APP.workflowStep = 1;
+  updateWorkflowLine();
+  document.getElementById('wf-1').className = 'wf-step active';
+  document.getElementById('wf-2').className = 'wf-step';
+  navigateTo('demands');
+}
+
+// ===== AI对话 =====
+const DEMO_MESSAGES = [
+  { role: 'system', text: '您好！我已收到需求方的需求单，基于以下信息开始创作：\n\n**活动**：双十一全场五折限时促销\n**目标人群**：25-35岁女性，一二线城市，月收入1万+\n**核心卖点**：全场五折、限时72小时、满200减50、全场包邮\n**语气风格**：活泼热情、简洁有力\n\n正在生成3个版本文案，请稍候...', time: '10:02' },
+  { role: 'ai', result: true, text: '✨ 已为您生成3个版本文案', versions: ['A','B','C'], time: '10:02' },
+  { role: 'user', text: '版本A整体不错，但感觉限时感不够强，能不能更紧迫一点？另外结尾的行动号召可以更直接', time: '10:05' },
+  { role: 'ai', text: '明白！我来加强限时感和行动力。调整思路：\n\n1. 标题增加倒计时感\n2. 正文多次强调"72小时"的稀缺性\n3. 结尾改用更直接的动词驱动\n\n已更新版本A：', result: true, isRevised: true, time: '10:05' },
+];
+
+const VERSION_A_CONTENT = `【标题】五折！72小时限时抢！双十一年度最大折扣来了
+
+亲爱的你，等这一天等了多久？
+
+双十一，我们给你最真实的诚意——全场商品五折起，不玩套路，不设门槛！
+
+🔥 三重福利叠加：
+✅ 全场5折，买就是赚
+✅ 满200立减50，直接到手价
+✅ 全场包邮，省心省力
+
+⏰ 重要：活动仅限72小时！
+
+11月1日0点准时开抢，11月11日23:59结束。错过这波，再等一年！
+
+📱 立即打开App，提前加购，一键抢购不手软！
+
+你喜欢的，都在这里。你期待的，都打五折。
+
+现在加购物车，11月1日0点自动付款，省心又省钱 💖`;
+
+function initChat() {
+  const container = document.getElementById('chatMessages');
+  container.innerHTML = '';
+  
+  // 系统消息
+  const sysMsg = document.createElement('div');
+  sysMsg.className = 'message ai';
+  sysMsg.innerHTML = `
+    <div class="message-avatar" style="background:linear-gradient(135deg,var(--primary),var(--secondary));">🤖</div>
+    <div class="message-content">
+      <div class="message-text" style="white-space:pre-line;">${DEMO_MESSAGES[0].text}</div>
+      <div class="message-meta">${DEMO_MESSAGES[0].time} · AI助手</div>
+    </div>
+  `;
+  container.appendChild(sysMsg);
+  
+  // AI结果消息
+  const resultMsg = document.createElement('div');
+  resultMsg.className = 'message ai';
+  resultMsg.innerHTML = `
+    <div class="message-avatar" style="background:linear-gradient(135deg,var(--primary),var(--secondary));">🤖</div>
+    <div class="message-content" style="max-width:520px;">
+      <div class="message-text">✨ 已为您生成 <strong>3个版本</strong> 文案，推荐版本A：</div>
+      <div class="ai-result-block">
+        <div class="result-title">📄 版本 A（推荐） <span class="badge badge-primary" style="font-size:10px;">218字</span></div>
+        <div class="result-content">${VERSION_A_CONTENT}</div>
+        <div class="result-actions">
+          <button class="btn btn-ghost btn-sm" onclick="copyContent()">📋 复制</button>
+          <button class="btn btn-ghost btn-sm" onclick="openCompare()">🔍 对比版本</button>
+          <button class="btn btn-success btn-sm" onclick="submitForReview()">📤 提交审核</button>
+        </div>
+      </div>
+      <div class="message-meta">10:02 · AI助手 · 用时约8秒</div>
+    </div>
+  `;
+  container.appendChild(resultMsg);
+  
+  // 用户消息
+  const userMsg = document.createElement('div');
+  userMsg.className = 'message user';
+  userMsg.innerHTML = `
+    <div class="message-avatar" style="background:${APP.users[APP.role]?.color || '#6366f1'};">${APP.users[APP.role]?.avatar || 'U'}</div>
+    <div class="message-content">
+      <div class="message-text">${DEMO_MESSAGES[2].text}</div>
+      <div class="message-meta">10:05</div>
+    </div>
+  `;
+  container.appendChild(userMsg);
+  
+  // AI修改后结果
+  const revMsg = document.createElement('div');
+  revMsg.className = 'message ai';
+  revMsg.innerHTML = `
+    <div class="message-avatar" style="background:linear-gradient(135deg,var(--primary),var(--secondary));">🤖</div>
+    <div class="message-content" style="max-width:520px;">
+      <div class="message-text">明白！已加强限时感和行动号召力，版本A更新如下：</div>
+      <div class="ai-result-block">
+        <div class="result-title">📄 版本 A（已优化） <span class="badge badge-success" style="font-size:10px;">当前版本</span></div>
+        <div class="result-content" style="font-size:13px;">${VERSION_A_CONTENT}</div>
+        <div class="result-actions">
+          <button class="btn btn-ghost btn-sm" onclick="copyContent()">📋 复制</button>
+          <button class="btn btn-ghost btn-sm" onclick="openCompare()">🔍 对比版本</button>
+          <button class="btn btn-success btn-sm" onclick="submitForReview()">📤 提交审核</button>
+        </div>
+      </div>
+      <div class="message-meta">10:05 · AI助手</div>
+    </div>
+  `;
+  container.appendChild(revMsg);
+  
+  scrollToBottom();
+}
+
+function sendChatMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  
+  const container = document.getElementById('chatMessages');
+  const user = APP.users[APP.role];
+  
+  // 用户消息
+  const userMsg = document.createElement('div');
+  userMsg.className = 'message user';
+  userMsg.innerHTML = `
+    <div class="message-avatar" style="background:${user?.color || '#6366f1'};">${user?.avatar || 'U'}</div>
+    <div class="message-content">
+      <div class="message-text">${text}</div>
+      <div class="message-meta">${new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'})}</div>
+    </div>
+  `;
+  container.appendChild(userMsg);
+  input.value = '';
+  autoResize(input);
+  scrollToBottom();
+  
+  // AI思考中
+  const thinkMsg = document.createElement('div');
+  thinkMsg.className = 'message ai';
+  thinkMsg.id = 'thinkingMsg';
+  thinkMsg.innerHTML = `
+    <div class="message-avatar" style="background:linear-gradient(135deg,var(--primary),var(--secondary));">🤖</div>
+    <div class="message-content">
+      <div class="thinking-indicator">
+        <div class="thinking-dot"></div>
+        <div class="thinking-dot"></div>
+        <div class="thinking-dot"></div>
+        <span style="font-size:12px;color:var(--text-light);margin-left:4px;">AI正在思考...</span>
+      </div>
+    </div>
+  `;
+  container.appendChild(thinkMsg);
+  scrollToBottom();
+  
+  // 模拟AI回复
+  setTimeout(() => {
+    thinkMsg.remove();
+    const aiResponse = generateAIResponse(text);
+    const aiMsg = document.createElement('div');
+    aiMsg.className = 'message ai';
+    aiMsg.innerHTML = `
+      <div class="message-avatar" style="background:linear-gradient(135deg,var(--primary),var(--secondary));">🤖</div>
+      <div class="message-content" style="max-width:520px;">
+        <div class="message-text">${aiResponse.intro}</div>
+        ${aiResponse.result ? `
+        <div class="ai-result-block">
+          <div class="result-title">📄 已更新版本A <span class="badge badge-success" style="font-size:10px;">最新</span></div>
+          <div class="result-content" style="font-size:13px;">${aiResponse.content}</div>
+          <div class="result-actions">
+            <button class="btn btn-ghost btn-sm" onclick="copyContent()">📋 复制</button>
+            <button class="btn btn-success btn-sm" onclick="submitForReview()">📤 提交审核</button>
+          </div>
+        </div>
+        ` : ''}
+        <div class="message-meta">${new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'})} · AI助手</div>
+      </div>
+    `;
+    container.appendChild(aiMsg);
+    scrollToBottom();
+  }, 1800);
+}
+
+function generateAIResponse(text) {
+  const responses = {
+    '年轻化': { intro: '好的！将语气调整为更年轻活泼、适合Z世代的风格，加入当下流行词汇：', result: true, content: `【标题】OMG！双十一来了！全场五折超真实！\n\n姐妹们！等了多久的双十一终于来了🎉\n\n全场真•五折，不是套路那种，是货真价实！\n\n✨ 福利清单：\n🉐 全场5折起（是真的哦）\n💰 满200减50，叠加更省\n📦 全程包邮，躺平购物\n\n⏰ 只有72小时！手慢无！\n\n快去加购物车，11月1日0点见👀` },
+    '标题': { intro: '为您新增5个标题方案，涵盖不同角度：\n\n**方案1**（数字冲击）："五折！限72小时！双十一最强福利"\n**方案2**（情感共鸣）："等了一年，只为这72小时的你"\n**方案3**（悬念制造）："今年双十一，我们破了规矩"\n**方案4**（利益直给）："全场五折+满减+包邮，三重福利等你来"\n**方案5**（行动驱动）："现在加购，11月1日零点自动付款"', result: false },
+    '限时': { intro: '已强化限时紧迫感，增加了倒计时元素和视觉强调：', result: true, content: `【标题】⏰ 倒计时开始！72小时后恢复原价！\n\n⏱ 距活动结束还有：72:00:00\n\n双十一年度最大折扣——全场五折！\n这不是演习，这是真实的五折！\n\n🔥 超值福利（限时72小时）：\n✅ 全场商品5折起\n✅ 每满200立减50\n✅ 全场免邮，0门槛\n\n⚠️ 温馨提醒：\n活动仅限72小时！结束后恢复原价！\n11月1日0点开始→11月3日24点结束\n\n现在加入购物车，倒计时结束前付款，省心更省钱！` },
+    '缩短': { intro: '已压缩至约100字，保留核心信息：', result: true, content: `【标题】双十一，全场五折！72小时限时抢\n\n全场商品五折起，满200减50，全场包邮。\n\n11月1日0点开始，仅限72小时。\n\n不囤货，只囤你喜欢的。\n\n立即加购，0点自动付款 →` },
+    '评价': { intro: '已加入真实用户评价模块，增强可信度：', result: true, content: `【标题】双十一，全场五折！万人已囤货！\n\n⭐ 真实买家反馈：\n"趁双十一囤了好多，全是五折，太值了！" —— 上海·晶晶\n"包邮还满减，一下省了200多" —— 北京·小美\n\n📊 本次活动数据：\n✅ 已有 50,000+ 人加入购物车\n✅ 全场商品5折起 · 满200减50 · 全场包邮\n\n⏰ 距结束还有72小时，立即加购！` },
+    '目标人群': { intro: '已根据目标人群（25-35岁都市职场女性，月收入1万+）重新调整文案方向，更聚焦品质生活场景：', result: true, content: `【标题】双十一，聪明女孩都在囤这些！\n\n忙碌一年，是时候犒劳一下自己了。\n\n双十一，品质好物全场五折，认真挑选，聪明消费。\n\n💎 专属福利：\n✨ 精选好物5折起\n💰 满200减50，品质不将就\n📦 全场包邮，省时省力\n\n你值得更好的。\n趁这72小时，把想要的都收进购物车 ✨` },
+  };
+  
+  for (const key of Object.keys(responses)) {
+    if (text.includes(key)) return responses[key];
+  }
+  
+  return { intro: '好的，已根据您的要求调整文案！主要修改了语气和重点表达，请查看更新后的版本：', result: true, content: VERSION_A_CONTENT };
+}
+
+function sendQuickPrompt(el) {
+  document.getElementById('chatInput').value = el.textContent;
+  sendChatMessage();
+}
+
+function handleChatKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChatMessage();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function scrollToBottom() {
+  const container = document.getElementById('chatMessages');
+  if (container) setTimeout(() => { container.scrollTop = container.scrollHeight; }, 50);
+}
+
+function copyContent() {
+  showToast('文案已复制到剪贴板', 'success');
+}
+
+function showVersion(v) {
+  showToast(`已切换到版本 ${['A','B','C'][v-1]}`, 'info');
+}
+
+function openVersionPanel() {
+  showToast('版本管理面板已在左侧显示', 'info');
+}
+
+// ===== 审核操作 =====
+function submitForReview() {
+  openModal('modal-submit-review');
+}
+
+function confirmSubmitReview() {
+  closeModal('modal-submit-review');
+  showToast('文案已提交品牌审核！已通知张品牌', 'success');
+  setTimeout(() => {
+    showToast('审核任务已创建，流程进入品牌审核阶段', 'info');
+    navigateTo('review');
+    APP.workflowStep = 4;
+    document.getElementById('wf-3').className = 'wf-step done';
+    document.getElementById('wf-4').className = 'wf-step active';
+    updateWorkflowLine();
+  }, 1200);
+}
+
+function approveReview() {
+  openModal('modal-approve');
+}
+
+function finalApprove() {
+  closeModal('modal-approve');
+  showToast('文案已通过审核，正在归档发布...', 'success');
+  APP.workflowStep = 6;
+  for (let i = 1; i <= 6; i++) {
+    document.getElementById(`wf-${i}`).className = 'wf-step done';
+  }
+  updateWorkflowLine();
+  document.getElementById('workflowLine').style.width = '100%';
+  setTimeout(() => {
+    showToast('🎉 文案已成功发布！已自动归档至文案库', 'success');
+    navigateTo('archive');
+  }, 1500);
+}
+
+function rejectReview() {
+  openModal('modal-reject');
+}
+
+function confirmReject() {
+  closeModal('modal-reject');
+  showToast('已驳回，驳回意见已发送给文案方', 'warning');
+  APP.workflowStep = 5;
+  document.getElementById('wf-4').className = 'wf-step done';
+  document.getElementById('wf-5').className = 'wf-step active';
+  document.getElementById('workflowLine').style.width = '80%';
+  setTimeout(() => {
+    openModal('modal-rejected-back');
+  }, 800);
+}
+
+function openRejectedModal() {
+  openModal('modal-rejected-back');
+}
+
+function goToAIRevise() {
+  closeModal('modal-rejected-back');
+  navigateTo('chat');
+  
+  // 在聊天中自动添加驳回意见
+  setTimeout(() => {
+    const container = document.getElementById('chatMessages');
+    const sysMsg = document.createElement('div');
+    sysMsg.style.cssText = 'display:flex;justify-content:center;margin:10px 0;';
+    sysMsg.innerHTML = `
+      <div style="background:#fff5f5;border:1px solid var(--danger);border-radius:var(--radius);padding:14px 18px;max-width:480px;text-align:center;">
+        <div style="font-size:13px;font-weight:600;color:var(--danger);margin-bottom:6px;">📌 已收到审核驳回意见</div>
+        <div style="font-size:13px;color:var(--text);text-align:left;line-height:1.7;">
+          1. "全场商品五折起"需法务确认活动范围<br>
+          2. "一键抢购不手软"改为更品牌化的表述<br>
+          3. 整体合规，创意优秀，小改即可通过
+        </div>
+        <button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="sendReviseRequest()">🤖 让AI根据驳回意见修改</button>
+      </div>
+    `;
+    container.appendChild(sysMsg);
+    scrollToBottom();
+    showToast('已加载审核驳回意见，点击按钮让AI辅助修改', 'info');
+  }, 500);
+}
+
+function sendReviseRequest() {
+  document.getElementById('chatInput').value = '请根据审核驳回意见修改：1. 将"全场商品五折起"改为更合规的表述 2. 将"一键抢购不手软"改为更品牌化的表述，如"一键加购，轻松拥有"';
+  sendChatMessage();
+}
+
+function requestInfo() {
+  showToast('已向需求方发送追加信息请求', 'info');
+}
+
+function selectRisk(el, val) {
+  el.parentElement.querySelectorAll('.risk-option').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function addAnnotation() {
+  showToast('批注功能：点击文案中高亮文字可查看或添加批注', 'info');
+}
+
+function showAnnotation(el) {
+  showToast('批注：' + el.title, 'warning');
+}
+
+function switchReviewVersion(el, ver) {
+  document.querySelectorAll('.version-tab').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  showToast(`已切换至版本${ver}`, 'info');
+}
+
+function filterDemands(type, el) {
+  document.querySelectorAll('.filter-tab').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  showToast(`已筛选：${el.textContent.trim()}`, 'info');
+}
+
+// ===== 抽屉 =====
+function openDrawer(type) {
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+  
+  if (type === 'demand-detail') {
+    document.getElementById('drawerTitle').textContent = '📋 需求详情';
+    document.getElementById('drawerBody').innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div style="background:var(--primary-light);border-radius:var(--radius);padding:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:15px;font-weight:700;">双十一全场五折限时促销</span>
+            <span class="badge badge-danger">🔴 紧急</span>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <span class="badge badge-primary">促销活动</span>
+            <span class="badge badge-info">微信公众号</span>
+          </div>
+        </div>
+        
+        <div class="card" style="padding:16px;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text-muted);">基本信息</div>
+          ${[
+            ['活动名称', '双十一全场五折限时促销'],
+            ['活动时间', '2026年11月1日 - 11月11日'],
+            ['投放渠道', '微信公众号 + 朋友圈'],
+            ['需求提交人', '王晓明（销售总监）'],
+            ['文案负责人', '李雅文（高级文案）'],
+            ['截止时间', '2026-10-25 17:00'],
+          ].map(([k,v]) => `<div class="info-row"><span class="info-label">${k}</span><span class="info-value">${v}</span></div>`).join('')}
+        </div>
+        
+        <div class="card" style="padding:16px;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text-muted);">目标受众</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span class="tag">25-35岁女性</span>
+            <span class="tag">一二线城市</span>
+            <span class="tag">月收入1万+</span>
+            <span class="tag">有消费意愿</span>
+          </div>
+        </div>
+        
+        <div class="card" style="padding:16px;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text-muted);">产品卖点</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span class="tag">全场五折</span>
+            <span class="tag">限时72小时</span>
+            <span class="tag">满200减50</span>
+            <span class="tag">免费包邮</span>
+          </div>
+        </div>
+        
+        <div class="card" style="padding:16px;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text-muted);">内容要求</div>
+          ${[
+            ['文案类型', '标题+正文（完整版）'],
+            ['字数要求', '200-300字'],
+            ['语气风格', '活泼热情、简洁有力'],
+            ['版本数量', '3个版本'],
+            ['禁止词', '绝对第一、完美无瑕、100%'],
+          ].map(([k,v]) => `<div class="info-row"><span class="info-label">${k}</span><span class="info-value" style="${k==='禁止词'?'color:var(--danger);':''}">${v}</span></div>`).join('')}
+        </div>
+        
+        <div class="card" style="padding:16px;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text-muted);">背景说明</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.7;background:var(--bg);padding:12px;border-radius:var(--radius-sm);">去年双十一同类活动文案风格偏向年轻化、活泼，受众反馈很好，本次希望延续该风格并突出限时感。</div>
+        </div>
+        
+        <div class="card" style="padding:16px;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text-muted);">上传附件（2个）</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:var(--radius-sm);">📄 品牌规范手册v3.pdf <span style="margin-left:auto;font-size:12px;color:var(--text-muted);">2.4MB</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:var(--radius-sm);">📝 去年双十一参考文案.docx <span style="margin-left:auto;font-size:12px;color:var(--text-muted);">156KB</span></div>
+          </div>
+        </div>
+        
+        <button class="btn btn-primary btn-block" onclick="closeDrawer();sendQuickPrompttFromDemand()">
+          💬 以目标人群[25-35岁女性]重新生成
+        </button>
+      </div>
+    `;
+  }
+}
+
+function closeDrawer() {
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+}
+
+function sendQuickPrompttFromDemand() {
+  document.getElementById('chatInput').value = '请根据目标人群[25-35岁职场女性，一二线城市，月收入1万+]重新优化文案语气，使其更符合她们的消费心理';
+  sendChatMessage();
+}
+
+// ===== 模态框 =====
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function openCompare() {
+  openModal('modal-compare');
+}
+
+function selectVersionA() {
+  closeModal('modal-compare');
+  showToast('已选定版本A为提交版本', 'success');
+}
+
+// ===== Toast通知 =====
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `<span class="toast-icon">${icons[type]}</span><span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.animation = 'none';
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.3s';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
+// 初始化工作流线动画
+window.addEventListener('load', () => {
+  setTimeout(updateWorkflowLine, 500);
+});
+</script>
+</body>
+</html>

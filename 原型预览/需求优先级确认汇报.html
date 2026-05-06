@@ -1,0 +1,2064 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI营销场景优先级确认 · 汇报材料</title>
+<style>
+:root {
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --primary-light: #e0e7ff;
+  --secondary: #8b5cf6;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #3b82f6;
+  --orange: #f97316;
+  --teal: #14b8a6;
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ===== 页面切换 ===== */
+.slide { display: none; min-height: 100vh; }
+.slide.active { display: flex; flex-direction: column; }
+
+/* ===== 顶部导航 ===== */
+.nav-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 32px; height: 56px;
+}
+.nav-logo { display: flex; align-items: center; gap: 10px; }
+.nav-logo .logo-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.nav-logo span { font-size: 14px; font-weight: 700; color: var(--text); }
+.nav-logo small { font-size: 11px; color: var(--text-muted); margin-left: 6px; }
+.nav-steps { display: flex; align-items: center; gap: 4px; }
+.nav-step {
+  padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s; color: var(--text-muted); border: 1px solid transparent;
+}
+.nav-step:hover { background: var(--primary-light); color: var(--primary); }
+.nav-step.active { background: var(--primary); color: white; }
+.nav-step.visited { color: var(--primary); }
+.nav-actions { display: flex; gap: 8px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 16px; border-radius: 8px;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  border: 1px solid transparent; transition: all 0.2s; text-decoration: none;
+}
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+.btn-outline { background: white; color: var(--text); border-color: var(--border); }
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ===== 幻灯片内容 ===== */
+.slide-content {
+  flex: 1; padding-top: 56px;
+  display: flex; flex-direction: column;
+}
+
+/* ===== 封面页 ===== */
+.cover-slide {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 70%, #6d28d9 100%);
+  justify-content: center; align-items: center;
+  min-height: 100vh; position: relative; overflow: hidden;
+}
+.cover-slide::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 20% 50%, rgba(99,102,241,0.3) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(139,92,246,0.2) 0%, transparent 40%),
+              radial-gradient(circle at 60% 80%, rgba(16,185,129,0.15) 0%, transparent 40%);
+}
+.cover-inner {
+  position: relative; z-index: 1; text-align: center;
+  padding: 48px; max-width: 760px;
+}
+.cover-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px; padding: 6px 16px; margin-bottom: 28px;
+  font-size: 13px; color: rgba(255,255,255,0.9);
+}
+.cover-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.2)} }
+.cover-title {
+  font-size: 42px; font-weight: 800; color: white;
+  line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.5px;
+}
+.cover-title span { 
+  background: linear-gradient(90deg, #a5f3fc, #c4b5fd);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.cover-subtitle {
+  font-size: 18px; color: rgba(255,255,255,0.7);
+  margin-bottom: 40px; line-height: 1.5;
+}
+.cover-meta {
+  display: flex; justify-content: center; gap: 32px;
+  margin-bottom: 40px;
+}
+.cover-meta-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.cover-meta-item .meta-num {
+  font-size: 32px; font-weight: 800; color: white; line-height: 1;
+}
+.cover-meta-item .meta-label {
+  font-size: 12px; color: rgba(255,255,255,0.6);
+}
+.cover-divider { width: 1px; background: rgba(255,255,255,0.2); }
+.cover-start-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: white; color: var(--primary);
+  padding: 14px 32px; border-radius: 12px;
+  font-size: 15px; font-weight: 600; cursor: pointer; border: none;
+  transition: all 0.2s; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+.cover-start-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+.cover-floating {
+  position: absolute; font-size: 28px; opacity: 0.08;
+  animation: float 6s ease-in-out infinite;
+}
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
+
+/* ===== 通用页面布局 ===== */
+.page-header {
+  background: white; border-bottom: 1px solid var(--border);
+  padding: 28px 48px 24px;
+}
+.page-header-inner { max-width: 1100px; margin: 0 auto; }
+.breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+.breadcrumb span:last-child { color: var(--primary); font-weight: 500; }
+.page-h1 { font-size: 26px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+.page-desc { font-size: 14px; color: var(--text-muted); }
+.page-body { padding: 32px 48px; max-width: 1148px; margin: 0 auto; width: 100%; }
+
+/* ===== 卡片 ===== */
+.card {
+  background: white; border-radius: 14px;
+  border: 1px solid var(--border); overflow: hidden;
+}
+.card-header { padding: 18px 24px; border-bottom: 1px solid var(--border); }
+.card-body { padding: 24px; }
+.card-title { font-size: 15px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.card-desc { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+/* ===== 优先级矩阵 ===== */
+.priority-overview {
+  display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 24px;
+}
+.priority-list { display: flex; flex-direction: column; gap: 10px; }
+.priority-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 18px; border-radius: 12px;
+  border: 1.5px solid var(--border); background: white;
+  transition: all 0.2s; cursor: default;
+  position: relative; overflow: hidden;
+}
+.priority-item::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+}
+.priority-item.tier-1::before { background: var(--danger); }
+.priority-item.tier-2::before { background: var(--warning); }
+.priority-item.tier-3::before { background: var(--info); }
+.priority-item:hover { border-color: var(--primary); box-shadow: 0 2px 12px rgba(99,102,241,0.1); transform: translateX(2px); }
+.priority-rank {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; flex-shrink: 0;
+}
+.tier-1 .priority-rank { background: #fee2e2; color: var(--danger); }
+.tier-2 .priority-rank { background: #fef3c7; color: #b45309; }
+.tier-3 .priority-rank { background: #dbeafe; color: #1e40af; }
+.priority-info { flex: 1; min-width: 0; }
+.priority-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.priority-desc { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+.priority-tags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.tag {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500;
+}
+.tag-red { background: #fee2e2; color: #991b1b; }
+.tag-yellow { background: #fef3c7; color: #92400e; }
+.tag-blue { background: #dbeafe; color: #1e40af; }
+.tag-green { background: #d1fae5; color: #065f46; }
+.tag-purple { background: #ede9fe; color: #5b21b6; }
+.tag-gray { background: #f1f5f9; color: #475569; }
+.tag-orange { background: #ffedd5; color: #9a3412; }
+.priority-arrow {
+  font-size: 16px; color: var(--text-light); flex-shrink: 0;
+}
+
+/* ===== 分类统计 ===== */
+.category-cards { display: flex; flex-direction: column; gap: 12px; }
+.category-card {
+  border-radius: 12px; padding: 16px; border: 1.5px solid;
+}
+.category-card.cat-content { background: #fef2f2; border-color: #fecaca; }
+.category-card.cat-insight { background: #eff6ff; border-color: #bfdbfe; }
+.category-card-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.cat-content .category-card-title { color: #991b1b; }
+.cat-insight .category-card-title { color: #1e40af; }
+.category-card-body { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+.category-card-nums { display: flex; gap: 8px; margin-top: 8px; }
+
+/* ===== 核心问题 ===== */
+.core-question {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 1.5px solid #fcd34d; border-radius: 12px; padding: 16px 20px;
+  margin-bottom: 20px;
+}
+.core-question-title { font-size: 13px; font-weight: 700; color: #92400e; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.core-question-body { font-size: 13px; color: #78350f; line-height: 1.7; }
+
+/* ===== 决策框架 ===== */
+.decision-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.decision-card {
+  border-radius: 12px; padding: 18px; border: 1.5px solid;
+}
+.decision-card.opt-a { background: #f0fdf4; border-color: #86efac; }
+.decision-card.opt-b { background: #eff6ff; border-color: #93c5fd; }
+.decision-card.opt-rec { background: linear-gradient(135deg, #f0fdf4, #eff6ff); border-color: #6366f1; grid-column: 1/-1; }
+.decision-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.opt-a .decision-title { color: #166534; }
+.opt-b .decision-title { color: #1e40af; }
+.opt-rec .decision-title { color: var(--primary); }
+.decision-pros, .decision-cons { font-size: 12px; line-height: 1.8; }
+.pro { color: #166534; }
+.con { color: #991b1b; }
+.rec-body { font-size: 13px; color: var(--text); line-height: 1.7; }
+
+/* ===== 场景详情页 ===== */
+.scenario-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.scenario-tab {
+  padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; border: 1.5px solid var(--border);
+  color: var(--text-muted); background: white;
+}
+.scenario-tab:hover { border-color: var(--primary); color: var(--primary); }
+.scenario-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+.scenario-tab.tier-1-tab.active { background: var(--danger); border-color: var(--danger); }
+.scenario-tab.tier-2-tab.active { background: var(--warning); border-color: var(--warning); }
+.scenario-tab.tier-3-tab.active { background: var(--info); border-color: var(--info); }
+.scenario-panel { display: none; }
+.scenario-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+.scenario-header {
+  grid-column: 1/-1;
+  border-radius: 14px; padding: 20px 24px;
+  display: flex; align-items: flex-start; gap: 16px;
+}
+.scenario-icon-wrap {
+  width: 52px; height: 52px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; flex-shrink: 0;
+}
+.scenario-meta { flex: 1; }
+.scenario-num { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+.scenario-title { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+.scenario-summary { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+.scenario-tags { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+
+/* tier 颜色 */
+.t1-header { background: linear-gradient(135deg, #fff1f2, #ffe4e6); border: 1.5px solid #fecdd3; }
+.t1-icon { background: #fee2e2; }
+.t1-num { color: var(--danger); }
+.t2-header { background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1.5px solid #fde68a; }
+.t2-icon { background: #fef3c7; }
+.t2-num { color: #b45309; }
+.t3-header { background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 1.5px solid #bfdbfe; }
+.t3-icon { background: #dbeafe; }
+.t3-num { color: #1e40af; }
+
+.info-section { border-radius: 12px; padding: 18px; }
+.info-section-title { font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.step-list { display: flex; flex-direction: column; gap: 10px; }
+.step-item { display: flex; gap: 12px; align-items: flex-start; }
+.step-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--primary); color: white;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.step-content { font-size: 13px; color: var(--text); line-height: 1.6; }
+.step-content strong { color: var(--primary); }
+
+.input-list, .output-list { display: flex; flex-direction: column; gap: 8px; }
+.input-item, .output-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; color: var(--text); padding: 8px 12px;
+  background: var(--bg); border-radius: 8px; border-left: 3px solid;
+}
+.input-item { border-color: var(--primary); }
+.output-item { border-color: var(--success); }
+.input-icon, .output-icon { flex-shrink: 0; margin-top: 1px; }
+
+.confirm-list { display: flex; flex-direction: column; gap: 8px; }
+.confirm-item {
+  display: flex; gap: 10px; padding: 10px 14px;
+  background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;
+  font-size: 13px; color: #78350f; align-items: flex-start;
+}
+.confirm-q { flex-shrink: 0; font-weight: 700; color: #b45309; }
+
+.dependency-box {
+  background: var(--primary-light); border-radius: 8px; padding: 12px;
+  font-size: 12px; color: var(--primary-dark);
+  display: flex; align-items: flex-start; gap: 8px;
+  margin-top: 12px;
+}
+.dependency-box strong { font-weight: 700; }
+
+/* ===== 生成逻辑架构图 ===== */
+.arch-slide .page-body { padding-top: 24px; }
+.arch-flow { display: flex; flex-direction: column; gap: 0; }
+.arch-row {
+  display: flex; align-items: stretch; gap: 0;
+  margin-bottom: 0;
+}
+.arch-layer {
+  flex: 1; padding: 20px 24px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.arch-layer-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; margin-bottom: 4px;
+}
+.arch-boxes { display: flex; gap: 10px; flex-wrap: wrap; }
+.arch-box {
+  padding: 10px 14px; border-radius: 10px;
+  font-size: 12px; font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
+  border: 1.5px solid;
+}
+
+.arch-arrow {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-light); font-size: 22px; padding: 8px 0;
+}
+
+/* ===== 建议与确认 ===== */
+.confirm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+.question-list { display: flex; flex-direction: column; gap: 12px; }
+.question-item {
+  display: flex; gap: 14px; padding: 16px 18px;
+  background: white; border-radius: 12px; border: 1.5px solid var(--border);
+  align-items: flex-start; transition: all 0.2s;
+}
+.question-item:hover { border-color: var(--primary); box-shadow: 0 2px 12px rgba(99,102,241,0.1); }
+.q-num {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: var(--primary-light); color: var(--primary);
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.q-body { flex: 1; }
+.q-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.q-detail { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+.q-options { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.q-option {
+  padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+  border: 1px solid; cursor: pointer; transition: all 0.15s;
+}
+.q-option.opt-yes { border-color: var(--success); color: var(--success); }
+.q-option.opt-yes:hover { background: var(--success); color: white; }
+.q-option.opt-no { border-color: var(--danger); color: var(--danger); }
+.q-option.opt-no:hover { background: var(--danger); color: white; }
+.q-option.opt-a { border-color: var(--primary); color: var(--primary); }
+.q-option.opt-a:hover { background: var(--primary); color: white; }
+.q-option.opt-b { border-color: var(--info); color: var(--info); }
+.q-option.opt-b:hover { background: var(--info); color: white; }
+
+/* ===== 时间规划 ===== */
+.timeline { display: flex; flex-direction: column; gap: 0; }
+.timeline-item { display: flex; gap: 0; }
+.timeline-left {
+  width: 100px; flex-shrink: 0; text-align: right;
+  padding-right: 20px; padding-top: 4px;
+}
+.timeline-phase { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.timeline-date { font-size: 11px; color: var(--text-muted); }
+.timeline-mid {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0 16px;
+}
+.timeline-dot {
+  width: 14px; height: 14px; border-radius: 50%; border: 3px solid white;
+  flex-shrink: 0;
+}
+.timeline-line { width: 2px; flex: 1; min-height: 40px; }
+.timeline-right { flex: 1; padding-bottom: 28px; padding-top: 0; }
+.timeline-card {
+  background: white; border-radius: 12px; border: 1.5px solid var(--border);
+  padding: 14px 18px;
+}
+.timeline-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.timeline-tasks { display: flex; flex-direction: column; gap: 4px; }
+.timeline-task { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+.timeline-task::before { content: '▸'; color: var(--primary); }
+
+/* ===== 结尾 ===== */
+.end-slide {
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+  justify-content: center; align-items: center;
+  min-height: 100vh; flex-direction: column; text-align: center;
+}
+.end-inner { max-width: 600px; padding: 48px; }
+.end-icon { font-size: 64px; margin-bottom: 24px; }
+.end-title { font-size: 36px; font-weight: 800; color: white; margin-bottom: 12px; }
+.end-subtitle { font-size: 16px; color: rgba(255,255,255,0.6); margin-bottom: 40px; line-height: 1.6; }
+.end-actions { display: flex; justify-content: center; gap: 16px; }
+.end-btn {
+  padding: 12px 28px; border-radius: 10px; font-size: 14px; font-weight: 600;
+  cursor: pointer; border: none; transition: all 0.2s;
+}
+.end-btn-primary { background: white; color: var(--primary); }
+.end-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+.end-btn-outline { background: transparent; color: white; border: 1.5px solid rgba(255,255,255,0.3); }
+.end-btn-outline:hover { background: rgba(255,255,255,0.1); }
+
+/* ===== 滚动进度 ===== */
+.progress-bar {
+  position: fixed; top: 56px; left: 0; right: 0; height: 2px;
+  background: var(--border); z-index: 99;
+}
+.progress-fill {
+  height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary));
+  transition: width 0.3s ease;
+}
+
+/* ===== 浮动提示 ===== */
+.float-tip {
+  position: fixed; bottom: 24px; right: 24px; z-index: 200;
+  background: white; border-radius: 12px; border: 1.5px solid var(--border);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  padding: 12px 16px; display: flex; align-items: center; gap: 10px;
+  font-size: 13px; color: var(--text-muted);
+  animation: slideIn 0.3s ease;
+}
+@keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.float-tip-nav { display: flex; gap: 6px; }
+.nav-btn {
+  width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border);
+  background: white; cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+}
+.nav-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+
+/* ===== 工具栏 ===== */
+.toolbar {
+  display: flex; gap: 8px; align-items: center;
+  padding: 16px 48px; background: white;
+  border-top: 1px solid var(--border);
+  position: sticky; bottom: 0; z-index: 50;
+}
+.toolbar-left { flex: 1; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
+.toolbar-right { display: flex; gap: 8px; }
+
+/* ===== 响应式 ===== */
+@media (max-width: 900px) {
+  .priority-overview { grid-template-columns: 1fr; }
+  .scenario-panel.active { grid-template-columns: 1fr; }
+  .decision-grid { grid-template-columns: 1fr; }
+  .confirm-grid { grid-template-columns: 1fr; }
+  .page-body { padding: 20px 24px; }
+  .nav-steps { display: none; }
+  .cover-title { font-size: 28px; }
+}
+
+/* ===== 折叠面板 ===== */
+.collapse-header {
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; user-select: none; padding: 14px 18px;
+  border-radius: 10px; background: var(--bg); transition: all 0.2s;
+}
+.collapse-header:hover { background: var(--primary-light); }
+.collapse-body { padding: 0 18px 14px; }
+.collapse-arrow { transition: transform 0.2s; font-size: 12px; color: var(--text-muted); }
+.collapse-header.open .collapse-arrow { transform: rotate(180deg); }
+
+/* ===== 高亮盒子 ===== */
+.highlight-box {
+  border-radius: 12px; padding: 16px 20px;
+  display: flex; gap: 12px; align-items: flex-start;
+  margin-bottom: 16px;
+}
+.highlight-box.info { background: #eff6ff; border: 1.5px solid #bfdbfe; }
+.highlight-box.success { background: #f0fdf4; border: 1.5px solid #86efac; }
+.highlight-box.warning { background: #fffbeb; border: 1.5px solid #fde68a; }
+.highlight-box.danger { background: #fff1f2; border: 1.5px solid #fecdd3; }
+.highlight-box .hb-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.highlight-box .hb-body { flex: 1; }
+.highlight-box .hb-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.highlight-box.info .hb-title { color: #1e40af; }
+.highlight-box.success .hb-title { color: #166534; }
+.highlight-box.warning .hb-title { color: #92400e; }
+.highlight-box.danger .hb-title { color: #991b1b; }
+.highlight-box .hb-text { font-size: 13px; line-height: 1.6; color: var(--text); }
+</style>
+</head>
+<body>
+
+<!-- ===== 进度条 ===== -->
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:16.6%"></div></div>
+
+<!-- ===== 顶部导航 ===== -->
+<div class="nav-bar">
+  <div class="nav-logo">
+    <div class="logo-icon">🤖</div>
+    <span>AI营销助手</span>
+    <small>· 需求场景优先级汇报</small>
+  </div>
+  <div class="nav-steps" id="navSteps">
+    <div class="nav-step active" onclick="goSlide(0)" id="step-0">封面</div>
+    <div class="nav-step" onclick="goSlide(1)" id="step-1">优先级总览</div>
+    <div class="nav-step" onclick="goSlide(2)" id="step-2">场景详情</div>
+    <div class="nav-step" onclick="goSlide(3)" id="step-3">生成逻辑</div>
+    <div class="nav-step" onclick="goSlide(4)" id="step-4">确认事项</div>
+    <div class="nav-step" onclick="goSlide(5)" id="step-5">落地计划</div>
+  </div>
+  <div class="nav-actions">
+    <button class="btn btn-outline" onclick="window.print()">🖨 打印</button>
+    <button class="btn btn-primary" onclick="goSlide(currentSlide+1)">下一页 →</button>
+  </div>
+</div>
+
+<!-- ========================================
+     幻灯片 0：封面
+     ======================================== -->
+<div class="slide active" id="slide-0">
+  <div class="cover-slide" style="padding-top:56px; min-height:100vh; display:flex; align-items:center; justify-content:center;">
+    <div style="position:absolute;top:80px;left:60px;font-size:36px;opacity:0.06;animation:float 8s ease-in-out infinite;">📦</div>
+    <div style="position:absolute;top:120px;right:80px;font-size:42px;opacity:0.06;animation:float 6s ease-in-out infinite 1s;">🎯</div>
+    <div style="position:absolute;bottom:100px;left:100px;font-size:38px;opacity:0.06;animation:float 7s ease-in-out infinite 2s;">📊</div>
+    <div style="position:absolute;bottom:80px;right:60px;font-size:32px;opacity:0.06;animation:float 9s ease-in-out infinite 0.5s;">✍️</div>
+    <div class="cover-inner">
+      <div class="cover-badge">
+        <div class="dot"></div>
+        2026年Q2 · 产品营销智能助手系统
+      </div>
+      <div class="cover-title">
+        AI营销场景<br><span>需求优先级确认</span>
+      </div>
+      <div class="cover-subtitle">
+        10大核心场景 · 优先级框架 · 生成逻辑梳理<br>
+        用于老板汇报 &amp; 需求对齐
+      </div>
+      <div class="cover-meta">
+        <div class="cover-meta-item">
+          <div class="meta-num">10</div>
+          <div class="meta-label">需求场景</div>
+        </div>
+        <div class="cover-divider"></div>
+        <div class="cover-meta-item">
+          <div class="meta-num">3</div>
+          <div class="meta-label">优先级层级</div>
+        </div>
+        <div class="cover-divider"></div>
+        <div class="cover-meta-item">
+          <div class="meta-num">2</div>
+          <div class="meta-label">场景大类</div>
+        </div>
+        <div class="cover-divider"></div>
+        <div class="cover-meta-item">
+          <div class="meta-num">6</div>
+          <div class="meta-label">关键确认问题</div>
+        </div>
+      </div>
+      <button class="cover-start-btn" onclick="goSlide(1)">
+        开始汇报 →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================
+     幻灯片 1：优先级总览
+     ======================================== -->
+<div class="slide" id="slide-1">
+  <div class="slide-content">
+    <div class="page-header">
+      <div class="page-header-inner">
+        <div class="breadcrumb"><span>汇报材料</span><span>›</span><span>优先级总览</span></div>
+        <div class="page-h1">📋 10大场景优先级总览</div>
+        <div class="page-desc">基于老板给出的优先级排序，梳理分层逻辑与待确认关键问题</div>
+      </div>
+    </div>
+    <div class="page-body">
+
+      <!-- 核心待确认问题 -->
+      <div class="core-question" style="margin-bottom:20px;">
+        <div class="core-question-title">⚠️ 核心待确认问题（汇报前先请老板明确）</div>
+        <div class="core-question-body">
+          当前老板给出的优先级顺序，<strong>1-6是内容生产类</strong>（直出营销物料），<strong>7-10是洞察报告类</strong>（支撑决策分析）。
+          关键矛盾：<strong>洞察报告（7-10）应该是1-6的输入前置条件</strong>，先有洞察再出内容质量更高，但洞察报告放在低优先级。
+          需请老板确认：是「先快速上线内容生产场景验证价值」，还是「先把数据底座（洞察）做好再做内容」？
+        </div>
+      </div>
+
+      <div class="priority-overview">
+        <!-- 左侧：优先级列表 -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🏆 按老板给出的优先级排序</div>
+            <div class="card-desc">红色=高优先，黄色=中优先，蓝色=低优先</div>
+          </div>
+          <div class="card-body" style="padding:16px;">
+            <div class="priority-list">
+              <div class="priority-item tier-1" onclick="goSlide(2);switchScenario('s1')" style="cursor:pointer;">
+                <div class="priority-rank">1</div>
+                <div class="priority-info">
+                  <div class="priority-name">Listing 7张图卖点</div>
+                  <div class="priority-desc">电商主图卖点文案，直接影响转化率</div>
+                  <div class="priority-tags">
+                    <span class="tag tag-red">🔥 最高优先</span>
+                    <span class="tag tag-purple">电商核心</span>
+                    <span class="tag tag-gray">内容生产</span>
+                  </div>
+                </div>
+                <div class="priority-arrow">›</div>
+              </div>
+
+              <div class="priority-item tier-1" onclick="goSlide(2);switchScenario('s2')" style="cursor:pointer;">
+                <div class="priority-rank">2</div>
+                <div class="priority-info">
+                  <div class="priority-name">视频创意和文案</div>
+                  <div class="priority-desc">短视频脚本+文案，流量红利场景</div>
+                  <div class="priority-tags">
+                    <span class="tag tag-red">🔥 高优先</span>
+                    <span class="tag tag-orange">视频营销</span>
+                    <span class="tag tag-gray">内容生产</span>
+                  </div>
+                </div>
+                <div class="priority-arrow">›</div>
+              </div>
+
+              <div class="priority-item tier-1" onclick="goSlide(2);switchScenario('s3')" style="cursor:pointer;">
+                <div class="priority-rank">3</div>
+                <div class="priority-info">
+                  <div class="priority-name">包装盒文案</div>
+                  <div class="priority-desc">产品实物包装，品牌第一触点</div>
+                  <div class="priority-tags">
+                    <span class="tag tag-red">🔥 高优先</span>
+                    <span class="tag tag-green">品牌体验</span>
+                    <span class="tag tag-gray">内容生产</span>
+                  </div>
+                </div>
+                <div class="priority-arrow">›</div>
+              </div>
+
+              <div class="priority-item tier-2" onclick="goSlide(2);switchScenario('s4')" style="cursor:pointer;">
+                <div class="priority-rank">4</div>
+                <div class="priority-info">
+                  <div class="priority-name">用户友好型说明书</div>
+                  <div class="priority-desc">含图文结构，提升用户体验，降低客诉</div>
+                  <div class="priority-tags">
+                    <span class="tag tag-yellow">⚡ 中优先</span>
+                    <span class="tag tag-green">用户体验</span>
+                    <span class="tag tag-gray">内容生产</span>
+                  </div>
+                </div>
+                <div class="priority-arrow">›</div>
+              </div>
+
+              <div class="priority-item tier-2" onclick="goSlide(2);switchScenario('s5')" style="cursor:pointer;">
+                <div class="priority-rank">5</div>
+                <div class="priority-info">
+                  <div class="priority-name">广告创意和文案</div>
+                  <div class="priority-desc">付费投放广告素材，ROI衡量明确</div>
+                  <div class="priority-tags">
+                    <span class="tag tag-yellow">⚡ 中优先</span>
+                    <span class="tag tag-blue">付费投放</span>
+                    <span class="tag tag-gray">内容生产</span>
+                  </div>
+                </div>
+                <div class="priority-arrow">›</div>
+              </div>
+
+              <div class="priority-item tier-2" onclick="goSlide(2);switchScenario('s6')" style="cursor:pointer;">
+                <div class="priority-rank">6</div>
+                <div class="priority-info">
+                  <div class="priority-name">种草文章</div>
+                  <div class="priority-desc">小红书/公众号内容营销，影响用户心智</div>
+                  <div class="priority-tags">
+                    <span class="tag tag-yellow">⚡ 中优先</span>
+                    <span class="tag tag-purple">内容营销</span>
+                    <span class="tag tag-gray">内容生产</span>
+                  </div>
+                </div>
+                <div class="priority-arrow">›</div>
+              </div>
+
+              <div class="priority-item tier-3" onclick="goSlide(2);switchScenario('s7')" style="cursor:pointer;">
+                <div class="priority-rank">7</div>
+                <div class="priority-info">
+                  <div class="priority-name">品类洞察报告</div>
+                  <div class="priority-desc">市场趋势、品类规模、机会分析</div>
+                  <div class="priority-tags">
+                    <span class="tag tag-blue">📊 基础支撑</span>
+                    <span class="tag tag-gray">洞察报告</span>
+                  </div>
+                </div>
+                <div class="priority-arrow">›</div>
+              </div>
+
+              <div class="priority-item tier-3" onclick="goSlide(2);switchScenario('s8')" style="cursor:pointer;">
+                <div class="priority-rank">8</div>
+                <div class="priority-info">
+                  <div class="priority-name">竞对洞察报告</div>
+                  <div class="priority-desc">竞品分析、差异化定位、策略建议</div>
+                  <div class="priority-tags">
+                    <span class="tag tag-blue">📊 基础支撑</span>
+                    <span class="tag tag-gray">洞察报告</span>
+                  </div>
+                </div>
+                <div class="priority-arrow">›</div>
+              </div>
+
+              <div class="priority-item tier-3" onclick="goSlide(2);switchScenario('s9')" style="cursor:pointer;">
+                <div class="priority-rank">9</div>
+                <div class="priority-info">
+                  <div class="priority-name">产品洞察报告</div>
+                  <div class="priority-desc">产品卖点挖掘、功能价值、改进方向</div>
+                  <div class="priority-tags">
+                    <span class="tag tag-blue">📊 基础支撑</span>
+                    <span class="tag tag-gray">洞察报告</span>
+                  </div>
+                </div>
+                <div class="priority-arrow">›</div>
+              </div>
+
+              <div class="priority-item tier-3" onclick="goSlide(2);switchScenario('s10')" style="cursor:pointer;">
+                <div class="priority-rank">10</div>
+                <div class="priority-info">
+                  <div class="priority-name">用户洞察报告</div>
+                  <div class="priority-desc">用户画像、需求痛点、购买决策分析</div>
+                  <div class="priority-tags">
+                    <span class="tag tag-blue">📊 基础支撑</span>
+                    <span class="tag tag-gray">洞察报告</span>
+                  </div>
+                </div>
+                <div class="priority-arrow">›</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右侧：分类与建议 -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <!-- 两大类别 -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🗂 场景分类</div>
+            </div>
+            <div class="card-body" style="padding:16px;">
+              <div class="category-cards">
+                <div class="category-card cat-content">
+                  <div class="category-card-title">🎨 内容生产类（1-6）</div>
+                  <div class="category-card-body">直接输出营销物料，覆盖电商、视频、广告、内容营销全链路，<strong>用户最直接感知到价值</strong>，验证效果快。</div>
+                  <div class="category-card-nums">
+                    <span class="tag tag-red">3个高优先</span>
+                    <span class="tag tag-yellow">3个中优先</span>
+                  </div>
+                </div>
+                <div class="category-card cat-insight">
+                  <div class="category-card-title">📊 洞察报告类（7-10）</div>
+                  <div class="category-card-body">生成品类/竞对/产品/用户的分析报告，<strong>是内容生产的数据底座</strong>，先做则内容更精准，但见效周期更长。</div>
+                  <div class="category-card-nums">
+                    <span class="tag tag-blue">4个低优先</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 建议调整 -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">💡 我的建议调整</div>
+            </div>
+            <div class="card-body" style="padding:16px;display:flex;flex-direction:column;gap:10px;">
+              <div class="highlight-box success">
+                <div class="hb-icon">✅</div>
+                <div class="hb-body">
+                  <div class="hb-title">认同：1-3优先级最高</div>
+                  <div class="hb-text">Listing图、视频、包装是离成交最近的环节，先上线价值最直观。</div>
+                </div>
+              </div>
+              <div class="highlight-box warning">
+                <div class="hb-icon">⚠️</div>
+                <div class="hb-body">
+                  <div class="hb-title">建议：9&10（产品+用户洞察）提前</div>
+                  <div class="hb-text">产品洞察和用户洞察是所有内容生产的原材料，建议与1-3并行开发，否则内容生产会缺少数据支撑，只能靠人工输入。</div>
+                </div>
+              </div>
+              <div class="highlight-box info">
+                <div class="hb-icon">ℹ️</div>
+                <div class="hb-body">
+                  <div class="hb-title">可以后置：7&8（品类+竞对洞察）</div>
+                  <div class="hb-text">品类洞察和竞对洞察更偏向决策支持，不影响内容生产初期的功能上线，可稳定后迭代。</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 决策框架 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🔀 关键决策：两种策略路线，请老板确认</div>
+        </div>
+        <div class="card-body" style="padding:16px;">
+          <div class="decision-grid">
+            <div class="decision-card opt-a">
+              <div class="decision-title">🚀 方案A：速度优先（按老板排序）</div>
+              <div style="font-size:12px;color:#166534;font-weight:600;margin-bottom:6px;">优先实现内容生产1-6，洞察7-10后期迭代</div>
+              <div class="decision-pros">
+                <div class="pro">✔ 最快上线，最早交付用户价值</div>
+                <div class="pro">✔ 逻辑清晰，执行简单</div>
+                <div class="pro">✔ 先用模板/人工输入补充数据缺口</div>
+              </div>
+              <div style="height:8px;"></div>
+              <div class="decision-cons">
+                <div class="con">✘ 内容质量依赖人工提供的产品信息</div>
+                <div class="con">✘ 洞察能力后补，初期输出可能不够精准</div>
+              </div>
+            </div>
+            <div class="decision-card opt-b">
+              <div class="decision-title">🏗 方案B：质量优先（建议调整）</div>
+              <div style="font-size:12px;color:#1e40af;font-weight:600;margin-bottom:6px;">产品+用户洞察(9&10)与内容生产1-3并行，其余不变</div>
+              <div class="decision-pros">
+                <div class="pro">✔ 内容生产有数据支撑，质量更高</div>
+                <div class="pro">✔ 洞察→内容形成闭环，长期价值大</div>
+                <div class="pro">✔ 开发量增加有限，并行不影响速度</div>
+              </div>
+              <div style="height:8px;"></div>
+              <div class="decision-cons">
+                <div class="con">✘ 初期需要并行两条线，资源要求更高</div>
+                <div class="con">✘ 洞察模块技术复杂度更高</div>
+              </div>
+            </div>
+            <div class="decision-card opt-rec">
+              <div class="decision-title">⭐ 综合建议（推荐确认）</div>
+              <div class="rec-body">
+                <strong>Phase 1（第1-4周）</strong>：按老板顺序，优先实现 #1 Listing卖点 + #2 视频文案，同步启动 #9 产品洞察 作为数据底座（3个场景并行）。<br>
+                <strong>Phase 2（第5-8周）</strong>：补全 #3 包装盒 + #4 说明书 + #10 用户洞察，形成内容生产+洞察双引擎。<br>
+                <strong>Phase 3（第9周+）</strong>：#5 广告 + #6 种草 + #7 品类洞察 + #8 竞对洞察。
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="toolbar">
+      <div class="toolbar-left">📋 第1页 · 优先级总览</div>
+      <div class="toolbar-right">
+        <button class="btn btn-outline" onclick="goSlide(0)">← 上一页</button>
+        <button class="btn btn-primary" onclick="goSlide(2)">场景详情 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================
+     幻灯片 2：场景详情
+     ======================================== -->
+<div class="slide" id="slide-2">
+  <div class="slide-content">
+    <div class="page-header">
+      <div class="page-header-inner">
+        <div class="breadcrumb"><span>汇报材料</span><span>›</span><span>场景详情</span></div>
+        <div class="page-h1">🔍 10大场景详细说明</div>
+        <div class="page-desc">点击切换不同场景，查看输入要素、生成逻辑与输出形式</div>
+      </div>
+    </div>
+    <div class="page-body">
+
+      <!-- 场景切换标签 -->
+      <div class="scenario-tabs">
+        <div class="scenario-tab tier-1-tab active" id="tab-s1" onclick="switchScenario('s1')">① Listing卖点图</div>
+        <div class="scenario-tab tier-1-tab" id="tab-s2" onclick="switchScenario('s2')">② 视频创意</div>
+        <div class="scenario-tab tier-1-tab" id="tab-s3" onclick="switchScenario('s3')">③ 包装盒文案</div>
+        <div class="scenario-tab tier-2-tab" id="tab-s4" onclick="switchScenario('s4')">④ 说明书</div>
+        <div class="scenario-tab tier-2-tab" id="tab-s5" onclick="switchScenario('s5')">⑤ 广告文案</div>
+        <div class="scenario-tab tier-2-tab" id="tab-s6" onclick="switchScenario('s6')">⑥ 种草文章</div>
+        <div class="scenario-tab tier-3-tab" id="tab-s7" onclick="switchScenario('s7')">⑦ 品类洞察</div>
+        <div class="scenario-tab tier-3-tab" id="tab-s8" onclick="switchScenario('s8')">⑧ 竞对洞察</div>
+        <div class="scenario-tab tier-3-tab" id="tab-s9" onclick="switchScenario('s9')">⑨ 产品洞察</div>
+        <div class="scenario-tab tier-3-tab" id="tab-s10" onclick="switchScenario('s10')">⑩ 用户洞察</div>
+      </div>
+
+      <!-- 场景 1：Listing 7张图卖点 -->
+      <div class="scenario-panel active" id="panel-s1">
+        <div class="scenario-header t1-header">
+          <div class="scenario-icon-wrap t1-icon">🖼</div>
+          <div class="scenario-meta">
+            <div class="scenario-num t1-num">🔥 优先级 #1 · 内容生产类</div>
+            <div class="scenario-title">Listing 7张图卖点</div>
+            <div class="scenario-summary">针对亚马逊/京东/天猫等电商平台，为产品主图（共7张）分别生成对应的卖点文案结构与视觉引导内容，最大化转化率。</div>
+            <div class="scenario-tags">
+              <span class="tag tag-red">最高优先</span>
+              <span class="tag tag-purple">电商平台</span>
+              <span class="tag tag-gray">亚马逊/京东/天猫</span>
+              <span class="tag tag-green">直接影响转化</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">📥 所需输入要素</div></div>
+          <div class="card-body">
+            <div class="input-list">
+              <div class="input-item"><div class="input-icon">📦</div><div><strong>产品基础信息</strong>：名称、类目、功能、规格参数、材质</div></div>
+              <div class="input-item"><div class="input-icon">🎯</div><div><strong>目标平台</strong>：亚马逊 / 天猫 / 京东（规则不同）</div></div>
+              <div class="input-item"><div class="input-icon">👥</div><div><strong>核心用户画像</strong>：年龄、性别、使用场景、痛点</div></div>
+              <div class="input-item"><div class="input-icon">🏆</div><div><strong>竞品参考</strong>（可选）：对标竞品链接或截图</div></div>
+              <div class="input-item"><div class="input-icon">🌟</div><div><strong>核心卖点</strong>：3-5个关键差异化优势</div></div>
+              <div class="input-item"><div class="input-icon">🚫</div><div><strong>禁用词/品牌规范</strong>（可选）</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">⚙️ 生成逻辑</div></div>
+          <div class="card-body">
+            <div class="step-list">
+              <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>图位规划</strong>：按7张图的标准结构分配内容主题（主图/场景图/功能图/细节图/对比图/人群图/权威图）</div></div>
+              <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>卖点提炼</strong>：从产品信息中提炼每张图的核心卖点主张（标题+副标题+支撑点）</div></div>
+              <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>平台适配</strong>：按目标平台规则调整字数、禁用词、视觉引导文字</div></div>
+              <div class="step-item"><div class="step-num">4</div><div class="step-content"><strong>多版本输出</strong>：每张图提供2-3版文案变体，供设计师选用</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">📤 输出形式</div></div>
+          <div class="card-body">
+            <div class="output-list">
+              <div class="output-item"><div class="output-icon">✅</div><div>7张图的文案结构表（含：主标题、副标题、卖点支撑、视觉引导词）</div></div>
+              <div class="output-item"><div class="output-icon">✅</div><div>每张图2-3个文案版本（可一键复制）</div></div>
+              <div class="output-item"><div class="output-icon">✅</div><div>卖点关键词列表（可导入设计工具）</div></div>
+            </div>
+            <div class="dependency-box">
+              💡 <div><strong>与洞察关联</strong>：若先有用户洞察（#10）和产品洞察（#9），可自动提炼卖点，否则需人工输入核心卖点</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column:1/-1;">
+          <div class="card-header"><div class="card-title">❓ 需向老板确认的问题</div></div>
+          <div class="card-body">
+            <div class="confirm-list">
+              <div class="confirm-item"><div class="confirm-q">Q1</div><div>优先支持哪个平台？亚马逊、天猫、京东的Listing规则差异较大，建议先做1个平台的完整方案再扩展。</div></div>
+              <div class="confirm-item"><div class="confirm-q">Q2</div><div>7张图的数量是固定的吗？不同平台主图数量规范不同（亚马逊最多9张，天猫7张），是否需要弹性配置？</div></div>
+              <div class="confirm-item"><div class="confirm-q">Q3</div><div>是否需要支持英文/海外站？如果涉及跨境，需要多语言翻译能力。</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 场景 2：视频创意和文案 -->
+      <div class="scenario-panel" id="panel-s2">
+        <div class="scenario-header t1-header">
+          <div class="scenario-icon-wrap t1-icon">🎬</div>
+          <div class="scenario-meta">
+            <div class="scenario-num t1-num">🔥 优先级 #2 · 内容生产类</div>
+            <div class="scenario-title">视频创意和文案</div>
+            <div class="scenario-summary">为短视频平台（抖音/快手/视频号）生成视频拍摄脚本、分镜头文案、口播稿及字幕文案，覆盖带货视频、品牌视频、测评视频等类型。</div>
+            <div class="scenario-tags">
+              <span class="tag tag-red">高优先</span>
+              <span class="tag tag-orange">抖音/快手/视频号</span>
+              <span class="tag tag-gray">短视频营销</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">📥 所需输入要素</div></div>
+          <div class="card-body">
+            <div class="input-list">
+              <div class="input-item"><div class="input-icon">📱</div><div><strong>投放平台</strong>：抖音 / 快手 / 视频号 / B站</div></div>
+              <div class="input-item"><div class="input-icon">🎭</div><div><strong>视频类型</strong>：带货口播 / 测评 / 剧情 / 开箱 / 教程</div></div>
+              <div class="input-item"><div class="input-icon">⏱</div><div><strong>视频时长</strong>：15s / 30s / 60s / 3min+</div></div>
+              <div class="input-item"><div class="input-icon">🎯</div><div><strong>视频目标</strong>：涨粉 / 带货转化 / 品牌曝光</div></div>
+              <div class="input-item"><div class="input-icon">🗣</div><div><strong>账号风格</strong>：幽默 / 专业 / 生活化 / 种草</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">⚙️ 生成逻辑</div></div>
+          <div class="card-body">
+            <div class="step-list">
+              <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>钩子设计</strong>：生成前3秒吸引眼球的开场（黄金3秒原则）</div></div>
+              <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>脚本分镜</strong>：按时间轴拆分画面+旁白+字幕+转场说明</div></div>
+              <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>口播文案</strong>：生成完整口播稿，带自然停顿节点标记</div></div>
+              <div class="step-item"><div class="step-num">4</div><div class="step-content"><strong>标题+标签</strong>：生成发布标题（含关键词）和话题标签</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">📤 输出形式</div></div>
+          <div class="card-body">
+            <div class="output-list">
+              <div class="output-item"><div class="output-icon">✅</div><div>完整视频脚本（分镜表格：时间轴/画面描述/口播/字幕）</div></div>
+              <div class="output-item"><div class="output-icon">✅</div><div>口播稿全文（可复制给主播直接使用）</div></div>
+              <div class="output-item"><div class="output-icon">✅</div><div>视频标题+话题标签（3个版本）</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column:1/-1;">
+          <div class="card-header"><div class="card-title">❓ 需向老板确认的问题</div></div>
+          <div class="card-body">
+            <div class="confirm-list">
+              <div class="confirm-item"><div class="confirm-q">Q1</div><div>是否需要支持多种视频类型？带货口播 vs 剧情短片 vs 测评，生成逻辑差异很大，建议先聚焦1-2种核心类型。</div></div>
+              <div class="confirm-item"><div class="confirm-q">Q2</div><div>是否需要输出分镜头图示？如需含参考图，涉及图片生成能力，技术复杂度显著提升。</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 场景 3：包装盒文案 -->
+      <div class="scenario-panel" id="panel-s3">
+        <div class="scenario-header t1-header">
+          <div class="scenario-icon-wrap t1-icon">📦</div>
+          <div class="scenario-meta">
+            <div class="scenario-num t1-num">🔥 优先级 #3 · 内容生产类</div>
+            <div class="scenario-title">包装盒文案</div>
+            <div class="scenario-summary">为产品外包装（正面/背面/侧面/内盒）生成品牌标语、产品卖点、使用说明、法规声明等结构化文案，需符合行业合规要求。</div>
+            <div class="scenario-tags">
+              <span class="tag tag-red">高优先</span>
+              <span class="tag tag-green">品牌第一触点</span>
+              <span class="tag tag-gray">线下+线上</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📥 所需输入要素</div></div>
+          <div class="card-body">
+            <div class="input-list">
+              <div class="input-item"><div class="input-icon">📐</div><div><strong>包装结构</strong>：正面/背面/左侧/右侧/顶部/底部（各区域面积/字数限制）</div></div>
+              <div class="input-item"><div class="input-icon">⚖️</div><div><strong>行业类目</strong>：食品/美妆/3C/家居（合规内容不同）</div></div>
+              <div class="input-item"><div class="input-icon">🌍</div><div><strong>销售市场</strong>：国内 / 海外（需符合当地标签法规）</div></div>
+              <div class="input-item"><div class="input-icon">🏷</div><div><strong>品牌调性</strong>：高端/亲民/专业/趣味</div></div>
+              <div class="input-item"><div class="input-icon">📋</div><div><strong>必须包含的合规信息</strong>：成分/净含量/条形码/生产日期/许可证号等</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">⚙️ 生成逻辑</div></div>
+          <div class="card-body">
+            <div class="step-list">
+              <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>合规检查</strong>：根据类目自动检查必填合规字段</div></div>
+              <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>面向分区</strong>：按包装各面（正/背/侧）分配文案内容与优先级</div></div>
+              <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>品牌植入</strong>：Slogan + 品牌故事简版（背面/内盒）</div></div>
+              <div class="step-item"><div class="step-num">4</div><div class="step-content"><strong>字数控制</strong>：按面积约束自动压缩或扩展文案</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📤 输出形式</div></div>
+          <div class="card-body">
+            <div class="output-list">
+              <div class="output-item"><div class="output-icon">✅</div><div>各面文案分区（结构化表格，可直接给设计师）</div></div>
+              <div class="output-item"><div class="output-icon">✅</div><div>合规字段检查清单（自动标注缺失项）</div></div>
+              <div class="output-item"><div class="output-icon">✅</div><div>品牌Slogan 3个备选版本</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="grid-column:1/-1;">
+          <div class="card-header"><div class="card-title">❓ 需向老板确认的问题</div></div>
+          <div class="card-body">
+            <div class="confirm-list">
+              <div class="confirm-item"><div class="confirm-q">Q1</div><div>是否需要内置合规检查？食品/美妆等类目的包装合规要求差异很大，是否需要AI自动检查合规性（需专项数据库支持）？</div></div>
+              <div class="confirm-item"><div class="confirm-q">Q2</div><div>是否支持多语言包装？如果SKU涉及海外市场（英/日/德/法），需要增加翻译+本地化合规能力。</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 场景 4：说明书 -->
+      <div class="scenario-panel" id="panel-s4">
+        <div class="scenario-header t2-header">
+          <div class="scenario-icon-wrap t2-icon">📖</div>
+          <div class="scenario-meta">
+            <div class="scenario-num t2-num">⚡ 优先级 #4 · 内容生产类</div>
+            <div class="scenario-title">用户友好型说明书（含图和文）</div>
+            <div class="scenario-summary">将晦涩的技术参数和操作步骤转化为图文结合、通俗易懂的用户手册，降低客诉率，提升用户体验分。</div>
+            <div class="scenario-tags">
+              <span class="tag tag-yellow">中优先</span>
+              <span class="tag tag-green">降低客诉</span>
+              <span class="tag tag-gray">含图示设计建议</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📥 所需输入要素</div></div>
+          <div class="card-body">
+            <div class="input-list">
+              <div class="input-item"><div class="input-icon">📄</div><div><strong>原始技术文档</strong>：工程说明书/规格书/原版说明书（上传）</div></div>
+              <div class="input-item"><div class="input-icon">🔧</div><div><strong>产品使用步骤</strong>：安装/开机/操作/清洁/常见问题</div></div>
+              <div class="input-item"><div class="input-icon">👥</div><div><strong>目标用户</strong>：技术小白 / 老年用户 / 专业用户</div></div>
+              <div class="input-item"><div class="input-icon">⚠️</div><div><strong>安全警告</strong>：必须包含的注意事项</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">⚙️ 生成逻辑</div></div>
+          <div class="card-body">
+            <div class="step-list">
+              <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>文档解析</strong>：OCR/上传解析原始技术文档</div></div>
+              <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>简化重写</strong>：将技术语言转化为日常用语（按用户层级调整复杂度）</div></div>
+              <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>图示建议</strong>：在关键步骤处标注"此处需插图：[图示描述]"，供设计师制作</div></div>
+              <div class="step-item"><div class="step-num">4</div><div class="step-content"><strong>结构优化</strong>：生成目录+快速开始指南+FAQ</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="grid-column:1/-1;">
+          <div class="card-header"><div class="card-title">❓ 需向老板确认的问题</div></div>
+          <div class="card-body">
+            <div class="confirm-list">
+              <div class="confirm-item"><div class="confirm-q">Q1</div><div>「含图」是AI生成图示，还是标注图示占位符由设计师画？AI直接生成说明书配图技术难度高，如果是标注占位符则容易实现。</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 场景 5：广告文案 -->
+      <div class="scenario-panel" id="panel-s5">
+        <div class="scenario-header t2-header">
+          <div class="scenario-icon-wrap t2-icon">📢</div>
+          <div class="scenario-meta">
+            <div class="scenario-num t2-num">⚡ 优先级 #5 · 内容生产类</div>
+            <div class="scenario-title">广告创意和文案</div>
+            <div class="scenario-summary">为付费投放渠道（信息流/搜索/Banner/开屏）生成广告标题、描述文案、CTA、A/B测试版本，最大化点击率和转化率。</div>
+            <div class="scenario-tags">
+              <span class="tag tag-yellow">中优先</span>
+              <span class="tag tag-blue">ROI可量化</span>
+              <span class="tag tag-gray">信息流/搜索/开屏</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📥 所需输入要素</div></div>
+          <div class="card-body">
+            <div class="input-list">
+              <div class="input-item"><div class="input-icon">📡</div><div><strong>投放平台</strong>：巨量引擎/腾讯广告/百度/小红书广告</div></div>
+              <div class="input-item"><div class="input-icon">🎯</div><div><strong>广告目标</strong>：品牌曝光 / 点击 / 转化 / 加购</div></div>
+              <div class="input-item"><div class="input-icon">👤</div><div><strong>人群定向标签</strong>：性别/年龄/兴趣/地域</div></div>
+              <div class="input-item"><div class="input-icon">💰</div><div><strong>卖点/促销信息</strong>：折扣、赠品、限时</div></div>
+              <div class="input-item"><div class="input-icon">📏</div><div><strong>字数限制</strong>：各平台标题/描述字数上限</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">⚙️ 生成逻辑</div></div>
+          <div class="card-body">
+            <div class="step-list">
+              <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>用户痛点匹配</strong>：按人群标签匹配对应的情感诉求与功能诉求</div></div>
+              <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>多版本创意</strong>：生成5-10条差异化广告文案（痛点型/利益型/好奇型/权威型）</div></div>
+              <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>平台适配</strong>：按各平台字数/格式规范裁剪</div></div>
+              <div class="step-item"><div class="step-num">4</div><div class="step-content"><strong>A/B分组</strong>：将多版本自动归类为A/B测试组并附测试建议</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="grid-column:1/-1;">
+          <div class="card-header"><div class="card-title">❓ 需向老板确认的问题</div></div>
+          <div class="card-body">
+            <div class="confirm-list">
+              <div class="confirm-item"><div class="confirm-q">Q1</div><div>是否需要接入广告平台API自动投放？文案生成是P1，自动投放是P2，建议先做文案，后期接API。</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 场景 6：种草文章 -->
+      <div class="scenario-panel" id="panel-s6">
+        <div class="scenario-header t2-header">
+          <div class="scenario-icon-wrap t2-icon">🌿</div>
+          <div class="scenario-meta">
+            <div class="scenario-num t2-num">⚡ 优先级 #6 · 内容生产类</div>
+            <div class="scenario-title">种草文章</div>
+            <div class="scenario-summary">为小红书、公众号、知乎、抖音图文等平台生成测评型、攻略型、故事型的种草内容，影响用户购买决策的心智。</div>
+            <div class="scenario-tags">
+              <span class="tag tag-yellow">中优先</span>
+              <span class="tag tag-purple">小红书/公众号</span>
+              <span class="tag tag-gray">内容营销</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📥 所需输入要素</div></div>
+          <div class="card-body">
+            <div class="input-list">
+              <div class="input-item"><div class="input-icon">📱</div><div><strong>发布平台</strong>：小红书 / 公众号 / 知乎 / 抖音图文</div></div>
+              <div class="input-item"><div class="input-icon">✍️</div><div><strong>写作风格</strong>：真实测评 / 生活场景 / 干货攻略 / 故事型</div></div>
+              <div class="input-item"><div class="input-icon">🙋</div><div><strong>作者人设</strong>：素人 / 达人 / 品牌官号</div></div>
+              <div class="input-item"><div class="input-icon">🎯</div><div><strong>目标读者</strong>：人群画像</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">⚙️ 生成逻辑</div></div>
+          <div class="card-body">
+            <div class="step-list">
+              <div class="step-item"><div class="step-num">1</div><div class="step-content"><strong>场景代入</strong>：构建真实使用场景，让读者产生代入感</div></div>
+              <div class="step-item"><div class="step-num">2</div><div class="step-content"><strong>结构化写作</strong>：钩子标题→痛点共鸣→产品体验→效果展示→购买理由</div></div>
+              <div class="step-item"><div class="step-num">3</div><div class="step-content"><strong>平台风格适配</strong>：小红书emoji+分段/公众号长图文/知乎专业体</div></div>
+              <div class="step-item"><div class="step-num">4</div><div class="step-content"><strong>关键词植入</strong>：SEO关键词自然融入，提升搜索曝光</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="grid-column:1/-1;">
+          <div class="card-header"><div class="card-title">❓ 需向老板确认的问题</div></div>
+          <div class="card-body">
+            <div class="confirm-list">
+              <div class="confirm-item"><div class="confirm-q">Q1</div><div>种草文章是给内部运营使用，还是给达人/KOL作为参考素材？两种场景的写作风格和长度要求差异较大。</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 场景 7：品类洞察 -->
+      <div class="scenario-panel" id="panel-s7">
+        <div class="scenario-header t3-header">
+          <div class="scenario-icon-wrap t3-icon">📈</div>
+          <div class="scenario-meta">
+            <div class="scenario-num t3-num">📊 优先级 #7 · 洞察报告类</div>
+            <div class="scenario-title">品类洞察报告</div>
+            <div class="scenario-summary">分析目标品类的市场规模、增长趋势、消费者结构、热门子品类、季节性规律，帮助产品团队把握品类机会窗口。</div>
+            <div class="scenario-tags">
+              <span class="tag tag-blue">决策支撑</span>
+              <span class="tag tag-gray">市场分析</span>
+              <span class="tag tag-gray">战略级输入</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📥 数据来源</div></div>
+          <div class="card-body">
+            <div class="input-list">
+              <div class="input-item"><div class="input-icon">🔗</div><div><strong>电商数据</strong>：淘宝/京东/亚马逊品类销量/增速/价格带</div></div>
+              <div class="input-item"><div class="input-icon">🔍</div><div><strong>搜索数据</strong>：百度指数/微信指数/Google Trends</div></div>
+              <div class="input-item"><div class="input-icon">📱</div><div><strong>社媒数据</strong>：小红书/抖音品类内容声量与趋势</div></div>
+              <div class="input-item"><div class="input-icon">📊</div><div><strong>第三方报告</strong>：艾瑞/尼尔森/欧睿数据接入（可选）</div></div>
+            </div>
+            <div class="dependency-box">
+              ⚠️ <div><strong>技术依赖</strong>：需要外部数据API接入或人工数据上传，是4个洞察报告中<strong>数据获取难度最高</strong>的场景</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📤 输出形式</div></div>
+          <div class="card-body">
+            <div class="output-list">
+              <div class="output-item"><div class="output-icon">✅</div><div>品类规模&增速图表（含同比/环比数据）</div></div>
+              <div class="output-item"><div class="output-icon">✅</div><div>热门子品类Top10排行</div></div>
+              <div class="output-item"><div class="output-icon">✅</div><div>品类趋势预判（未来3-6个月机会窗口）</div></div>
+              <div class="output-item"><div class="output-icon">✅</div><div>策略建议摘要（3条可操作洞察）</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="grid-column:1/-1;">
+          <div class="card-header"><div class="card-title">❓ 需向老板确认的问题</div></div>
+          <div class="card-body">
+            <div class="confirm-list">
+              <div class="confirm-item"><div class="confirm-q">Q1</div><div>数据来源是接入外部API还是支持人工上传Excel？接API成本高但自动化，人工上传灵活但效率低。</div></div>
+              <div class="confirm-item"><div class="confirm-q">Q2</div><div>品类洞察报告的使用方是产品团队还是销售/运营？不同使用方对报告深度和展示形式要求不同。</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 场景 8：竞对洞察 -->
+      <div class="scenario-panel" id="panel-s8">
+        <div class="scenario-header t3-header">
+          <div class="scenario-icon-wrap t3-icon">🔬</div>
+          <div class="scenario-meta">
+            <div class="scenario-num t3-num">📊 优先级 #8 · 洞察报告类</div>
+            <div class="scenario-title">竞对洞察报告</div>
+            <div class="scenario-summary">系统分析竞品的卖点策略、定价结构、营销打法、用户口碑，输出差异化竞争建议，指导产品定位与内容策略。</div>
+            <div class="scenario-tags">
+              <span class="tag tag-blue">竞争情报</span>
+              <span class="tag tag-gray">差异化定位</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📥 数据来源</div></div>
+          <div class="card-body">
+            <div class="input-list">
+              <div class="input-item"><div class="input-icon">🛒</div><div><strong>电商链接</strong>：竞品商品链接（系统自动抓取标题/卖点/评论）</div></div>
+              <div class="input-item"><div class="input-icon">⭐</div><div><strong>评论数据</strong>：好评/差评/追评（NLP情感分析）</div></div>
+              <div class="input-item"><div class="input-icon">💵</div><div><strong>价格数据</strong>：价格历史趋势、促销策略</div></div>
+              <div class="input-item"><div class="input-icon">📱</div><div><strong>社媒内容</strong>：竞品的小红书/抖音内容声量分析</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📤 输出形式</div></div>
+          <div class="card-body">
+            <div class="output-list">
+              <div class="output-item"><div class="output-icon">✅</div><div>竞品矩阵对比表（卖点/价格/评分/销量）</div></div>
+              <div class="output-item"><div class="output-icon">✅</div><div>竞品口碑分析（用户好评/差评词云+归因）</div></div>
+              <div class="output-item"><div class="output-icon">✅</div><div>差异化机会点（可直接用于产品定位）</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="grid-column:1/-1;">
+          <div class="card-header"><div class="card-title">❓ 需向老板确认的问题</div></div>
+          <div class="card-body">
+            <div class="confirm-list">
+              <div class="confirm-item"><div class="confirm-q">Q1</div><div>竞品数据抓取是否涉及合规风险？自动爬取电商平台数据在某些平台有违反ToS风险，建议确认法务意见。</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 场景 9：产品洞察 -->
+      <div class="scenario-panel" id="panel-s9">
+        <div class="scenario-header t3-header">
+          <div class="scenario-icon-wrap t3-icon">🔎</div>
+          <div class="scenario-meta">
+            <div class="scenario-num t3-num">📊 优先级 #9 · 洞察报告类（建议提前）</div>
+            <div class="scenario-title">产品洞察报告</div>
+            <div class="scenario-summary">深度挖掘产品的核心卖点、隐性价值、功能优先级，是所有内容生产场景的数据底座，建议与优先级1-3并行开发。</div>
+            <div class="scenario-tags">
+              <span class="tag tag-blue">内容底座</span>
+              <span class="tag tag-green">建议提前</span>
+              <span class="tag tag-gray">赋能1-6所有场景</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📥 所需输入要素</div></div>
+          <div class="card-body">
+            <div class="input-list">
+              <div class="input-item"><div class="input-icon">📄</div><div><strong>产品规格书/技术文档</strong></div></div>
+              <div class="input-item"><div class="input-icon">📦</div><div><strong>现有产品描述/旧版文案</strong></div></div>
+              <div class="input-item"><div class="input-icon">⭐</div><div><strong>用户评论数据</strong>（好评+差评）</div></div>
+              <div class="input-item"><div class="input-icon">🧪</div><div><strong>产品测试报告/实验室数据</strong>（可选）</div></div>
+            </div>
+            <div class="dependency-box">
+              💡 <div><strong>上游价值</strong>：产品洞察的输出会直接作为 #1 Listing卖点、#2 视频文案、#3 包装文案的输入，建议最早启动</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📤 输出形式</div></div>
+          <div class="card-body">
+            <div class="output-list">
+              <div class="output-item"><div class="output-icon">✅</div><div>产品卖点库（按强度分级：核心卖点/次要卖点/差异点）</div></div>
+              <div class="output-item"><div class="output-icon">✅</div><div>产品价值主张（USP）声明</div></div>
+              <div class="output-item"><div class="output-icon">✅</div><div>用户痛点↔产品功能映射表</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="grid-column:1/-1;">
+          <div class="card-header"><div class="card-title">❓ 需向老板确认的问题</div></div>
+          <div class="card-body">
+            <div class="confirm-list">
+              <div class="confirm-item"><div class="confirm-q">Q1</div><div>是否同意将产品洞察（#9）的开发时间提前，与Listing卖点（#1）并行开发？这样可以给内容生产场景提供更好的数据输入，整体质量会更高。</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 场景 10：用户洞察 -->
+      <div class="scenario-panel" id="panel-s10">
+        <div class="scenario-header t3-header">
+          <div class="scenario-icon-wrap t3-icon">👥</div>
+          <div class="scenario-meta">
+            <div class="scenario-num t3-num">📊 优先级 #10 · 洞察报告类（建议提前）</div>
+            <div class="scenario-title">用户洞察报告</div>
+            <div class="scenario-summary">构建精准用户画像，挖掘用户真实需求、购买决策路径、使用场景和情感诉求，是内容创作的"用户之声"数据源。</div>
+            <div class="scenario-tags">
+              <span class="tag tag-blue">用户画像</span>
+              <span class="tag tag-green">建议提前</span>
+              <span class="tag tag-gray">赋能所有内容场景</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📥 数据来源</div></div>
+          <div class="card-body">
+            <div class="input-list">
+              <div class="input-item"><div class="input-icon">⭐</div><div><strong>电商评论</strong>：用户购后真实反馈（情感分析）</div></div>
+              <div class="input-item"><div class="input-icon">🔍</div><div><strong>用户搜索词</strong>：关键词反映用户真实需求</div></div>
+              <div class="input-item"><div class="input-icon">📱</div><div><strong>社媒UGC</strong>：用户自发的小红书/抖音内容</div></div>
+              <div class="input-item"><div class="input-icon">📋</div><div><strong>客服记录/问卷数据</strong>（可选上传）</div></div>
+            </div>
+            <div class="dependency-box">
+              💡 <div><strong>上游价值</strong>：用户洞察的人群画像会直接作为 #1 Listing、#2 视频、#5 广告、#6 种草的"目标受众"输入，显著提升内容精准度</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📤 输出形式</div></div>
+          <div class="card-body">
+            <div class="output-list">
+              <div class="output-item"><div class="output-icon">✅</div><div>用户画像卡（含：人群特征/核心需求/使用场景/购买动机）</div></div>
+              <div class="output-item"><div class="output-icon">✅</div><div>用户痛点Top10（按提及频率排序）</div></div>
+              <div class="output-item"><div class="output-icon">✅</div><div>用户之声原话库（可直接用于文案创作的真实用语）</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="grid-column:1/-1;">
+          <div class="card-header"><div class="card-title">❓ 需向老板确认的问题</div></div>
+          <div class="card-body">
+            <div class="confirm-list">
+              <div class="confirm-item"><div class="confirm-q">Q1</div><div>是否同意将用户洞察（#10）提前，与前3个内容场景并行开发？用户洞察会大幅提升Listing、视频、广告等所有内容的精准度。</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="toolbar">
+      <div class="toolbar-left">📋 第2页 · 场景详情（点击标签切换场景）</div>
+      <div class="toolbar-right">
+        <button class="btn btn-outline" onclick="goSlide(1)">← 优先级总览</button>
+        <button class="btn btn-primary" onclick="goSlide(3)">生成逻辑 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================
+     幻灯片 3：生成逻辑架构
+     ======================================== -->
+<div class="slide" id="slide-3">
+  <div class="slide-content arch-slide">
+    <div class="page-header">
+      <div class="page-header-inner">
+        <div class="breadcrumb"><span>汇报材料</span><span>›</span><span>生成逻辑</span></div>
+        <div class="page-h1">⚙️ AI生成逻辑总架构</div>
+        <div class="page-desc">从「输入」到「输出」的完整数据流向与AI处理逻辑</div>
+      </div>
+    </div>
+    <div class="page-body">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+        <!-- 左：核心流程图 -->
+        <div class="card" style="grid-column:1/-1;">
+          <div class="card-header">
+            <div class="card-title">🔄 整体数据流：洞察→内容的双向闭环</div>
+            <div class="card-desc">两类场景的协同关系：洞察报告是内容生产的上游数据底座</div>
+          </div>
+          <div class="card-body">
+            <!-- 流程图 -->
+            <div style="display:flex;align-items:center;gap:0;overflow-x:auto;padding:8px 0;">
+              <!-- 输入层 -->
+              <div style="flex-shrink:0;min-width:160px;">
+                <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;text-align:center;">📥 输入层</div>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                  <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;color:#166534;text-align:center;">产品信息<br><span style="font-weight:400;color:#4b7a52;">规格/文档/卖点</span></div>
+                  <div style="background:#eff6ff;border:1.5px solid #93c5fd;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;color:#1e40af;text-align:center;">用户数据<br><span style="font-weight:400;color:#4b6cb7;">评论/搜索/画像</span></div>
+                  <div style="background:#fef3c7;border:1.5px solid #fde68a;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;color:#92400e;text-align:center;">市场数据<br><span style="font-weight:400;color:#a16207;">品类/竞品/趋势</span></div>
+                  <div style="background:#faf5ff;border:1.5px solid #d8b4fe;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;color:#6b21a8;text-align:center;">内容需求<br><span style="font-weight:400;color:#7e3abf;">平台/类型/风格</span></div>
+                </div>
+              </div>
+
+              <div style="font-size:28px;color:var(--text-light);padding:0 12px;flex-shrink:0;">→</div>
+
+              <!-- 洞察层 -->
+              <div style="flex-shrink:0;min-width:160px;">
+                <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;text-align:center;">📊 洞察层（7-10）</div>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                  <div style="background:#eff6ff;border:1.5px solid #6366f1;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;color:#4338ca;text-align:center;">产品洞察 #9<br><span style="font-weight:400;">卖点挖掘·USP</span></div>
+                  <div style="background:#eff6ff;border:1.5px solid #6366f1;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;color:#4338ca;text-align:center;">用户洞察 #10<br><span style="font-weight:400;">画像·痛点·场景</span></div>
+                  <div style="background:#f8fafc;border:1.5px dashed #cbd5e1;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;color:#94a3b8;text-align:center;">品类洞察 #7<br><span style="font-weight:400;">（后期迭代）</span></div>
+                  <div style="background:#f8fafc;border:1.5px dashed #cbd5e1;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;color:#94a3b8;text-align:center;">竞对洞察 #8<br><span style="font-weight:400;">（后期迭代）</span></div>
+                </div>
+              </div>
+
+              <div style="font-size:28px;color:var(--text-light);padding:0 12px;flex-shrink:0;">→</div>
+
+              <!-- AI处理层 -->
+              <div style="flex-shrink:0;min-width:180px;">
+                <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;text-align:center;">🤖 AI处理层</div>
+                <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:12px;padding:16px;color:white;text-align:center;">
+                  <div style="font-size:18px;margin-bottom:8px;">🧠</div>
+                  <div style="font-size:13px;font-weight:700;margin-bottom:6px;">大语言模型</div>
+                  <div style="font-size:11px;opacity:0.85;line-height:1.6;">
+                    ▸ 卖点提炼<br>
+                    ▸ 场景构建<br>
+                    ▸ 平台适配<br>
+                    ▸ 多版本生成<br>
+                    ▸ 合规检查
+                  </div>
+                </div>
+              </div>
+
+              <div style="font-size:28px;color:var(--text-light);padding:0 12px;flex-shrink:0;">→</div>
+
+              <!-- 输出层 -->
+              <div style="flex:1;min-width:200px;">
+                <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;text-align:center;">📤 输出层（1-6）</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                  <div style="background:#fff1f2;border:1.5px solid #fecdd3;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:600;color:#991b1b;text-align:center;">🖼 Listing图<br>卖点文案</div>
+                  <div style="background:#fff1f2;border:1.5px solid #fecdd3;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:600;color:#991b1b;text-align:center;">🎬 视频<br>脚本文案</div>
+                  <div style="background:#fff1f2;border:1.5px solid #fecdd3;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:600;color:#991b1b;text-align:center;">📦 包装盒<br>文案</div>
+                  <div style="background:#fef3c7;border:1.5px solid #fde68a;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:600;color:#92400e;text-align:center;">📖 说明书<br>图文</div>
+                  <div style="background:#fef3c7;border:1.5px solid #fde68a;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:600;color:#92400e;text-align:center;">📢 广告<br>创意文案</div>
+                  <div style="background:#fef3c7;border:1.5px solid #fde68a;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:600;color:#92400e;text-align:center;">🌿 种草<br>文章</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 三个核心设计原则 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;">
+        <div class="card">
+          <div class="card-body">
+            <div style="font-size:28px;margin-bottom:10px;">🎯</div>
+            <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;">场景化提示词设计</div>
+            <div style="font-size:13px;color:var(--text-muted);line-height:1.6;">
+              每个场景对应一套定制化的Prompt模板，包含角色设定、输出格式、约束规则、示例样本，而非通用问答。
+            </div>
+            <div style="margin-top:12px;display:flex;flex-direction:column;gap:4px;">
+              <div style="font-size:12px;color:var(--primary);display:flex;align-items:center;gap:4px;">▸ 角色：你是一位10年经验的电商文案专家</div>
+              <div style="font-size:12px;color:var(--primary);display:flex;align-items:center;gap:4px;">▸ 格式：按表格输出7行×4列</div>
+              <div style="font-size:12px;color:var(--primary);display:flex;align-items:center;gap:4px;">▸ 约束：每个标题≤14字，禁用词列表</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <div style="font-size:28px;margin-bottom:10px;">🔀</div>
+            <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;">多版本差异化输出</div>
+            <div style="font-size:13px;color:var(--text-muted);line-height:1.6;">
+              每个场景默认生成3个差异化版本（不是同质化重复），覆盖不同诉求方向，供人工快速筛选。
+            </div>
+            <div style="margin-top:12px;display:flex;flex-direction:column;gap:4px;">
+              <div style="font-size:12px;color:var(--success);display:flex;align-items:center;gap:4px;">▸ 版本A：功能诉求导向</div>
+              <div style="font-size:12px;color:var(--warning);display:flex;align-items:center;gap:4px;">▸ 版本B：情感场景导向</div>
+              <div style="font-size:12px;color:var(--info);display:flex;align-items:center;gap:4px;">▸ 版本C：价格价值导向</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <div style="font-size:28px;margin-bottom:10px;">♻️</div>
+            <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;">人机协作闭环</div>
+            <div style="font-size:13px;color:var(--text-muted);line-height:1.6;">
+              AI生成→人工评审→反馈优化，每次修改形成学习数据，持续提升该品牌/品类的生成质量。
+            </div>
+            <div style="margin-top:12px;display:flex;flex-direction:column;gap:4px;">
+              <div style="font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:4px;">▸ 生成 → 标注好/差 → 优化Prompt</div>
+              <div style="font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:4px;">▸ 历史好文案作为Few-shot示例</div>
+              <div style="font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:4px;">▸ 品牌库积累品牌专属风格</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 技术复杂度评估 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">⚡ 各场景技术复杂度 &amp; 开发周期估算</div>
+          <div class="card-desc">供老板参考，评估资源投入与排期</div>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr style="background:var(--bg);border-bottom:1px solid var(--border);">
+                <th style="padding:12px 16px;text-align:left;font-weight:600;color:var(--text-muted);width:40px;">#</th>
+                <th style="padding:12px 16px;text-align:left;font-weight:600;color:var(--text-muted);">场景名称</th>
+                <th style="padding:12px 16px;text-align:center;font-weight:600;color:var(--text-muted);">复杂度</th>
+                <th style="padding:12px 16px;text-align:center;font-weight:600;color:var(--text-muted);">核心难点</th>
+                <th style="padding:12px 16px;text-align:center;font-weight:600;color:var(--text-muted);">估算周期</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:12px 16px;color:var(--danger);font-weight:700;">1</td>
+                <td style="padding:12px 16px;font-weight:600;">Listing 7张图卖点</td>
+                <td style="padding:12px 16px;text-align:center;"><span style="background:#d1fae5;color:#065f46;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;">低</span></td>
+                <td style="padding:12px 16px;text-align:center;color:var(--text-muted);">Prompt设计+平台规则库</td>
+                <td style="padding:12px 16px;text-align:center;font-weight:600;color:var(--success);">1-2周</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:12px 16px;color:var(--danger);font-weight:700;">2</td>
+                <td style="padding:12px 16px;font-weight:600;">视频创意和文案</td>
+                <td style="padding:12px 16px;text-align:center;"><span style="background:#fef3c7;color:#92400e;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;">中</span></td>
+                <td style="padding:12px 16px;text-align:center;color:var(--text-muted);">分镜结构化输出+多类型模板</td>
+                <td style="padding:12px 16px;text-align:center;font-weight:600;color:var(--warning);">2-3周</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:12px 16px;color:var(--danger);font-weight:700;">3</td>
+                <td style="padding:12px 16px;font-weight:600;">包装盒文案</td>
+                <td style="padding:12px 16px;text-align:center;"><span style="background:#fef3c7;color:#92400e;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;">中</span></td>
+                <td style="padding:12px 16px;text-align:center;color:var(--text-muted);">合规字段库+行业分类规则</td>
+                <td style="padding:12px 16px;text-align:center;font-weight:600;color:var(--warning);">2-3周</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:12px 16px;color:#b45309;font-weight:700;">4</td>
+                <td style="padding:12px 16px;font-weight:600;">用户友好型说明书</td>
+                <td style="padding:12px 16px;text-align:center;"><span style="background:#fef3c7;color:#92400e;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;">中</span></td>
+                <td style="padding:12px 16px;text-align:center;color:var(--text-muted);">文档解析（OCR/PDF）+改写</td>
+                <td style="padding:12px 16px;text-align:center;font-weight:600;color:var(--warning);">2-3周</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:12px 16px;color:#b45309;font-weight:700;">5</td>
+                <td style="padding:12px 16px;font-weight:600;">广告创意和文案</td>
+                <td style="padding:12px 16px;text-align:center;"><span style="background:#d1fae5;color:#065f46;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;">低</span></td>
+                <td style="padding:12px 16px;text-align:center;color:var(--text-muted);">平台字数规范库+A/B分组</td>
+                <td style="padding:12px 16px;text-align:center;font-weight:600;color:var(--success);">1-2周</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:12px 16px;color:#b45309;font-weight:700;">6</td>
+                <td style="padding:12px 16px;font-weight:600;">种草文章</td>
+                <td style="padding:12px 16px;text-align:center;"><span style="background:#d1fae5;color:#065f46;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;">低</span></td>
+                <td style="padding:12px 16px;text-align:center;color:var(--text-muted);">多平台风格模板+SEO关键词</td>
+                <td style="padding:12px 16px;text-align:center;font-weight:600;color:var(--success);">1-2周</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border);background:#f8fafc;">
+                <td style="padding:12px 16px;color:#1e40af;font-weight:700;">7</td>
+                <td style="padding:12px 16px;font-weight:600;">品类洞察报告</td>
+                <td style="padding:12px 16px;text-align:center;"><span style="background:#fee2e2;color:#991b1b;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;">高</span></td>
+                <td style="padding:12px 16px;text-align:center;color:var(--text-muted);">外部数据API接入+图表生成</td>
+                <td style="padding:12px 16px;text-align:center;font-weight:600;color:var(--danger);">4-6周</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border);background:#f8fafc;">
+                <td style="padding:12px 16px;color:#1e40af;font-weight:700;">8</td>
+                <td style="padding:12px 16px;font-weight:600;">竞对洞察报告</td>
+                <td style="padding:12px 16px;text-align:center;"><span style="background:#fee2e2;color:#991b1b;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;">高</span></td>
+                <td style="padding:12px 16px;text-align:center;color:var(--text-muted);">电商爬虫+NLP情感分析</td>
+                <td style="padding:12px 16px;text-align:center;font-weight:600;color:var(--danger);">4-5周</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border);background:#f0fdf4;">
+                <td style="padding:12px 16px;color:#1e40af;font-weight:700;">9</td>
+                <td style="padding:12px 16px;font-weight:600;">产品洞察报告 ⭐建议提前</td>
+                <td style="padding:12px 16px;text-align:center;"><span style="background:#fef3c7;color:#92400e;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;">中</span></td>
+                <td style="padding:12px 16px;text-align:center;color:var(--text-muted);">文档解析+卖点提炼算法</td>
+                <td style="padding:12px 16px;text-align:center;font-weight:600;color:var(--warning);">2-3周</td>
+              </tr>
+              <tr style="background:#f0fdf4;">
+                <td style="padding:12px 16px;color:#1e40af;font-weight:700;">10</td>
+                <td style="padding:12px 16px;font-weight:600;">用户洞察报告 ⭐建议提前</td>
+                <td style="padding:12px 16px;text-align:center;"><span style="background:#fef3c7;color:#92400e;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;">中</span></td>
+                <td style="padding:12px 16px;text-align:center;color:var(--text-muted);">评论NLP分析+画像生成</td>
+                <td style="padding:12px 16px;text-align:center;font-weight:600;color:var(--warning);">2-3周</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+    <div class="toolbar">
+      <div class="toolbar-left">📋 第3页 · 生成逻辑总架构</div>
+      <div class="toolbar-right">
+        <button class="btn btn-outline" onclick="goSlide(2)">← 场景详情</button>
+        <button class="btn btn-primary" onclick="goSlide(4)">确认事项 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================
+     幻灯片 4：关键确认事项
+     ======================================== -->
+<div class="slide" id="slide-4">
+  <div class="slide-content">
+    <div class="page-header">
+      <div class="page-header-inner">
+        <div class="breadcrumb"><span>汇报材料</span><span>›</span><span>确认事项</span></div>
+        <div class="page-h1">✅ 需请老板确认的关键问题</div>
+        <div class="page-desc">6个核心决策点，建议逐一确认后再启动开发排期</div>
+      </div>
+    </div>
+    <div class="page-body">
+
+      <div class="question-list">
+
+        <div class="question-item">
+          <div class="q-num">Q1</div>
+          <div class="q-body">
+            <div class="q-title">优先级策略确认：速度优先 vs 质量优先？</div>
+            <div class="q-detail">
+              <strong>方案A（按老板排序）</strong>：1-6内容生产先行，7-10洞察后期迭代。最快上线，但初期内容生产缺少数据支撑。<br>
+              <strong>方案B（建议）</strong>：产品洞察(#9)和用户洞察(#10)与前3个场景并行开发，稍微增加初期工作量，但内容生产质量更高。
+            </div>
+            <div class="q-options">
+              <span class="q-option opt-a">✔ 按老板排序（方案A）</span>
+              <span class="q-option opt-b">✔ 洞察与内容并行（方案B）</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="question-item">
+          <div class="q-num">Q2</div>
+          <div class="q-body">
+            <div class="q-title">Listing场景：优先支持哪个平台？</div>
+            <div class="q-detail">
+              亚马逊、天猫、京东的Listing规则差异显著（图片数量、文字规范、禁用词、SEO逻辑均不同）。建议选定1个平台先做深，再横向扩展。
+            </div>
+            <div class="q-options">
+              <span class="q-option opt-a">亚马逊（跨境）</span>
+              <span class="q-option opt-b">天猫/京东（国内）</span>
+              <span class="q-option opt-a" style="border-color:var(--success);color:var(--success);">全平台并行</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="question-item">
+          <div class="q-num">Q3</div>
+          <div class="q-body">
+            <div class="q-title">说明书场景中的「图」如何实现？</div>
+            <div class="q-detail">
+              「含图和文」有两种理解：<br>
+              <strong>方案A</strong>：AI在关键步骤生成图示描述占位符（如"此处插入：产品开机按钮位置示意图"），由设计师根据描述制图，技术简单，可快速上线。<br>
+              <strong>方案B</strong>：AI直接生成说明书配图（通过图片生成模型），技术复杂度高，需要额外的图片生成模块，开发周期+4-6周。
+            </div>
+            <div class="q-options">
+              <span class="q-option opt-a">方案A：占位符描述（快）</span>
+              <span class="q-option opt-b">方案B：AI生成图片（慢）</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="question-item">
+          <div class="q-num">Q4</div>
+          <div class="q-body">
+            <div class="q-title">洞察报告的数据来源如何解决？</div>
+            <div class="q-detail">
+              洞察报告（7-10）的质量高度依赖数据：<br>
+              <strong>方案A（人工上传）</strong>：用户自行上传Excel/CSV数据，系统做分析和可视化。成本低、灵活，但数据时效性差。<br>
+              <strong>方案B（API对接）</strong>：接入生意参谋、艾瑞咨询、亚马逊SP-API等数据源。数据质量高但成本高（API费用+开发成本）。<br>
+              <strong>方案C（混合）</strong>：优先支持人工上传，后期逐步接入API。
+            </div>
+            <div class="q-options">
+              <span class="q-option opt-a">方案A：人工上传</span>
+              <span class="q-option opt-b">方案B：接API</span>
+              <span class="q-option opt-a" style="border-color:var(--success);color:var(--success);">方案C：混合</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="question-item">
+          <div class="q-num">Q5</div>
+          <div class="q-body">
+            <div class="q-title">是否需要支持多语言 / 跨境场景？</div>
+            <div class="q-detail">
+              如果产品涉及跨境销售（美国/日本/欧洲等），Listing文案、包装文案、说明书都需要翻译+本地化合规适配，这会显著增加开发复杂度（约+20-30%工作量），建议提前规划是否需要该能力。
+            </div>
+            <div class="q-options">
+              <span class="q-option opt-yes">需要多语言</span>
+              <span class="q-option opt-no">暂不需要，先做中文</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="question-item">
+          <div class="q-num">Q6</div>
+          <div class="q-body">
+            <div class="q-title">各场景的验收标准是什么？</div>
+            <div class="q-detail">
+              AI生成内容的质量评估需要明确量化标准，否则难以判断"是否完成"。建议确认：<br>
+              ① 是否有人工评审环节（谁来评审？运营/文案/产品？）<br>
+              ② 质量达标标准（如：生成内容满意度≥80%，文案通过率≥70%）<br>
+              ③ 是否需要和现有工作流（飞书/钉钉/企微）打通
+            </div>
+            <div class="q-options">
+              <span class="q-option opt-a">需要定义验收标准</span>
+              <span class="q-option opt-b">先上线后迭代</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+    <div class="toolbar">
+      <div class="toolbar-left">📋 第4页 · 关键确认事项（请老板逐一明确）</div>
+      <div class="toolbar-right">
+        <button class="btn btn-outline" onclick="goSlide(3)">← 生成逻辑</button>
+        <button class="btn btn-primary" onclick="goSlide(5)">落地计划 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================
+     幻灯片 5：落地计划
+     ======================================== -->
+<div class="slide" id="slide-5">
+  <div class="slide-content">
+    <div class="page-header">
+      <div class="page-header-inner">
+        <div class="breadcrumb"><span>汇报材料</span><span>›</span><span>落地计划</span></div>
+        <div class="page-h1">🗓 建议落地计划（3阶段）</div>
+        <div class="page-desc">基于优先级和技术复杂度，建议分3个阶段有节奏地推进</div>
+      </div>
+    </div>
+    <div class="page-body">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
+
+        <!-- 时间线 -->
+        <div class="card" style="grid-column:1/-1;">
+          <div class="card-header"><div class="card-title">📅 三阶段交付时间线</div></div>
+          <div class="card-body">
+            <div class="timeline">
+
+              <div class="timeline-item">
+                <div class="timeline-left">
+                  <div class="timeline-phase" style="color:var(--danger);">Phase 1</div>
+                  <div class="timeline-date">第1-4周</div>
+                </div>
+                <div class="timeline-mid">
+                  <div class="timeline-dot" style="background:var(--danger);box-shadow:0 0 0 3px #fee2e2;"></div>
+                  <div class="timeline-line" style="background:linear-gradient(180deg,var(--danger),var(--warning));"></div>
+                </div>
+                <div class="timeline-right">
+                  <div class="timeline-card" style="border-color:#fecdd3;">
+                    <div class="timeline-title">🚀 MVP上线：核心内容生产场景</div>
+                    <div class="timeline-tasks">
+                      <div class="timeline-task"><strong style="color:var(--danger);">#1</strong> Listing 7张图卖点 · 选定1个平台（建议天猫/京东）</div>
+                      <div class="timeline-task"><strong style="color:var(--danger);">#2</strong> 视频创意和文案 · 先做带货口播类型</div>
+                      <div class="timeline-task"><strong style="color:var(--info);">#9</strong> 产品洞察报告 · 并行启动，作为#1/#2的数据底座</div>
+                      <div class="timeline-task">✅ 目标：核心场景内测，收集首批用户反馈</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="timeline-item">
+                <div class="timeline-left">
+                  <div class="timeline-phase" style="color:var(--warning);">Phase 2</div>
+                  <div class="timeline-date">第5-8周</div>
+                </div>
+                <div class="timeline-mid">
+                  <div class="timeline-dot" style="background:var(--warning);box-shadow:0 0 0 3px #fef3c7;"></div>
+                  <div class="timeline-line" style="background:linear-gradient(180deg,var(--warning),var(--info));"></div>
+                </div>
+                <div class="timeline-right">
+                  <div class="timeline-card" style="border-color:#fde68a;">
+                    <div class="timeline-title">⚡ 扩展：完善内容生产矩阵</div>
+                    <div class="timeline-tasks">
+                      <div class="timeline-task"><strong style="color:var(--warning);">#3</strong> 包装盒文案 · 含合规字段检查</div>
+                      <div class="timeline-task"><strong style="color:var(--warning);">#4</strong> 用户友好型说明书 · 占位符方案</div>
+                      <div class="timeline-task"><strong style="color:var(--info);">#10</strong> 用户洞察报告 · 基于评论NLP分析</div>
+                      <div class="timeline-task">✅ 目标：6大内容场景完成4个，洞察能力初步建立</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="timeline-item">
+                <div class="timeline-left">
+                  <div class="timeline-phase" style="color:var(--info);">Phase 3</div>
+                  <div class="timeline-date">第9-14周</div>
+                </div>
+                <div class="timeline-mid">
+                  <div class="timeline-dot" style="background:var(--info);box-shadow:0 0 0 3px #dbeafe;"></div>
+                  <div class="timeline-line" style="background:var(--border);"></div>
+                </div>
+                <div class="timeline-right">
+                  <div class="timeline-card" style="border-color:#bfdbfe;">
+                    <div class="timeline-title">🏗 完善：投放能力+洞察闭环</div>
+                    <div class="timeline-tasks">
+                      <div class="timeline-task"><strong style="color:var(--info);">#5</strong> 广告创意和文案 · 多平台投放素材</div>
+                      <div class="timeline-task"><strong style="color:var(--info);">#6</strong> 种草文章 · 小红书/公众号多平台</div>
+                      <div class="timeline-task"><strong style="color:var(--info);">#7</strong> 品类洞察报告 · 接入外部数据API</div>
+                      <div class="timeline-task"><strong style="color:var(--info);">#8</strong> 竞对洞察报告 · 竞品分析+NLP</div>
+                      <div class="timeline-task">✅ 目标：10大场景全部上线，洞察→内容完整闭环</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- 成功标准 -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">🎯 各阶段成功标准</div></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--danger);margin-bottom:6px;">Phase 1 成功标准</div>
+                <div style="font-size:12px;color:var(--text-muted);line-height:1.8;padding-left:10px;border-left:3px solid var(--danger);">
+                  • Listing文案生成满意率 ≥ 70%<br>
+                  • 单次生成耗时 ≤ 30秒<br>
+                  • 内测用户净推荐值（NPS）≥ 30
+                </div>
+              </div>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--warning);margin-bottom:6px;">Phase 2 成功标准</div>
+                <div style="font-size:12px;color:var(--text-muted);line-height:1.8;padding-left:10px;border-left:3px solid var(--warning);">
+                  • 月活跃使用次数 ≥ 500次<br>
+                  • 用户二次使用率 ≥ 60%<br>
+                  • 文案通过率（无需大改）≥ 65%
+                </div>
+              </div>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--info);margin-bottom:6px;">Phase 3 成功标准</div>
+                <div style="font-size:12px;color:var(--text-muted);line-height:1.8;padding-left:10px;border-left:3px solid var(--info);">
+                  • 10大场景全部上线并稳定运行<br>
+                  • 用户整体满意度 ≥ 80%<br>
+                  • 内容生产效率提升 ≥ 3倍（对比纯人工）
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 资源需求 -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">👥 资源需求建议</div></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;gap:12px;align-items:flex-start;padding:10px 12px;background:var(--bg);border-radius:8px;">
+                <span style="font-size:20px;flex-shrink:0;">🧑‍💻</span>
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:var(--text);">AI/后端工程师 × 2</div>
+                  <div style="font-size:12px;color:var(--text-muted);">Prompt工程、大模型接入、API开发</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start;padding:10px 12px;background:var(--bg);border-radius:8px;">
+                <span style="font-size:20px;flex-shrink:0;">🎨</span>
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:var(--text);">前端工程师 × 1</div>
+                  <div style="font-size:12px;color:var(--text-muted);">交互界面、结果展示、编辑器</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start;padding:10px 12px;background:var(--bg);border-radius:8px;">
+                <span style="font-size:20px;flex-shrink:0;">✍️</span>
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:var(--text);">资深文案 × 1（兼职评审）</div>
+                  <div style="font-size:12px;color:var(--text-muted);">建立Prompt优化语料库，评审AI输出质量</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start;padding:10px 12px;background:var(--bg);border-radius:8px;">
+                <span style="font-size:20px;flex-shrink:0;">📊</span>
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:var(--text);">产品经理 × 1</div>
+                  <div style="font-size:12px;color:var(--text-muted);">需求排期、用户调研、场景验收</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 风险提示 -->
+      <div class="card">
+        <div class="card-header"><div class="card-title">⚠️ 主要风险提示</div></div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+            <div style="background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;padding:14px;">
+              <div style="font-size:13px;font-weight:700;color:var(--danger);margin-bottom:6px;">🔴 AI幻觉风险</div>
+              <div style="font-size:12px;color:#7f1d1d;line-height:1.7;">AI可能生成不准确的产品参数或违规声明，必须设计人工审核流程，禁止直接复制使用。</div>
+              <div style="font-size:11px;color:var(--danger);font-weight:600;margin-top:8px;">缓解：强制合规字段人工确认</div>
+            </div>
+            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px;">
+              <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:6px;">🟡 数据冷启动</div>
+              <div style="font-size:12px;color:#78350f;line-height:1.7;">洞察场景在初期缺少足够的产品数据和用户数据，生成质量可能不稳定。</div>
+              <div style="font-size:11px;color:#b45309;font-weight:600;margin-top:8px;">缓解：允许人工输入补充数据</div>
+            </div>
+            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px;">
+              <div style="font-size:13px;font-weight:700;color:#1e40af;margin-bottom:6px;">🔵 竞对数据合规</div>
+              <div style="font-size:12px;color:#1e3a8a;line-height:1.7;">自动抓取竞品电商数据可能违反平台ToS，需法务评估数据抓取边界。</div>
+              <div style="font-size:11px;color:#1e40af;font-weight:600;margin-top:8px;">缓解：优先支持人工输入竞品数据</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="toolbar">
+      <div class="toolbar-left">📋 第5页 · 落地计划（3阶段14周交付）</div>
+      <div class="toolbar-right">
+        <button class="btn btn-outline" onclick="goSlide(4)">← 确认事项</button>
+        <button class="btn btn-primary" onclick="goSlide(0)">回到封面</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== JavaScript ===== -->
+<script>
+let currentSlide = 0;
+const totalSlides = 6;
+
+function goSlide(n) {
+  if (n < 0 || n >= totalSlides) return;
+  document.getElementById('slide-' + currentSlide).classList.remove('active');
+  document.getElementById('step-' + currentSlide).classList.remove('active');
+  document.getElementById('step-' + currentSlide).classList.add('visited');
+  currentSlide = n;
+  document.getElementById('slide-' + currentSlide).classList.add('active');
+  document.getElementById('step-' + currentSlide).classList.remove('visited');
+  document.getElementById('step-' + currentSlide).classList.add('active');
+  // 更新进度条
+  document.getElementById('progressFill').style.width = ((currentSlide + 1) / totalSlides * 100) + '%';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function switchScenario(id) {
+  // 切换到场景页
+  if (currentSlide !== 2) {
+    goSlide(2);
+    setTimeout(() => doSwitch(id), 100);
+  } else {
+    doSwitch(id);
+  }
+}
+
+function doSwitch(id) {
+  document.querySelectorAll('.scenario-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.scenario-tab').forEach(t => t.classList.remove('active'));
+  const panel = document.getElementById('panel-' + id);
+  const tab = document.getElementById('tab-' + id);
+  if (panel) panel.classList.add('active');
+  if (tab) tab.classList.add('active');
+}
+
+// 键盘导航
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goSlide(currentSlide + 1);
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goSlide(currentSlide - 1);
+});
+</script>
+</body>
+</html>

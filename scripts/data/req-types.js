@@ -1,0 +1,66 @@
+/* ============================================
+   需求类型 / 站点 / 子品类 字典与样式映射
+   抽取自 创建需求-上传页面.html
+   ============================================ */
+
+const BIZ_TYPES = [
+  { id: 'package',  iconKey: 'package',  name: '包装盒',         desc: '产品外包装文案' },
+  { id: 'manual',   iconKey: 'manual',   name: '产品说明书',     desc: '使用说明 / 介绍' },
+  { id: 'listing7', iconKey: 'image',    name: '卖点图片',         desc: '主图卖点文案' },
+  { id: 'titletd',  iconKey: 'titletd',  name: 'Listing',        desc: '标题与描述',  hasSub: true },
+  { id: 'video',    iconKey: 'video',    name: '卖点视频',       desc: '卖点视频文案' },
+  { id: 'faq',      iconKey: 'faq',      name: 'FQA',            desc: '常见问题解答' },
+  { id: 'ad',       iconKey: 'ad',       name: '广告创意',       desc: '广告文案 / 素材' },
+  { id: 'grass',    iconKey: 'spark',    name: '种草文案',       desc: '社媒种草内容' },
+  { id: 'news',     iconKey: 'news',     name: '新闻稿',         desc: '品牌 / 产品新闻发布' },
+];
+
+const TITLETD_SUB = [
+  { id: 'title',    iconKey: 'title',   name: 'Title',     desc: '仅标题' },
+  { id: 'td',       iconKey: 'td',      name: 'TD',        desc: '仅描述' },
+  { id: 'titletd',  iconKey: 'titletd', name: 'Listing',   desc: '标题 + 描述' },
+];
+
+const stageLabels = { new: '新品', old: '优化' };
+
+const reqTypeLabels = new Proxy({}, {
+  get(_, key) {
+    if (!key || key === 'undefined') return '';
+    // 解析 key: stage-biz 或 stage-titletd-sub
+    const parts = String(key).split('-');
+    if (parts.length < 2) return '';
+    const stage = parts[0];
+    const biz = parts[1];
+    const sub = parts[2];
+    const stageLabel = stageLabels[stage] || stage;
+    if (biz === 'titletd' && sub) {
+      const subItem = TITLETD_SUB.find(s => s.id === sub);
+      return `${stageLabel} · ${subItem ? subItem.name : 'Listing'}`;
+    }
+    const bizItem = BIZ_TYPES.find(b => b.id === biz);
+    return `${stageLabel} · ${bizItem ? bizItem.name : biz}`;
+  }
+});
+
+const siteLabels = {
+  us: '🇺🇸 美国站', uk: '🇬🇧 英国站', de: '🇩🇪 德国站', fr: '🇫🇷 法国站',
+  jp: '🇯🇵 日本站', ca: '🇨🇦 加拿大站', au: '🇦🇺 澳大利亚站',
+  ae: '🇦🇪 中东站', sg: '🇸🇬 新加坡站', mx: '🇲🇽 墨西哥站'
+};
+
+const subLabels = {
+  outdoor: '户外运动', kitchen: '厨房用品', electronics: '消费电子',
+  home: '家居生活', beauty: '美妆个护', sports: '运动健身',
+  pet: '宠物用品', baby: '母婴玩具', office: '办公文具', tools: '工具五金'
+};
+
+const REQ_TYPE_STYLES = {
+  '新品Listing':  'req-type-new',
+  '新品Title':    'req-type-new',
+  '新品TD':       'req-type-new',
+  '新品Title TD': 'req-type-new',
+  '老品Title':    'req-type-old',
+  '老品TD':       'req-type-old',
+  '老品Title TD': 'req-type-old',
+};
+

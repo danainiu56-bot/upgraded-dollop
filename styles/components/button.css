@@ -1,0 +1,25 @@
+/* ============================================
+   通用按钮 .btn
+   ============================================ */
+
+  /* ===== 通用按钮 ===== */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 18px; border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 500; cursor: pointer;
+    border: 1px solid transparent; transition: var(--transition);
+    text-decoration: none; white-space: nowrap;
+  }
+  .btn-primary { background: var(--primary); color: white; border-color: var(--primary); }
+  .btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+  .btn-secondary { background: white; color: var(--text); border-color: var(--border); }
+  .btn-secondary:hover { background: var(--bg); border-color: #cbd5e1; }
+  .btn-success { background: var(--success); color: white; border-color: var(--success); }
+  .btn-success:hover { background: #059669; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+  .btn-ghost { background: transparent; color: var(--primary); border-color: var(--primary-light); }
+  .btn-ghost:hover { background: var(--primary-light); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-lg { padding: 12px 28px; font-size: 15px; font-weight: 600; }
+  .btn-block { width: 100%; justify-content: center; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+

@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>亚马逊电商营销系统 - 业务框架</title>
+<style>
+  :root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --primary-light: #e0e7ff;
+    --primary-soft: #eef2ff;
+    --secondary: #8b5cf6;
+    --success: #10b981;
+    --success-light: #d1fae5;
+    --warning: #f59e0b;
+    --warning-light: #fef3c7;
+    --danger: #ef4444;
+    --info: #3b82f6;
+    --info-light: #dbeafe;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --text-light: #94a3b8;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --transition: all 0.2s ease;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ===== 顶部 ===== */
+  .header {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    padding: 32px 40px 24px;
+    box-shadow: var(--shadow-md);
+  }
+  .header-inner { max-width: 1400px; margin: 0 auto; }
+  .header h1 {
+    font-size: 26px; font-weight: 700; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .header .subtitle { font-size: 14px; opacity: 0.9; margin-bottom: 20px; }
+  .header .meta {
+    display: flex; gap: 20px; font-size: 13px; opacity: 0.85;
+  }
+  .header .meta span { display: flex; align-items: center; gap: 6px; }
+
+  /* ===== Tab 导航 ===== */
+  .tabs {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: var(--shadow);
+  }
+  .tabs-inner {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; gap: 4px; padding: 0 40px;
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 14px 20px;
+    font-size: 14px; font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: var(--transition);
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .tab:hover { color: var(--primary); background: var(--primary-soft); }
+  .tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    background: var(--primary-soft);
+  }
+  .tab-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--bg); color: var(--text-muted);
+    font-size: 12px; font-weight: 600;
+  }
+  .tab.active .tab-num { background: var(--primary); color: white; }
+
+  /* ===== 主内容 ===== */
+  .main {
+    max-width: 1400px; margin: 0 auto;
+    padding: 32px 40px 60px;
+  }
+  .view { display: none; animation: fadeIn 0.3s ease; }
+  .view.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .view-title {
+    font-size: 20px; font-weight: 700; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .view-desc { color: var(--text-muted); margin-bottom: 28px; font-size: 14px; }
+  .view-desc code {
+    background: var(--primary-soft); color: var(--primary);
+    padding: 2px 6px; border-radius: 4px; font-size: 13px;
+  }
+
+  /* ===== 视图 1：六层架构 ===== */
+  .arch-layer {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 14px;
+    padding: 18px 24px;
+    transition: var(--transition);
+    position: relative;
+  }
+  .arch-layer:hover { box-shadow: var(--shadow-md); }
+  .arch-layer-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 14px;
+  }
+  .arch-layer-num {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; color: white;
+    flex-shrink: 0;
+  }
+  .arch-layer-title {
+    font-size: 15px; font-weight: 600; color: var(--text);
+  }
+  .arch-layer-desc {
+    font-size: 13px; color: var(--text-muted); margin-left: auto;
+  }
+  .arch-layer-items {
+    display: flex; flex-wrap: wrap; gap: 10px;
+  }
+  .arch-item {
+    padding: 10px 16px; border-radius: var(--radius-sm);
+    background: var(--bg);
+    font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: var(--transition);
+    border: 1px solid var(--border);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .arch-item:hover {
+    background: white; border-color: var(--primary);
+    color: var(--primary); transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .arch-item .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: currentColor; opacity: 0.5;
+  }
+
+  /* 层级色系 */
+  .layer-1 .arch-layer-num { background: #6366f1; }
+  .layer-2 .arch-layer-num { background: #8b5cf6; }
+  .layer-3 .arch-layer-num { background: #ec4899; }
+  .layer-4 .arch-layer-num { background: #f59e0b; }
+  .layer-5 .arch-layer-num { background: #10b981; }
+  .layer-6 .arch-layer-num { background: #64748b; }
+
+  .arch-connector {
+    text-align: center; margin: -2px 0;
+    color: var(--text-light); font-size: 18px;
+    line-height: 1;
+  }
+
+  /* ===== 视图 2：业务流 ===== */
+  .flow-container {
+    background: white; border-radius: var(--radius);
+    padding: 32px; border: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .flow-steps {
+    display: flex; align-items: stretch; gap: 8px;
+    min-width: max-content;
+  }
+  .flow-step {
+    flex: 1; min-width: 140px;
+    padding: 18px 14px; border-radius: var(--radius);
+    background: var(--bg); border: 2px solid var(--border);
+    cursor: pointer; transition: var(--transition);
+    text-align: center;
+    position: relative;
+  }
+  .flow-step:hover {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+  .flow-step-num {
+    display: inline-flex; width: 26px; height: 26px;
+    border-radius: 50%; background: var(--primary);
+    color: white; font-weight: 700; font-size: 12px;
+    align-items: center; justify-content: center;
+    margin-bottom: 8px;
+  }
+  .flow-step-title {
+    font-size: 13px; font-weight: 600; margin-bottom: 4px;
+  }
+  .flow-step-role {
+    font-size: 11px; color: var(--text-muted);
+  }
+  .flow-arrow {
+    display: flex; align-items: center;
+    color: var(--text-light); font-size: 16px;
+  }
+  .flow-loop-hint {
+    margin-top: 20px; text-align: center;
+    font-size: 13px; color: var(--text-muted);
+    padding: 12px; background: var(--primary-soft);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--primary);
+  }
+
+  /* ===== 视图 3：五大中心 ===== */
+  .centers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .center-card {
+    background: white; border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 24px; cursor: pointer;
+    transition: var(--transition);
+    position: relative; overflow: hidden;
+  }
+  .center-card::before {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 100%; height: 4px;
+    background: var(--center-color, var(--primary));
+  }
+  .center-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--center-color, var(--primary));
+  }
+  .center-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: var(--center-soft, var(--primary-soft));
+    color: var(--center-color, var(--primary));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin-bottom: 16px;
+  }
+  .center-version {
+    position: absolute; top: 20px; right: 20px;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+    background: var(--center-soft, var(--primary-soft));
+    color: var(--center-color, var(--primary));
+  }
+  .center-title {
+    font-size: 17px; font-weight: 700; margin-bottom: 6px;
+  }
+  .center-sub {
+    font-size: 13px; color: var(--text-muted); margin-bottom: 16px;
+    min-height: 40px;
+  }
+  .center-modules {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px;
+  }
+  .center-module-tag {
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 12px;
+    background: var(--bg); color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  .center-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 14px; border-top: 1px dashed var(--border);
+    font-size: 12px; color: var(--text-muted);
+  }
+  .center-footer strong { color: var(--center-color, var(--primary)); }
+
+  /* ===== 视图 4：版本路线 ===== */
+  .roadmap {
+    position: relative;
+    padding-left: 40px;
+  }
+  .roadmap::before {
+    content: ''; position: absolute;
+    left: 14px; top: 20px; bottom: 20px;
+    width: 2px; background: var(--border);
+  }
+  .roadmap-item {
+    position: relative; margin-bottom: 32px;
+    background: white; border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+    transition: var(--transition);
+  }
+  .roadmap-item:hover { box-shadow: var(--shadow-md); }
+  .roadmap-dot {
+    position: absolute; left: -34px; top: 24px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: white; border: 3px solid var(--primary);
+  }
+  .roadmap-item.v1 .roadmap-dot { border-color: #6366f1; }
+  .roadmap-item.v2 .roadmap-dot { border-color: #f59e0b; }
+  .roadmap-item.v3 .roadmap-dot { border-color: #10b981; }
+  .roadmap-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+  }
+  .roadmap-version {
+    padding: 4px 12px; border-radius: 6px;
+    font-size: 13px; font-weight: 700;
+    color: white;
+  }
+  .roadmap-item.v1 .roadmap-version { background: #6366f1; }
+  .roadmap-item.v2 .roadmap-version { background: #f59e0b; }
+  .roadmap-item.v3 .roadmap-version { background: #10b981; }
+  .roadmap-theme { font-size: 16px; font-weight: 600; }
+  .roadmap-stage {
+    font-size: 12px; color: var(--text-muted);
+    padding: 2px 8px; background: var(--bg); border-radius: 4px;
+  }
+  .roadmap-goal {
+    color: var(--text-muted); font-size: 13px; margin-bottom: 16px;
+  }
+  .roadmap-centers {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 14px;
+  }
+  .roadmap-center-chip {
+    padding: 6px 12px; border-radius: var(--radius-sm);
+    font-size: 12px; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 6px;
+    cursor: pointer; transition: var(--transition);
+  }
+  .roadmap-center-chip.core {
+    background: var(--primary-soft); color: var(--primary);
+    border: 1px solid var(--primary-light);
+  }
+  .roadmap-center-chip.mvp {
+    background: var(--warning-light); color: #92400e;
+    border: 1px solid #fcd34d;
+  }
+  .roadmap-center-chip.smart {
+    background: var(--success-light); color: #065f46;
+    border: 1px solid #6ee7b7;
+  }
+  .roadmap-center-chip:hover { transform: translateY(-2px); }
+  .roadmap-value {
+    background: var(--bg); padding: 12px 16px;
+    border-radius: var(--radius-sm); font-size: 13px;
+    border-left: 3px solid var(--primary);
+  }
+  .roadmap-item.v1 .roadmap-value { border-left-color: #6366f1; }
+  .roadmap-item.v2 .roadmap-value { border-left-color: #f59e0b; }
+  .roadmap-item.v3 .roadmap-value { border-left-color: #10b981; }
+
+  .roadmap-tip {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-radius: var(--radius);
+    padding: 16px 20px; margin-top: 24px;
+    border-left: 4px solid #f59e0b;
+    display: flex; gap: 12px;
+  }
+  .roadmap-tip-icon { font-size: 20px; }
+  .roadmap-tip-text { font-size: 13px; color: #78350f; }
+  .roadmap-tip-text strong { color: #451a03; }
+
+  /* ===== 视图 5：角色对照 ===== */
+  .roles-table {
+    background: white; border-radius: var(--radius);
+    border: 1px solid var(--border); overflow: hidden;
+  }
+  .roles-table table {
+    width: 100%; border-collapse: collapse;
+  }
+  .roles-table th {
+    background: var(--bg); padding: 14px 20px;
+    text-align: left; font-size: 13px; font-weight: 600;
+    color: var(--text-muted); border-bottom: 1px solid var(--border);
+  }
+  .roles-table td {
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    font-size: 13px; vertical-align: middle;
+  }
+  .roles-table tr:last-child td { border-bottom: none; }
+  .roles-table tr:hover { background: var(--primary-soft); cursor: pointer; }
+  .role-cell {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 600;
+  }
+  .role-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 13px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .scene-chips, .module-chips {
+    display: flex; flex-wrap: wrap; gap: 4px;
+  }
+  .scene-chip {
+    padding: 2px 8px; border-radius: 4px;
+    background: #fce7f3; color: #9f1239;
+    font-size: 11px;
+  }
+  .module-chip {
+    padding: 2px 8px; border-radius: 4px;
+    background: var(--warning-light); color: #92400e;
+    font-size: 11px;
+  }
+
+  /* ===== 详情抽屉 ===== */
+  .drawer-mask {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 200;
+  }
+  .drawer-mask.show { opacity: 1; pointer-events: auto; }
+  .drawer {
+    position: fixed; right: 0; top: 0; bottom: 0;
+    width: 480px; max-width: 90vw;
+    background: white;
+    box-shadow: -10px 0 40px rgba(0,0,0,0.15);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 201;
+    display: flex; flex-direction: column;
+  }
+  .drawer.show { transform: translateX(0); }
+  .drawer-header {
+    padding: 24px 28px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 16px;
+  }
+  .drawer-title {
+    font-size: 18px; font-weight: 700; margin-bottom: 4px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .drawer-subtitle {
+    font-size: 13px; color: var(--text-muted);
+  }
+  .drawer-close {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--bg); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: var(--transition); flex-shrink: 0;
+    color: var(--text-muted); font-size: 20px;
+  }
+  .drawer-close:hover { background: var(--border); color: var(--text); }
+  .drawer-body {
+    flex: 1; overflow-y: auto;
+    padding: 24px 28px;
+  }
+  .drawer-section { margin-bottom: 24px; }
+  .drawer-section:last-child { margin-bottom: 0; }
+  .drawer-section h4 {
+    font-size: 13px; font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .drawer-section p {
+    font-size: 14px; line-height: 1.7;
+    color: var(--text);
+  }
+  .drawer-list {
+    list-style: none; padding: 0;
+  }
+  .drawer-list li {
+    padding: 10px 14px; margin-bottom: 6px;
+    background: var(--bg); border-radius: var(--radius-sm);
+    font-size: 13px;
+    display: flex; align-items: flex-start; gap: 10px;
+    border-left: 3px solid var(--primary);
+  }
+  .drawer-list li strong {
+    color: var(--primary); font-weight: 600;
+    margin-right: 4px;
+  }
+  .drawer-tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .drawer-tag {
+    padding: 4px 10px; border-radius: 6px;
+    font-size: 12px;
+    background: var(--primary-soft); color: var(--primary);
+  }
+  .drawer-value-card {
+    background: linear-gradient(135deg, #eef2ff 0%, #ede9fe 100%);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    border-left: 3px solid var(--primary);
+  }
+  .drawer-value-card strong { color: var(--primary); }
+
+  /* ===== 图标 ===== */
+  .icon {
+    width: 18px; height: 18px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+
+  /* ===== 响应式 ===== */
+  @media (max-width: 768px) {
+    .header { padding: 24px 20px 20px; }
+    .tabs-inner, .main { padding-left: 20px; padding-right: 20px; }
+    .arch-layer-desc { display: none; }
+    .drawer { width: 100%; }
+  }
+
+  /* 滚动条美化 */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+</style>
+</head>
+<body>
+
+<!-- 顶部 -->
+<div class="header">
+  <div class="header-inner">
+    <h1>🎯 亚马逊电商营销系统 · 业务框架</h1>
+    <div class="subtitle">面向亚马逊电商业务的「产品→营销」一体化智能中台</div>
+    <div class="meta">
+      <span>📅 v0.3 草稿</span>
+      <span>👥 全员共识宣讲材料</span>
+      <span>🔗 配套文档：产品到营销系统-产品规划</span>
+      <span>🆕 新增 营销工具站</span>
+    </div>
+  </div>
+</div>
+
+<!-- Tab -->
+<div class="tabs">
+  <div class="tabs-inner">
+    <div class="tab active" data-view="overview"><span class="tab-num">1</span>六层架构总览</div>
+    <div class="tab" data-view="flow"><span class="tab-num">2</span>核心业务流</div>
+    <div class="tab" data-view="centers"><span class="tab-num">3</span>五大业务中心</div>
+    <div class="tab" data-view="roadmap"><span class="tab-num">4</span>版本路线</div>
+    <div class="tab" data-view="roles"><span class="tab-num">5</span>角色对照</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- 视图 1：六层架构 -->
+  <div class="view active" id="view-overview">
+    <div class="view-title">🏛 六层架构总览</div>
+    <div class="view-desc">
+      自上而下理解：<code>业务目标</code> 由谁做（角色）→ 通过哪些动作做（场景）→ 用哪些模块做（中心）→ 靠什么能力支撑 → 数据从哪来。
+      <strong>点击任意节点查看详情。</strong>
+    </div>
+
+    <div class="arch-layer layer-1">
+      <div class="arch-layer-header">
+        <div class="arch-layer-num">1</div>
+        <div class="arch-layer-title">业务目标层</div>
+        <div class="arch-layer-desc">WHY - 系统最终要达成的业务价值</div>
+      </div>
+      <div class="arch-layer-items" data-type="goal">
+        <div class="arch-item" data-id="g1"><span class="dot"></span>GMV 增长</div>
+        <div class="arch-item" data-id="g2"><span class="dot"></span>ROI 提升</div>
+        <div class="arch-item" data-id="g3"><span class="dot"></span>品牌沉淀</div>
+        <div class="arch-item" data-id="g4"><span class="dot"></span>效率提升</div>
+      </div>
+    </div>
+    <div class="arch-connector">▼</div>
+
+    <div class="arch-layer layer-2">
+      <div class="arch-layer-header">
+        <div class="arch-layer-num">2</div>
+        <div class="arch-layer-title">使用角色层</div>
+        <div class="arch-layer-desc">WHO - 系统的核心使用者</div>
+      </div>
+      <div class="arch-layer-items" data-type="role">
+        <div class="arch-item" data-id="r1"><span class="dot"></span>选品经理</div>
+        <div class="arch-item" data-id="r2"><span class="dot"></span>Listing 运营</div>
+        <div class="arch-item" data-id="r3"><span class="dot"></span>广告投手</div>
+        <div class="arch-item" data-id="r4"><span class="dot"></span>站外 / 红人运营</div>
+        <div class="arch-item" data-id="r5"><span class="dot"></span>文案 / 美工</div>
+        <div class="arch-item" data-id="r6"><span class="dot"></span>客服</div>
+        <div class="arch-item" data-id="r9"><span class="dot"></span>独立站运营 🆕</div>
+        <div class="arch-item" data-id="r7"><span class="dot"></span>数据分析师</div>
+        <div class="arch-item" data-id="r8"><span class="dot"></span>主管 / 总监</div>
+      </div>
+    </div>
+    <div class="arch-connector">▼</div>
+
+    <div class="arch-layer layer-3">
+      <div class="arch-layer-header">
+        <div class="arch-layer-num">3</div>
+        <div class="arch-layer-title">业务场景层</div>
+        <div class="arch-layer-desc">WHAT - 核心营销动作</div>
+      </div>
+      <div class="arch-layer-items" data-type="scene">
+        <div class="arch-item" data-id="s1"><span class="dot"></span>选品调研</div>
+        <div class="arch-item" data-id="s2"><span class="dot"></span>Listing 搭建</div>
+        <div class="arch-item" data-id="s3"><span class="dot"></span>首发推广</div>
+        <div class="arch-item" data-id="s4"><span class="dot"></span>日常运营</div>
+        <div class="arch-item" data-id="s5"><span class="dot"></span>活动促销</div>
+        <div class="arch-item" data-id="s6"><span class="dot"></span>评论管理</div>
+        <div class="arch-item" data-id="s7"><span class="dot"></span>数据复盘</div>
+      </div>
+    </div>
+    <div class="arch-connector">▼</div>
+
+    <div class="arch-layer layer-4">
+      <div class="arch-layer-header">
+        <div class="arch-layer-num">4</div>
+        <div class="arch-layer-title">七大业务中心 + 营销工具站</div>
+        <div class="arch-layer-desc">HOW - 产品模块（本系统的核心能力）</div>
+      </div>
+      <div class="arch-layer-items" data-type="center">
+        <div class="arch-item" data-id="m1"><span class="dot"></span>内容生产中心</div>
+        <div class="arch-item" data-id="m2"><span class="dot"></span>数据资产中心</div>
+        <div class="arch-item" data-id="m3"><span class="dot"></span>营销执行中心</div>
+        <div class="arch-item" data-id="m4"><span class="dot"></span>站外引流中心</div>
+        <div class="arch-item" data-id="m6"><span class="dot"></span>智能客服中心</div>
+        <div class="arch-item" data-id="m7"><span class="dot"></span>自建站运营中心</div>
+        <div class="arch-item" data-id="m5"><span class="dot"></span>洞察决策中心</div>
+        <div class="arch-item" data-id="m8" style="border-color:#f97316;color:#9a3412;background:#fff7ed;"><span class="dot"></span>🧰 营销工具站 🆕</div>
+      </div>
+    </div>
+    <div class="arch-connector">▼</div>
+
+    <div class="arch-layer layer-5">
+      <div class="arch-layer-header">
+        <div class="arch-layer-num">5</div>
+        <div class="arch-layer-title">能力支撑层</div>
+        <div class="arch-layer-desc">通用能力底座</div>
+      </div>
+      <div class="arch-layer-items" data-type="capability">
+        <div class="arch-item" data-id="c1"><span class="dot"></span>AI 大模型</div>
+        <div class="arch-item" data-id="c2"><span class="dot"></span>数据采集引擎</div>
+        <div class="arch-item" data-id="c3"><span class="dot"></span>标签 / 分类体系</div>
+        <div class="arch-item" data-id="c4"><span class="dot"></span>品牌 / 产品知识库</div>
+        <div class="arch-item" data-id="c5"><span class="dot"></span>权限 / 审批流</div>
+      </div>
+    </div>
+    <div class="arch-connector">▼</div>
+
+    <div class="arch-layer layer-6">
+      <div class="arch-layer-header">
+        <div class="arch-layer-num">6</div>
+        <div class="arch-layer-title">数据源 / 基础设施层</div>
+        <div class="arch-layer-desc">数据来源与底层对接</div>
+      </div>
+      <div class="arch-layer-items" data-type="datasource">
+        <div class="arch-item" data-id="d1"><span class="dot"></span>亚马逊 SP-API</div>
+        <div class="arch-item" data-id="d2"><span class="dot"></span>亚马逊 Ads API</div>
+        <div class="arch-item" data-id="d3"><span class="dot"></span>站外平台 API</div>
+        <div class="arch-item" data-id="d4"><span class="dot"></span>第三方数据工具</div>
+        <div class="arch-item" data-id="d5"><span class="dot"></span>内部系统 (ERP/WMS/CRM)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 视图 2：业务流 -->
+  <div class="view" id="view-flow">
+    <div class="view-title">🔄 核心业务流 · 产品 → 营销全链路</div>
+    <div class="view-desc">
+      贯穿所有角色和模块的主流程。<strong>点击任意环节</strong>查看该环节依赖的业务中心与关键动作。
+    </div>
+
+    <div class="flow-container">
+      <div class="flow-steps">
+        <div class="flow-step" data-id="s1">
+          <div class="flow-step-num">1</div>
+          <div class="flow-step-title">选品调研</div>
+          <div class="flow-step-role">选品经理</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" data-id="s2">
+          <div class="flow-step-num">2</div>
+          <div class="flow-step-title">Listing 搭建</div>
+          <div class="flow-step-role">运营 + 文案</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" data-id="s3">
+          <div class="flow-step-num">3</div>
+          <div class="flow-step-title">首发推广</div>
+          <div class="flow-step-role">投手 + 站外</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" data-id="s4">
+          <div class="flow-step-num">4</div>
+          <div class="flow-step-title">日常运营</div>
+          <div class="flow-step-role">投手 + 运营</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" data-id="s5">
+          <div class="flow-step-num">5</div>
+          <div class="flow-step-title">活动促销</div>
+          <div class="flow-step-role">运营</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" data-id="s6">
+          <div class="flow-step-num">6</div>
+          <div class="flow-step-title">评论管理</div>
+          <div class="flow-step-role">客服 + 运营</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" data-id="s7">
+          <div class="flow-step-num">7</div>
+          <div class="flow-step-title">数据复盘</div>
+          <div class="flow-step-role">数据分析师</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" data-id="s8">
+          <div class="flow-step-num">8</div>
+          <div class="flow-step-title">产品迭代</div>
+          <div class="flow-step-role">选品 + 产品</div>
+        </div>
+      </div>
+      <div class="flow-loop-hint">
+        💡 <strong>闭环飞轮</strong>：产品迭代的结果回流到选品调研，形成「执行→数据→洞察→决策」的数据飞轮。
+      </div>
+    </div>
+  </div>
+
+  <!-- 视图 3：七大中心 + 工具站 -->
+  <div class="view" id="view-centers">
+    <div class="view-title">⚙️ 七大业务中心 + 营销工具站</div>
+    <div class="view-desc">
+      系统的核心能力落地。<strong>点击任意中心卡片</strong>查看详细子模块与核心价值。
+      <br><strong>七大业务中心</strong>是端到端业务工作流；<strong>营销工具站</strong>🆕是嵌入业务流程的瑞士军刀式提效工具集。
+      <br>🆕 <code>GEO</code> 作为 AI 搜索引流能力，分布在"内容生产"与"站外引流"两个中心。
+    </div>
+
+    <div class="centers-grid">
+      <div class="center-card" data-id="m1" style="--center-color:#6366f1; --center-soft:#eef2ff;">
+        <div class="center-version">V1.0</div>
+        <div class="center-icon">✍️</div>
+        <div class="center-title">内容生产中心</div>
+        <div class="center-sub">AI 驱动的营销内容工厂，覆盖全场景文案</div>
+        <div class="center-modules">
+          <span class="center-module-tag">Listing 文案</span>
+          <span class="center-module-tag">图片文案</span>
+          <span class="center-module-tag">视频脚本</span>
+          <span class="center-module-tag">包装文案</span>
+          <span class="center-module-tag">FAQ</span>
+          <span class="center-module-tag">广告文案</span>
+          <span class="center-module-tag">站外内容</span>
+          <span class="center-module-tag" style="background:#fef3c7;color:#92400e;border-color:#fcd34d;">GEO 内容 🆕</span>
+          <span class="center-module-tag" style="background:#fef3c7;color:#92400e;border-color:#fcd34d;">独立站内容 🆕</span>
+        </div>
+        <div class="center-footer">
+          <span>9 个子模块</span>
+          <span>效率提升 <strong>3-5×</strong></span>
+        </div>
+      </div>
+
+      <div class="center-card" data-id="m2" style="--center-color:#f59e0b; --center-soft:#fef3c7;">
+        <div class="center-version">V2.0</div>
+        <div class="center-icon">💾</div>
+        <div class="center-title">数据资产中心</div>
+        <div class="center-sub">公司级产品与营销数据的统一底座</div>
+        <div class="center-modules">
+          <span class="center-module-tag">产品库</span>
+          <span class="center-module-tag">竞品库</span>
+          <span class="center-module-tag">关键词库</span>
+          <span class="center-module-tag">评论库</span>
+          <span class="center-module-tag">素材库</span>
+          <span class="center-module-tag">标签体系</span>
+          <span class="center-module-tag" style="background:#fef3c7;color:#92400e;border-color:#fcd34d;">独立站会员库 🆕</span>
+        </div>
+        <div class="center-footer">
+          <span>7 个子模块</span>
+          <span>消除<strong>信息孤岛</strong></span>
+        </div>
+      </div>
+
+      <div class="center-card" data-id="m3" style="--center-color:#ec4899; --center-soft:#fce7f3;">
+        <div class="center-version">V2.0 新增</div>
+        <div class="center-icon">🎯</div>
+        <div class="center-title">营销执行中心</div>
+        <div class="center-sub">亚马逊站内营销动作的统一操作台</div>
+        <div class="center-modules">
+          <span class="center-module-tag">广告投放</span>
+          <span class="center-module-tag">活动管理</span>
+          <span class="center-module-tag">Listing 管理</span>
+          <span class="center-module-tag">定价策略</span>
+          <span class="center-module-tag">库存联动</span>
+        </div>
+        <div class="center-footer">
+          <span>5 个子模块</span>
+          <span>替代<strong>多后台切换</strong></span>
+        </div>
+      </div>
+
+      <div class="center-card" data-id="m4" style="--center-color:#3b82f6; --center-soft:#dbeafe;">
+        <div class="center-version">V2.0 新增</div>
+        <div class="center-icon">🌐</div>
+        <div class="center-title">站外引流中心</div>
+        <div class="center-sub">整合站外流量渠道，突破站内流量天花板</div>
+        <div class="center-modules">
+          <span class="center-module-tag">红人营销</span>
+          <span class="center-module-tag">社媒运营</span>
+          <span class="center-module-tag">Google SEO/Ads</span>
+          <span class="center-module-tag">EDM</span>
+          <span class="center-module-tag">Deal 站</span>
+          <span class="center-module-tag">归因追踪</span>
+          <span class="center-module-tag" style="background:#fef3c7;color:#92400e;border-color:#fcd34d;">GEO 运营 🆕</span>
+        </div>
+        <div class="center-footer">
+          <span>7 个子模块</span>
+          <span>突破<strong>站内流量天花板</strong></span>
+        </div>
+      </div>
+
+      <div class="center-card" data-id="m6" style="--center-color:#06b6d4; --center-soft:#cffafe;">
+        <div class="center-version">V2.0 新增 🆕</div>
+        <div class="center-icon">💬</div>
+        <div class="center-title">智能客服中心</div>
+        <div class="center-sub">AI 驱动的买家服务体系，把客服从成本中心变为增长中心</div>
+        <div class="center-modules">
+          <span class="center-module-tag">买家消息自动回复</span>
+          <span class="center-module-tag">差评监控响应</span>
+          <span class="center-module-tag">FAQ 智能问答</span>
+          <span class="center-module-tag">多语言翻译</span>
+          <span class="center-module-tag">客诉工单</span>
+          <span class="center-module-tag">舆情预警</span>
+        </div>
+        <div class="center-footer">
+          <span>6 个子模块</span>
+          <span>客服效率 <strong>↑5×</strong>、差评响应 <strong>↓1h</strong></span>
+        </div>
+      </div>
+
+      <div class="center-card" data-id="m7" style="--center-color:#fb7185; --center-soft:#ffe4e6;">
+        <div class="center-version">V2.0 新增 🆕</div>
+        <div class="center-icon">🏪</div>
+        <div class="center-title">自建站运营中心</div>
+        <div class="center-sub">独立站(Shopify/Shoplazza) 搭建与运营，沉淀品牌与私域用户</div>
+        <div class="center-modules">
+          <span class="center-module-tag">独立站搭建</span>
+          <span class="center-module-tag">商品/SKU 同步</span>
+          <span class="center-module-tag">会员体系</span>
+          <span class="center-module-tag">EDM / 私域营销</span>
+          <span class="center-module-tag">Google/Meta 投放</span>
+          <span class="center-module-tag">复购运营</span>
+        </div>
+        <div class="center-footer">
+          <span>6 个子模块</span>
+          <span>沉淀<strong>品牌私域</strong>、获取用户<strong>终身价值</strong></span>
+        </div>
+      </div>
+
+      <div class="center-card" data-id="m8" style="--center-color:#f97316; --center-soft:#fff7ed;">
+        <div class="center-version">贯穿 V1-V3 🆕</div>
+        <div class="center-icon">🧰</div>
+        <div class="center-title">营销工具站</div>
+        <div class="center-sub">瑞士军刀式提效工具集，嵌入到所有业务流程中</div>
+        <div class="center-modules">
+          <span class="center-module-tag">AI 生图</span>
+          <span class="center-module-tag">图片审核</span>
+          <span class="center-module-tag">抠图/水印</span>
+          <span class="center-module-tag">Listing 校验</span>
+          <span class="center-module-tag">关键词去重</span>
+          <span class="center-module-tag">FBA 计算器</span>
+          <span class="center-module-tag">利润测算</span>
+          <span class="center-module-tag">ASIN 批量查询</span>
+          <span class="center-module-tag">+ 更多</span>
+        </div>
+        <div class="center-footer">
+          <span>5 大类 20+ 工具</span>
+          <span>单点高频<strong>提效</strong></span>
+        </div>
+      </div>
+
+      <div class="center-card" data-id="m5" style="--center-color:#10b981; --center-soft:#d1fae5;">
+        <div class="center-version">V3.0</div>
+        <div class="center-icon">🔍</div>
+        <div class="center-title">洞察决策中心</div>
+        <div class="center-sub">数据资产转化为业务决策的决策大脑</div>
+        <div class="center-modules">
+          <span class="center-module-tag">市场洞察</span>
+          <span class="center-module-tag">产品洞察</span>
+          <span class="center-module-tag">竞争洞察</span>
+          <span class="center-module-tag">用户洞察</span>
+          <span class="center-module-tag">营销洞察</span>
+          <span class="center-module-tag" style="background:#fef3c7;color:#92400e;border-color:#fcd34d;">客服洞察 🆕</span>
+          <span class="center-module-tag" style="background:#fef3c7;color:#92400e;border-color:#fcd34d;">私域洞察 🆕</span>
+        </div>
+        <div class="center-footer">
+          <span>7 个子模块</span>
+          <span>从<strong>拍脑袋</strong>到<strong>数据驱动</strong></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 视图 4：版本路线 -->
+  <div class="view" id="view-roadmap">
+    <div class="view-title">🚀 版本演进路线</div>
+    <div class="view-desc">
+      五大中心与 V1/V2/V3 版本的对应关系。<strong>核心</strong> 表示该版本主攻，
+      <strong>MVP</strong> 表示最小可用版，<strong>智能化</strong> 表示能力升级。
+    </div>
+
+    <div class="roadmap">
+
+      <div class="roadmap-item v1">
+        <div class="roadmap-dot"></div>
+        <div class="roadmap-header">
+          <div class="roadmap-version">V1.0</div>
+          <div class="roadmap-theme">文案生成场景扩充 + 高频工具</div>
+          <div class="roadmap-stage">效率优先 · 当前版本</div>
+        </div>
+        <div class="roadmap-goal">拓展 AI 文案生成能力,覆盖产品全生命周期的核心内容场景;同步上线高频提效小工具</div>
+        <div class="roadmap-centers">
+          <div class="roadmap-center-chip core" data-id="m1">✍️ 内容生产中心 · 核心</div>
+          <div class="roadmap-center-chip mvp" data-id="m8">🧰 营销工具站 · 高频图片/文本工具 🆕</div>
+        </div>
+        <div class="roadmap-value">
+          <strong>一句话总结</strong>:用 AI 解决内容生产效率问题,降本增效 3-5 倍;工具站补齐"小而美"提效缺口
+        </div>
+      </div>
+
+      <div class="roadmap-item v2">
+        <div class="roadmap-dot"></div>
+        <div class="roadmap-header">
+          <div class="roadmap-version">V2.0</div>
+          <div class="roadmap-theme">基础数据建设 + 执行层 + 服务与私域</div>
+          <div class="roadmap-stage">夯实基础 · 下一版本</div>
+        </div>
+        <div class="roadmap-goal">构建数据管理体系，补齐营销执行、站外引流、智能客服、自建站四大能力的 MVP</div>
+        <div class="roadmap-centers">
+          <div class="roadmap-center-chip core" data-id="m2">💾 数据资产中心 · 核心</div>
+          <div class="roadmap-center-chip mvp" data-id="m3">🎯 营销执行中心 · MVP</div>
+          <div class="roadmap-center-chip mvp" data-id="m4">🌐 站外引流中心 · MVP</div>
+          <div class="roadmap-center-chip mvp" data-id="m6">💬 智能客服中心 · MVP 🆕</div>
+          <div class="roadmap-center-chip mvp" data-id="m7">🏪 自建站运营中心 · MVP 🆕</div>
+          <div class="roadmap-center-chip mvp" data-id="m8">🧰 营销工具站 · 计算/数据查询工具 🆕</div>
+        </div>
+        <div class="roadmap-value">
+          <strong>一句话总结</strong>:用数据体系 + 执行/服务/私域系统，让亚马逊和独立站双渠道都能跑起来
+        </div>
+      </div>
+
+      <div class="roadmap-item v3">
+        <div class="roadmap-dot"></div>
+        <div class="roadmap-header">
+          <div class="roadmap-version">V3.0</div>
+          <div class="roadmap-theme">四大洞察 + 全中心智能化升级</div>
+          <div class="roadmap-stage">释放价值 · 未来版本</div>
+        </div>
+        <div class="roadmap-goal">洞察产品化 + 各中心智能化升级（GEO 智能运营、客服 AI Agent、私域精准营销）</div>
+        <div class="roadmap-centers">
+          <div class="roadmap-center-chip core" data-id="m5">🔍 洞察决策中心 · 核心</div>
+          <div class="roadmap-center-chip smart" data-id="m3">🎯 营销执行 · 智能化</div>
+          <div class="roadmap-center-chip smart" data-id="m4">🌐 站外引流 + GEO · 智能化</div>
+          <div class="roadmap-center-chip smart" data-id="m6">💬 智能客服 · AI Agent</div>
+          <div class="roadmap-center-chip smart" data-id="m7">🏪 自建站 · 精准营销</div>
+          <div class="roadmap-center-chip smart" data-id="m8">🧰 工具站 · AI Agent 化 + 工作流编排 🆕</div>
+        </div>
+        <div class="roadmap-value">
+          <strong>一句话总结</strong>:用洞察驱动决策,让每一个中心都更聪明,形成数据飞轮
+        </div>
+      </div>
+
+    </div>
+
+    <div class="roadmap-tip">
+      <div class="roadmap-tip-icon">💡</div>
+      <div class="roadmap-tip-text">
+        <strong>关于 V2 范围的建议</strong>:原 V2 规划仅含"数据建设",但数据资产建好了若没有系统产生和消费数据,价值难以落地。
+        建议将<strong>营销执行中心</strong>和<strong>站外引流中心</strong>的最小可用版本纳入 V2,与数据资产同步推进。
+        <em>此点需和管理层对齐。</em>
+      </div>
+    </div>
+
+    <div class="roadmap-tip" style="background:linear-gradient(135deg,#fff7ed 0%,#fed7aa 100%);border-left-color:#f97316;">
+      <div class="roadmap-tip-icon">🧰</div>
+      <div class="roadmap-tip-text" style="color:#7c2d12;">
+        <strong style="color:#431407;">关于营销工具站的特殊说明</strong>:工具站和七大业务中心不同,它<strong>没有"完整版本"概念</strong>,
+        而是<strong>按业务紧急度持续添加单点工具</strong>。建议建立"工具需求池 + 优先级评分"机制,每两周迭代上线 1-2 个高频工具。
+        早期重点:图片审核(差评高发)、Listing 校验(违规风险)、FBA 计算器(测算高频)。
+      </div>
+    </div>
+  </div>
+
+  <!-- 视图 5：角色对照 -->
+  <div class="view" id="view-roles">
+    <div class="view-title">👥 角色 × 场景 × 中心 对照表</div>
+    <div class="view-desc">
+      每个角色在日常工作中覆盖哪些业务场景、使用哪些业务中心。<strong>点击行</strong>查看角色详情。
+    </div>
+
+    <div class="roles-table">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:20%">角色</th>
+            <th style="width:40%">主要业务场景</th>
+            <th style="width:40%">主要使用中心</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-id="r1">
+            <td><div class="role-cell"><div class="role-avatar" style="background:#6366f1;">选</div>选品经理</div></td>
+            <td><div class="scene-chips"><span class="scene-chip">选品调研</span><span class="scene-chip">产品迭代</span></div></td>
+            <td><div class="module-chips"><span class="module-chip">数据资产中心</span><span class="module-chip">洞察决策中心</span></div></td>
+          </tr>
+          <tr data-id="r2">
+            <td><div class="role-cell"><div class="role-avatar" style="background:#8b5cf6;">运</div>Listing 运营</div></td>
+            <td><div class="scene-chips"><span class="scene-chip">Listing 搭建</span><span class="scene-chip">日常运营</span><span class="scene-chip">活动促销</span></div></td>
+            <td><div class="module-chips"><span class="module-chip">内容生产中心</span><span class="module-chip">营销执行中心</span></div></td>
+          </tr>
+          <tr data-id="r3">
+            <td><div class="role-cell"><div class="role-avatar" style="background:#ec4899;">投</div>广告投手</div></td>
+            <td><div class="scene-chips"><span class="scene-chip">首发推广</span><span class="scene-chip">日常运营</span></div></td>
+            <td><div class="module-chips"><span class="module-chip">营销执行中心</span><span class="module-chip">洞察决策中心</span></div></td>
+          </tr>
+          <tr data-id="r4">
+            <td><div class="role-cell"><div class="role-avatar" style="background:#3b82f6;">站</div>站外 / 红人运营</div></td>
+            <td><div class="scene-chips"><span class="scene-chip">首发推广</span><span class="scene-chip">日常引流</span></div></td>
+            <td><div class="module-chips"><span class="module-chip">站外引流中心</span><span class="module-chip">内容生产中心</span></div></td>
+          </tr>
+          <tr data-id="r5">
+            <td><div class="role-cell"><div class="role-avatar" style="background:#f59e0b;">文</div>文案 / 美工</div></td>
+            <td><div class="scene-chips"><span class="scene-chip">Listing 搭建</span><span class="scene-chip">内容产出</span></div></td>
+            <td><div class="module-chips"><span class="module-chip">内容生产中心</span><span class="module-chip">数据资产(素材库)</span></div></td>
+          </tr>
+          <tr data-id="r6">
+            <td><div class="role-cell"><div class="role-avatar" style="background:#10b981;">客</div>客服</div></td>
+            <td><div class="scene-chips"><span class="scene-chip">买家消息</span><span class="scene-chip">评论管理</span><span class="scene-chip">FAQ 维护</span><span class="scene-chip">差评响应</span></div></td>
+            <td><div class="module-chips"><span class="module-chip">智能客服中心</span><span class="module-chip">内容生产(FAQ)</span><span class="module-chip">数据资产(评论库)</span></div></td>
+          </tr>
+          <tr data-id="r9">
+            <td><div class="role-cell"><div class="role-avatar" style="background:#fb7185;">独</div>独立站运营 🆕</div></td>
+            <td><div class="scene-chips"><span class="scene-chip">独立站搭建</span><span class="scene-chip">私域运营</span><span class="scene-chip">复购营销</span><span class="scene-chip">EDM</span></div></td>
+            <td><div class="module-chips"><span class="module-chip">自建站运营中心</span><span class="module-chip">站外引流中心</span><span class="module-chip">内容生产中心</span></div></td>
+          </tr>
+          <tr data-id="r7">
+            <td><div class="role-cell"><div class="role-avatar" style="background:#0ea5e9;">析</div>数据分析师</div></td>
+            <td><div class="scene-chips"><span class="scene-chip">数据复盘</span><span class="scene-chip">效果归因</span></div></td>
+            <td><div class="module-chips"><span class="module-chip">洞察决策中心</span></div></td>
+          </tr>
+          <tr data-id="r8">
+            <td><div class="role-cell"><div class="role-avatar" style="background:#64748b;">管</div>主管 / 总监</div></td>
+            <td><div class="scene-chips"><span class="scene-chip">决策</span><span class="scene-chip">复盘</span><span class="scene-chip">资源分配</span></div></td>
+            <td><div class="module-chips"><span class="module-chip">洞察决策中心(驾驶舱)</span></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- 详情抽屉 -->
+<div class="drawer-mask" id="drawerMask"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div>
+      <div class="drawer-title" id="drawerTitle"></div>
+      <div class="drawer-subtitle" id="drawerSubtitle"></div>
+    </div>
+    <button class="drawer-close" id="drawerClose">×</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</div>
+
+<script>
+  // ===== Tab 切换 =====
+  const tabs = document.querySelectorAll('.tab');
+  const views = document.querySelectorAll('.view');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      views.forEach(v => v.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('view-' + tab.dataset.view).classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  // ===== 详情数据 =====
+  const details = {
+    // 业务目标
+    g1: { title: '📈 GMV 增长', subtitle: '核心业务目标', body: {
+      '目标定义': '提升亚马逊店铺整体销售额',
+      '关键指标': ['月度 GMV', '同比增长率', '新品销售占比', '大促贡献率'],
+      '系统如何支撑': '通过广告投放优化、站外引流、活动促销执行,驱动销售额增长',
+      '价值': '营收增长是所有营销动作最终要服务的北极星指标'
+    }},
+    g2: { title: '💰 ROI 提升', subtitle: '效率类目标', body: {
+      '目标定义': '提升营销投入产出比,包括广告 ROAS、站外 ROI 等',
+      '关键指标': ['ACOS', 'TACOS', 'ROAS', '站外 ROI'],
+      '系统如何支撑': '通过广告智能优化、归因分析、渠道对比,精准控制投入',
+      '价值': '在同等预算下获得更多转化,或用更少预算达到同样效果'
+    }},
+    g3: { title: '🏆 品牌沉淀', subtitle: '长期战略目标', body: {
+      '目标定义': '建立品牌认知度、口碑和用户资产',
+      '关键指标': ['品牌搜索量', '复购率', 'Review 评分', '品牌旗舰店流量'],
+      '系统如何支撑': '通过站外红人/社媒、Listing 品牌化内容、评论管理提升品牌影响力',
+      '价值': '品牌是抵御价格战、获取溢价的根本'
+    }},
+    g4: { title: '⚡ 效率提升', subtitle: '内部效率目标', body: {
+      '目标定义': '提升团队各角色的工作效率,降低人力成本',
+      '关键指标': ['文案产出效率', '广告优化频次', '复盘报告产出周期'],
+      '系统如何支撑': 'AI 文案、自动化工具、数据看板替代重复人工',
+      '价值': '同等人力做更多事,释放人力聚焦高价值决策'
+    }},
+
+    // 角色
+    r1: { title: '🎯 选品经理', subtitle: '决定做什么产品', body: {
+      '核心职责': '基于市场和竞品数据,决策新品立项、老品迭代、下架',
+      '日常场景': ['市场调研', '竞品分析', '选品立项', '产品迭代建议'],
+      '使用模块': ['数据资产中心 - 产品库 / 竞品库 / 关键词库', '洞察决策中心 - 市场洞察 / 产品洞察 / 竞争洞察'],
+      '典型痛点': '数据散落在多处、竞品跟踪靠人工、决策靠经验'
+    }},
+    r2: { title: '📝 Listing 运营', subtitle: '负责产品在亚马逊站内的呈现', body: {
+      '核心职责': 'Listing 搭建、日常维护、活动设置、Listing 健康监控',
+      '日常场景': ['Listing 搭建', '日常运营', '活动促销', 'Listing 优化'],
+      '使用模块': ['内容生产中心 - Listing 文案 / 图片文案', '营销执行中心 - Listing 管理 / 活动管理 / 定价'],
+      '典型痛点': 'Listing 数量多、内容更新频繁、多个后台来回切换'
+    }},
+    r3: { title: '💹 广告投手', subtitle: '负责亚马逊站内付费流量', body: {
+      '核心职责': 'SP/SB/SD 广告投放、关键词优化、预算分配、ACOS 控制',
+      '日常场景': ['首发推广', '日常广告优化', '活动期广告配合'],
+      '使用模块': ['营销执行中心 - 广告投放', '洞察决策中心 - 营销洞察 / ROI 分析'],
+      '典型痛点': '关键词管理复杂、广告效果评估滞后、人工调整工作量大'
+    }},
+    r4: { title: '🌐 站外 / 红人运营', subtitle: '负责亚马逊站外流量获取', body: {
+      '核心职责': '红人合作、社媒内容、Google 广告、EDM 等站外渠道管理',
+      '日常场景': ['首发推广', '日常引流', '品牌曝光'],
+      '使用模块': ['站外引流中心 - 红人/社媒/Google/EDM', '内容生产中心 - 站外内容'],
+      '典型痛点': '渠道分散、效果归因难、红人管理靠 Excel'
+    }},
+    r5: { title: '✏️ 文案 / 美工', subtitle: '内容生产者', body: {
+      '核心职责': '产出 Listing 文案、主图、A+ 页面、视频脚本、营销图片',
+      '日常场景': ['Listing 搭建', '营销物料产出', '活动素材'],
+      '使用模块': ['内容生产中心 - 全场景文案', '数据资产中心 - 素材库'],
+      '典型痛点': '重复性高、品牌调性难统一、多语言版本工作量大'
+    }},
+    r6: { title: '💬 客服', subtitle: '用户反馈处理者与品牌守门员', body: {
+      '核心职责': '处理买家消息、差评跟进、FAQ 维护、舆情监控、多语言沟通',
+      '日常场景': ['买家消息', '评论管理', 'FAQ 维护', '差评响应', '舆情预警'],
+      '使用模块': ['智能客服中心 - 全部子模块(核心)', '内容生产中心 - FAQ 生成', '数据资产中心 - 评论库'],
+      '典型痛点': '重复问题多、差评响应慢、多语言客服人力成本高、评论数据没沉淀',
+      '智能客服中心如何赋能': 'AI 自动处理 80% 标准咨询,人工聚焦在高价值问题和差评危机处理;多语言翻译让 1 个客服能服务全站点'
+    }},
+    r7: { title: '📊 数据分析师', subtitle: '数据驱动决策支持', body: {
+      '核心职责': '产出周/月度报告、效果归因、洞察分析、异常预警',
+      '日常场景': ['数据复盘', '效果归因', '专题分析'],
+      '使用模块': ['洞察决策中心 - 所有洞察模块'],
+      '典型痛点': '取数慢、报表重复产出、归因数据不全'
+    }},
+    r8: { title: '👔 主管 / 总监', subtitle: '业务决策者', body: {
+      '核心职责': '资源分配、团队管理、战略决策、业绩复盘',
+      '日常场景': ['决策', '复盘', '资源分配', '目标管理'],
+      '使用模块': ['洞察决策中心 - 管理驾驶舱 / 各维度洞察'],
+      '典型痛点': '一线数据不透明、决策依赖下属汇报、难以实时看全局'
+    }},
+
+    r9: { title: '🏪 独立站运营', subtitle: '私域沉淀与品牌增长 🆕', body: {
+      '核心职责': '独立站搭建与迭代、EDM 营销、会员运营、站外广告(Google/Meta 直投独立站)、复购运营',
+      '日常场景': ['独立站搭建', '私域运营', '复购营销', 'EDM 营销', '会员管理'],
+      '使用模块': ['自建站运营中心(核心)', '站外引流中心 - Google/Meta 广告', '内容生产中心 - 独立站内容', '数据资产中心 - 会员库'],
+      '典型痛点': '独立站运营和亚马逊运营"两张皮"、用户数据没打通、重复建设多个后台',
+      '价值': '亚马逊运营追求 GMV 和 ROAS,独立站运营追求 LTV 和复购;两条路径互补,双轮驱动品牌长期增长'
+    }},
+
+    // 场景
+    s1: { title: '🔍 选品调研', subtitle: '业务流第 1 环', body: {
+      '核心动作': '市场容量评估、竞品分析、需求挖掘、选品立项',
+      '主要角色': ['选品经理', '数据分析师'],
+      '依赖中心': ['数据资产中心 - 竞品库 / 关键词库', '洞察决策中心 - 市场洞察 / 竞争洞察'],
+      '产出': '新品立项决策、选品报告'
+    }},
+    s2: { title: '🏗 Listing 搭建', subtitle: '业务流第 2 环', body: {
+      '核心动作': 'Title/Bullets 撰写、主图设计、A+ 页面、视频上传',
+      '主要角色': ['Listing 运营', '文案', '美工'],
+      '依赖中心': ['内容生产中心 - Listing / 图片 / 视频文案', '营销执行中心 - Listing 管理'],
+      '产出': '完整可发布的 Listing'
+    }},
+    s3: { title: '🚀 首发推广', subtitle: '业务流第 3 环', body: {
+      '核心动作': '新品 SP 广告开跑、Vine 计划、站外红人种草、促销设置',
+      '主要角色': ['广告投手', '站外运营'],
+      '依赖中心': ['营销执行中心 - 广告投放', '站外引流中心 - 红人 / 社媒'],
+      '产出': '新品初始流量和评价'
+    }},
+    s4: { title: '⚙️ 日常运营', subtitle: '业务流第 4 环', body: {
+      '核心动作': '广告调优、关键词迭代、Listing 优化、竞争跟进',
+      '主要角色': ['广告投手', 'Listing 运营'],
+      '依赖中心': ['营销执行中心 - 广告 / Listing', '洞察决策中心 - 营销洞察'],
+      '产出': '稳定的流量和转化'
+    }},
+    s5: { title: '🎁 活动促销', subtitle: '业务流第 5 环', body: {
+      '核心动作': 'Coupon/Deal/LD/BD 设置、Prime Day / BF 大促备战',
+      '主要角色': ['Listing 运营', '广告投手'],
+      '依赖中心': ['营销执行中心 - 活动管理 / 定价', '站外引流中心 - Deal 站'],
+      '产出': '销量爆发、排名提升'
+    }},
+    s6: { title: '⭐ 客服与评论管理', subtitle: '业务流第 6 环', body: {
+      '核心动作': '买家消息处理、差评监控响应、FAQ 更新、舆情分析、多语言沟通',
+      '主要角色': ['客服', 'Listing 运营'],
+      '依赖中心': ['🆕 智能客服中心 - 全部子模块(核心)', '内容生产中心 - FAQ', '数据资产中心 - 评论库', '洞察决策中心 - 用户洞察'],
+      '产出': '评分稳定、买家满意度、差评危机及时止损'
+    }},
+    s7: { title: '📈 数据复盘', subtitle: '业务流第 7 环', body: {
+      '核心动作': '周/月复盘、ROI 归因、渠道对比、异常分析',
+      '主要角色': ['数据分析师', '主管'],
+      '依赖中心': ['洞察决策中心 - 全部洞察模块'],
+      '产出': '复盘报告、下期计划'
+    }},
+    s8: { title: '🔁 产品迭代', subtitle: '业务流第 8 环', body: {
+      '核心动作': '基于评论和数据反馈进行产品改进,进入下一轮选品',
+      '主要角色': ['选品经理', '产品经理'],
+      '依赖中心': ['洞察决策中心 - 用户洞察 / 产品洞察'],
+      '产出': '产品迭代方案、闭环进入下一轮'
+    }},
+
+    // 中心
+    m1: { title: '✍️ 内容生产中心', subtitle: 'V1.0 核心模块', body: {
+      '定位': 'AI 驱动的营销内容工厂,覆盖亚马逊业务全场景文案需求',
+      '子模块': [
+        'Listing 文案:Title / Bullet Points / Description',
+        '图片文案:主图 / A+ 页面 / 场景图',
+        '视频脚本:短视频 / 品牌宣传片',
+        '包装文案:包装盒 / 说明书',
+        'FAQ 生成:客服 / 产品详情页',
+        '广告文案:SP / SB / 站外投放',
+        '站外内容:红人脚本 / 社媒帖子 / EDM',
+        '🆕 GEO 内容:AI 搜索友好的结构化 Q&A、权威引用、实体标注',
+        '🆕 独立站内容:独立站 Landing Page / 博客 / Product Story'
+      ],
+      '核心价值': '内容产出效率提升 3-5 倍,品牌调性标准化,外包成本降低;新增 GEO 与独立站内容,覆盖 AI 搜索与私域渠道',
+      '目标用户': '文案、美工、运营、客服、站外运营、独立站运营'
+    }},
+    m2: { title: '💾 数据资产中心', subtitle: 'V2.0 核心模块', body: {
+      '定位': '公司级产品与营销数据的统一底座,消除信息孤岛',
+      '子模块': [
+        '产品库:SKU / ASIN / 属性 / 卖点',
+        '竞品库:竞品 ASIN / 价格 / 变化跟踪',
+        '关键词库:流量词 / 长尾词 / 否定词',
+        '评论库:Review / QA / 舆情',
+        '素材库:图片 / 视频 / 文案模板',
+        '标签体系:产品 / 人群 / 场景标签',
+        '🆕 独立站会员库:订阅用户 / 购买行为 / 会员等级 / LTV'
+      ],
+      '核心价值': '数据资产化、管理标准化、为洞察分析提供燃料;新增独立站会员资产,打通站内外用户数据',
+      '目标用户': '选品经理、运营、数据分析师、独立站运营'
+    }},
+    m3: { title: '🎯 营销执行中心', subtitle: 'V2.0 新增模块', body: {
+      '定位': '亚马逊站内营销动作的统一操作台,广告+活动+Listing 一体化',
+      '子模块': [
+        '广告投放:SP / SB / SD / DSP',
+        '活动管理:Coupon / Deal / LD / BD',
+        'Listing 管理:A+ / 品牌旗舰店 / Post',
+        '定价策略:价格监控 / 动态定价',
+        '库存联动:与广告节奏协同'
+      ],
+      '核心价值': '一站式执行,替代多后台切换,动作可记录可复盘',
+      '目标用户': '广告投手、Listing 运营'
+    }},
+    m4: { title: '🌐 站外引流中心', subtitle: 'V2.0 新增模块', body: {
+      '定位': '整合亚马逊站外流量渠道,为站内 Listing / 独立站导流并沉淀品牌',
+      '子模块': [
+        '红人营销:红人库 / 合作跟踪 / 效果归因',
+        '社媒运营:TikTok / Facebook / Instagram',
+        'Google 营销:SEO / Google Ads',
+        'EDM:独立站 / 订阅用户',
+        'Deal 站:Slickdeals / DealNews',
+        '归因追踪:短链 / Attribution / Brand Referral Bonus',
+        '🆕 GEO 运营:ChatGPT/Perplexity/Google AIO 等 AI 搜索引擎答案露出监控与优化'
+      ],
+      '核心价值': '突破站内流量天花板,获取增量流量并沉淀品牌;抢占 AI 搜索时代的新流量入口',
+      'GEO 是什么': 'Generative Engine Optimization(生成式引擎优化)。当用户在 ChatGPT / Perplexity / Google AI Overview 中提问"best XXX 2026"时,我们的品牌和产品能被 AI 引用作为答案的一部分。是继 SEO 之后最重要的流量获取方式变革。',
+      '目标用户': '站外运营、红人运营、品牌经理、独立站运营'
+    }},
+    m5: { title: '🔍 洞察决策中心', subtitle: 'V3.0 核心模块', body: {
+      '定位': '将数据资产转化为业务决策,从"拍脑袋"到"数据驱动"',
+      '子模块': [
+        '市场洞察:市场规模 / 趋势 / 机会点',
+        '产品洞察:表现 / 生命周期 / 迭代建议',
+        '竞争洞察:竞品动态 / 差异化 / 定价策略',
+        '用户洞察:画像 / 需求 / 评论挖掘',
+        '营销洞察:ROI / 归因 / 渠道对比',
+        '🆕 客服洞察:响应时长 / 差评根因 / 买家高频诉求',
+        '🆕 私域洞察:独立站 LTV / 复购率 / 订阅转化'
+      ],
+      '核心价值': '每个决策都有数据支撑,缩短"试错-调整"周期;覆盖亚马逊 + 独立站双渠道的全景洞察',
+      '目标用户': '主管、总监、数据分析师、选品经理'
+    }},
+
+    m6: { title: '💬 智能客服中心', subtitle: 'V2.0 新增核心模块 🆕', body: {
+      '定位': 'AI 驱动的买家服务体系,把客服从"成本中心"转化为"增长中心"',
+      '子模块': [
+        '买家消息自动回复:基于商品知识库的 AI 应答,人工审核后发送',
+        '差评监控响应:1~3 星 Review 实时预警,AI 生成个性化 Reply 草稿',
+        'FAQ 智能问答:买家前置问题拦截,减少低价值咨询',
+        '多语言翻译:跨站点客服沟通,支持 EN/DE/JP/FR/ES 等',
+        '客诉工单:买家问题全流程跟踪,SLA 监控',
+        '舆情预警:社媒、Review、Q&A 负面舆情实时监控'
+      ],
+      '核心价值': '客服效率提升 5 倍;差评平均响应时长从 24h 降至 1h;减少客服人力 50%',
+      '为什么单独成中心': '客服是亚马逊运营的临门一脚:影响评分(搜索排名)、影响复购(LTV)、影响差评危机处理。在 AI 时代,智能客服已从"成本控制工具"变成"品牌增长引擎",值得作为独立中心投入。',
+      '目标用户': '客服团队、Listing 运营、品牌经理'
+    }},
+
+    m8: { title: '🧰 营销工具站', subtitle: '贯穿 V1-V3 · 瑞士军刀式提效工具集 🆕', body: {
+      '定位': '嵌入到所有业务流程中的小而美工具集合,解决七大业务中心覆盖不到的"细碎、高频、单点"提效需求',
+      '与业务中心的区别': '业务中心是"端到端工作流"(完整业务能力);工具站是"碎片化提效工具"(单点功能、按需调用)。两者互补,不存在替代关系。',
+      '🖼 图片工具组': [
+        'AI 生图:亚马逊主图 / 场景图 / 模特图 / 白底图',
+        '图片审核:亚马逊主图合规检查(背景纯白、占比、水印禁用等)、A+ 合规、版权风险检测',
+        '抠图 / 背景替换:批量去背景 / 一键换场景',
+        '批量水印:Logo / 文字水印批量打',
+        '批量调尺寸:适配亚马逊各类目尺寸要求',
+        '视频处理:剪辑 / 字幕生成 / 批量转码'
+      ],
+      '📝 文本工具组': [
+        'Listing 校验:Title / Bullet 字符数、关键词密度、敏感词、亚马逊禁用词扫描',
+        '关键词处理:去重 / 合并 / 词频统计 / 长尾词扩展',
+        '批量翻译:多语言 Listing 翻译,支持术语库',
+        '评论关键词提取:从 Review 中提取高频词与情感倾向'
+      ],
+      '🧮 业务计算工具组': [
+        'FBA 费用计算器:输入尺寸重量 → 自动算出 FBA 各项费用',
+        '利润 / 定价测算器:成本 + 各项费率 + 目标利润 → 反推定价',
+        '广告 ROAS / ACOS 模拟器:预算 / 转化率假设下的 ROI 测算',
+        '汇率换算:多币种实时换算'
+      ],
+      '🔎 数据查询工具组': [
+        'ASIN 批量查询:批量获取价格 / BSR / Review 数 / 评分',
+        '竞品 Listing 抓取:一键抓取竞品 Title / Bullets / A+',
+        '关键词反查 ASIN:查某关键词下哪些 ASIN 在打广告'
+      ],
+      '🤝 协作工具组': [
+        '素材分享链接生成:加密链接 + 有效期控制',
+        '二维码生成:批量生成 + Logo 嵌入',
+        '项目模板库:复用历史成功案例的物料 / 文案模板'
+      ],
+      '核心价值': '解决"七大中心覆盖不到的细碎需求",让每个角色每天少做 30 分钟重复劳动;同时降低工具采购成本(替代部分付费第三方工具)',
+      '建设节奏': '不绑定单一版本,采用"工具需求池 + 优先级评分"机制,每 2 周迭代上线 1-2 个高频工具。早期重点:图片审核 / Listing 校验 / FBA 计算器',
+      '目标用户': '全员 - 文案、美工、运营、广告投手、客服、选品、独立站运营都会用到'
+    }},
+
+    m7: { title: '🏪 自建站运营中心', subtitle: 'V2.0 新增核心模块 🆕', body: {
+      '定位': '独立站(Shopify / Shoplazza / 自研)搭建与运营,沉淀品牌与私域用户资产',
+      '子模块': [
+        '独立站搭建:主题 / 页面 / SEO 基础配置',
+        '商品/SKU 同步:与亚马逊库存 / 产品库打通',
+        '会员体系:注册 / 等级 / 积分 / 订阅',
+        'EDM / 私域营销:欢迎邮件 / 购物车挽回 / 生日营销',
+        'Google / Meta 投放:独立站专属广告投放',
+        '复购运营:基于购买行为的精准营销、交叉销售'
+      ],
+      '核心价值': '沉淀品牌私域资产,不受亚马逊平台规则变化影响;用户终身价值(LTV)是亚马逊一次性买家的 3-5 倍',
+      '独立站与亚马逊的关系': '独立站是亚马逊的战略后方:① 亚马逊做规模和转化,独立站做品牌和复购;② 站外流量优先引到独立站沉淀用户,再通过 Attribution 导回亚马逊;③ Brand Referral Bonus 奖励站外导流回亚马逊,形成互利循环。',
+      '目标用户': '独立站运营、品牌经理、EDM 运营、站外运营'
+    }},
+
+    // 能力层
+    c1: { title: '🤖 AI 大模型', subtitle: '能力支撑层', body: {
+      '作用': '为内容生产、洞察分析、智能问答提供底层 AI 能力',
+      '典型场景': ['文案生成', '评论情感分析', '关键词扩展', '智能翻译', '图文理解'],
+      '技术选型参考': 'GPT-4 / Claude / Gemini / 国产大模型',
+      '关键考量': '成本、延迟、多语言能力、电商场景微调'
+    }},
+    c2: { title: '🔄 数据采集引擎', subtitle: '能力支撑层', body: {
+      '作用': '自动从站内外各渠道采集数据,持续喂养数据资产',
+      '典型场景': ['亚马逊 Listing 爬取', '竞品价格监控', '评论抓取', '广告数据同步'],
+      '关键考量': '稳定性、采集频次、反爬应对、API 配额管理'
+    }},
+    c3: { title: '🏷 标签 / 分类体系', subtitle: '能力支撑层', body: {
+      '作用': '为产品、用户、内容建立统一的分类口径,支撑检索与分析',
+      '典型场景': ['产品品类树', '人群标签', '场景标签', '内容主题标签'],
+      '关键考量': '层级设计、命名规范、跨模块复用'
+    }},
+    c4: { title: '📚 品牌 / 产品知识库', subtitle: '能力支撑层', body: {
+      '作用': '沉淀品牌调性、产品卖点、行业知识,供 AI 生成内容时使用',
+      '典型场景': ['品牌 Slogan / Tone of Voice', '产品核心卖点', '行业黑话 / FAQ'],
+      '关键考量': 'RAG 检索质量、知识更新机制、权限隔离'
+    }},
+    c5: { title: '🔐 权限 / 审批流', subtitle: '能力支撑层', body: {
+      '作用': '多角色、多店铺、多品牌场景下的数据访问控制和动作审批',
+      '典型场景': ['按店铺/品牌分配权限', '广告预算审批', '内容发布审批'],
+      '关键考量': '细粒度控制、审批链灵活配置、操作日志审计'
+    }},
+
+    // 数据源
+    d1: { title: '🛒 亚马逊 SP-API', subtitle: '数据源层', body: {
+      '作用': '亚马逊官方卖家 API,获取订单、库存、Listing、财务等数据',
+      '常用接口': ['Orders API', 'Inventory API', 'Catalog API', 'Reports API'],
+      '关键考量': 'Token 管理、速率限制、多站点配置'
+    }},
+    d2: { title: '📢 亚马逊 Ads API', subtitle: '数据源层', body: {
+      '作用': '亚马逊广告 API,管理和获取 SP/SB/SD/DSP 广告数据',
+      '常用接口': ['Campaigns / Ad Groups / Keywords', 'Reports', 'Audiences', 'Attribution'],
+      '关键考量': '报表延迟、归因窗口、多账号管理'
+    }},
+    d3: { title: '🌍 站外平台 API', subtitle: '数据源层', body: {
+      '作用': '对接 Google / Meta / TikTok 等站外广告与社媒平台',
+      '常用平台': ['Google Ads API', 'Meta Marketing API', 'TikTok Ads API', 'Mailchimp / Klaviyo'],
+      '关键考量': '各平台数据口径差异、归因统一'
+    }},
+    d4: { title: '🔧 第三方数据工具', subtitle: '数据源层', body: {
+      '作用': '借助专业工具补充亚马逊官方 API 无法覆盖的数据',
+      '常用工具': ['Helium 10', 'Jungle Scout', '卖家精灵', 'Keepa'],
+      '关键考量': '成本、数据准确性、API 开放程度'
+    }},
+    d5: { title: '🏢 内部系统', subtitle: '数据源层', body: {
+      '作用': '对接公司内部的 ERP / WMS / CRM 等系统',
+      '数据内容': ['SKU 主数据', '库存数据', '采购成本', '客户数据'],
+      '关键考量': '数据一致性、权限打通、更新频次'
+    }},
+
+    // 目标
+    goal: null
+  };
+
+  // ===== 抽屉控制 =====
+  const drawer = document.getElementById('drawer');
+  const drawerMask = document.getElementById('drawerMask');
+  const drawerTitle = document.getElementById('drawerTitle');
+  const drawerSubtitle = document.getElementById('drawerSubtitle');
+  const drawerBody = document.getElementById('drawerBody');
+  const drawerClose = document.getElementById('drawerClose');
+
+  function openDrawer(id) {
+    const data = details[id];
+    if (!data) return;
+    drawerTitle.textContent = data.title;
+    drawerSubtitle.textContent = data.subtitle;
+
+    let html = '';
+    for (const [key, val] of Object.entries(data.body)) {
+      html += `<div class="drawer-section"><h4>${key}</h4>`;
+      if (Array.isArray(val)) {
+        html += '<ul class="drawer-list">';
+        val.forEach(item => {
+          const idx = item.indexOf(':');
+          if (idx > -1 && idx < 15) {
+            html += `<li><strong>${item.slice(0, idx)}</strong><span>${item.slice(idx+1)}</span></li>`;
+          } else {
+            html += `<li><span>${item}</span></li>`;
+          }
+        });
+        html += '</ul>';
+      } else if (key === '核心价值' || key === '价值') {
+        html += `<div class="drawer-value-card">${val}</div>`;
+      } else {
+        html += `<p>${val}</p>`;
+      }
+      html += '</div>';
+    }
+    drawerBody.innerHTML = html;
+    drawer.classList.add('show');
+    drawerMask.classList.add('show');
+  }
+
+  function closeDrawer() {
+    drawer.classList.remove('show');
+    drawerMask.classList.remove('show');
+  }
+
+  drawerClose.addEventListener('click', closeDrawer);
+  drawerMask.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+  // ===== 点击事件委托 =====
+  document.addEventListener('click', e => {
+    const target = e.target.closest('[data-id]');
+    if (target && target.dataset.id) {
+      openDrawer(target.dataset.id);
+      e.stopPropagation();
+    }
+  });
+</script>
+
+</body>
+</html>

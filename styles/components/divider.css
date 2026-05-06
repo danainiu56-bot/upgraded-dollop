@@ -1,0 +1,13 @@
+/* ============================================
+   分隔线 + 方法内容
+   ============================================ */
+
+  /* ===== 分隔线 ===== */
+  .divider {
+    height: 1px; background: var(--border); margin: 24px 0;
+  }
+
+  /* ===== 方法内容 ===== */
+  .method-content { display: none; }
+  .method-content.show { display: block; }
+

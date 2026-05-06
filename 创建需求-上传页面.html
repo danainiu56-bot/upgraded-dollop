@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>创建需求 - 产品营销智能助手</title>
+<!-- ===== CSS ===== -->
+<!-- 1. 设计变量 + 动画 -->
+<link rel="stylesheet" href="styles/_tokens.css">
+<link rel="stylesheet" href="styles/_animations.css">
+<!-- 2. 通用组件 -->
+<link rel="stylesheet" href="styles/components/button.css">
+<link rel="stylesheet" href="styles/components/card.css">
+<link rel="stylesheet" href="styles/components/form.css">
+<link rel="stylesheet" href="styles/components/sku-select.css">
+<link rel="stylesheet" href="styles/components/editable.css">
+<link rel="stylesheet" href="styles/components/divider.css">
+<link rel="stylesheet" href="styles/components/toast.css">
+<!-- 3. 页面级样式（按业务模块） -->
+<link rel="stylesheet" href="styles/pages/topbar.css">
+<link rel="stylesheet" href="styles/pages/layout.css">
+<link rel="stylesheet" href="styles/pages/wizard.css">
+<link rel="stylesheet" href="styles/pages/result.css">
+<link rel="stylesheet" href="styles/pages/demand-list.css">
+<link rel="stylesheet" href="styles/pages/copy-list.css">
+<link rel="stylesheet" href="styles/pages/workbench.css">
+<link rel="stylesheet" href="styles/pages/ai-chat.css">
+
+<!-- ===== Mock 数据层（必须在主 script 之前加载，因为有顶层立即引用）===== -->
+<!-- 接 API 时只改这些文件 -->
+<script src="scripts/data/req-types.js"></script>
+<script src="scripts/data/persons.js"></script>
+<script src="scripts/data/skus.js"></script>
+<script src="scripts/data/demand-list.js"></script>
+<script src="scripts/data/copy-list.js"></script>
+<script src="scripts/data/result-mock.js"></script>
+<script src="scripts/data/ai-skills.js"></script>
+<script src="scripts/data/ai-history.js"></script>
+<script src="scripts/data/bg-knowledge.js"></script>
+<script src="scripts/data/score-rules.js"></script>
+
+<!-- ===== Core 基础设施（在数据之后、主 inline 脚本之前加载）===== -->
+<script src="scripts/core/icons.js"></script>
+<script src="scripts/core/utils.js"></script>
+<script src="scripts/core/toast.js"></script>
+<script src="scripts/core/router.js"></script>
+
+<!-- ===== 页面级 JS（按业务模块） ===== -->
+<script src="scripts/pages/topbar.js"></script>
+<script src="scripts/pages/wizard.js"></script>
+<script src="scripts/pages/result.js"></script>
+<script src="scripts/pages/demand-list.js"></script>
+<script src="scripts/pages/copy-list.js"></script>
+<script src="scripts/pages/review-list.js"></script>
+<script src="scripts/pages/copy-review-list.js"></script>
+<script src="scripts/pages/ai-chat.js"></script>
+
+<!-- ===== 入口（DOMContentLoaded 初始化）===== -->
+<script src="scripts/main.js"></script>
+</head>
+<body>
+
+<!-- 顶栏 -->
+<header class="topbar">
+  <div class="topbar-left">
+    <a class="topbar-logo" href="#" onclick="goToList();return false;">
+      <div class="logo-icon"><span>PTM</span></div>
+      <span class="logo-name">产品到营销系统</span>
+    </a>
+    <div class="topbar-divider" id="topbar-divider" style="display:none;"></div>
+    <span class="topbar-title" id="topbar-title" style="display:none;">创建需求</span>
+  </div>
+  <div class="topbar-right">
+    <!-- 列表页工具区 -->
+    <div class="topbar-tools" id="topbar-tools">
+      <div class="topbar-date" id="topbar-date">
+        <div class="date-cal">
+          <div class="date-cal-top">十一</div>
+          <div class="date-cal-num" id="cal-day">—</div>
+        </div>
+        <div class="date-text" id="date-text">—</div>
+      </div>
+      <div class="user-mini" title="个人中心">
+        <span class="avatar">M</span>
+        <span class="name">Mason</span>
+      </div>
+    </div>
+    <!-- 向导页返回按钮 -->
+    <button class="btn btn-secondary btn-sm" id="back-to-list-btn" style="display:none;" onclick="goToList()">← 返回列表</button>
+  </div>
+</header>
+
+<!-- ============================================
+     列表页
+============================================ -->
+<div id="list-page" class="show">
+
+  <!-- 左侧菜单 -->
+  <aside class="list-sidebar">
+    <nav class="list-sidebar-nav" id="list-sidebar-nav"></nav>
+  </aside>
+
+  <!-- 主内容 -->
+  <main class="list-main">
+
+    <!-- 顶部 Tab -->
+    <div class="list-tab-bar">
+      <div class="list-tab" onclick="switchTab('home')">首页</div>
+      <div class="list-tab active" onclick="switchTab('copywriting')">
+        <span id="list-active-tab-title">需求管理</span>
+        <span class="tab-close" title="关闭" onclick="event.stopPropagation();showToast('当前 Tab 不可关闭','warning');">✕</span>
+      </div>
+      <div class="list-tab" onclick="switchTab('market')">市场洞察</div>
+      <div class="list-tab" onclick="switchTab('competitor')">竞争洞察</div>
+    </div>
+
+    <!-- 筛选区 -->
+    <div class="list-filter-bar">
+      <div class="list-filter-row">
+        <div class="filter-group">
+          <select class="filter-select" id="f-req-type" onchange="applyFilters()">
+            <option value="">全部需求类型</option>
+            <option value="新品Listing">新品 Listing</option>
+            <option value="老品Title">老品 Title</option>
+            <option value="老品TD">老品 TD</option>
+            <option value="老品Title TD">老品 Title TD</option>
+            <option value="新品Title">新品 Title</option>
+            <option value="新品TD">新品 TD</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <select class="filter-select" id="f-site" onchange="applyFilters()">
+            <option value="">全部站点</option>
+            <option value="US">🇺🇸 US</option>
+            <option value="UK">🇬🇧 UK</option>
+            <option value="DE">🇩🇪 DE</option>
+            <option value="JP">🇯🇵 JP</option>
+            <option value="CA">🇨🇦 CA</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <select class="filter-select" id="f-brand" onchange="applyFilters()">
+            <option value="">全部品牌</option>
+            <option value="AUVON">AUVON</option>
+            <option value="ZIKEE">ZIKEE</option>
+            <option value="AMOOS">AMOOS</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <select class="filter-select" id="f-subcategory" onchange="onFilterSubcategoryChange()">
+            <option value="">全部子品类</option>
+          </select>
+        </div>
+        <div class="filter-group filter-sku-wrap">
+          <button type="button" class="filter-select filter-sku-trigger" id="f-sku-trigger" onclick="toggleFilterSkuDropdown(event)">
+            <span id="f-sku-text" class="f-sku-placeholder">SKU</span>
+          </button>
+          <div class="f-sku-dropdown" id="f-sku-dropdown">
+            <div class="f-sku-search-bar">
+              <input
+                type="text"
+                class="f-sku-search-input"
+                id="f-sku-search"
+                placeholder="🔍 搜索 SKU 编号或名称..."
+                oninput="filterSkuDropdownOptions()"
+                onclick="event.stopPropagation()"
+              />
+            </div>
+            <div class="f-sku-toolbar">
+              <span style="font-size:12px;color:var(--text-muted);">共 <span id="f-sku-total">0</span> 个</span>
+              <button type="button" class="sku-toolbar-btn" onclick="clearFilterSku(event)">清除</button>
+            </div>
+            <div class="f-sku-list" id="f-sku-list"></div>
+          </div>
+        </div>
+        <div class="filter-group filter-group-wide">
+          <div class="combo-select">
+            <select class="combo-select-left" id="f-person-type" onchange="onPersonTypeChange()">
+              <option value="writer">文案人员</option>
+              <option value="op">运营人员</option>
+              <option value="bu">事业部</option>
+              <option value="bu_lead">BU长</option>
+            </select>
+            <select class="combo-select-right" id="f-person-value" onchange="applyFilters()"></select>
+          </div>
+        </div>
+        <div class="filter-group">
+          <select class="filter-select" id="f-status" onchange="applyFilters()">
+            <option value="">全部状态</option>
+            <option value="待审核">待审核</option>
+            <option value="已通过">已通过</option>
+            <option value="已驳回">已驳回</option>
+            <option value="处理中">处理中</option>
+            <option value="已完成">已完成</option>
+          </select>
+        </div>
+        <div class="filter-actions">
+          <button class="filter-btn" onclick="resetFilters()">重置</button>
+          <button class="filter-btn filter-btn-primary" onclick="goToCreate()" id="create-demand-btn"></button>
+        </div>
+      </div>
+      <div class="filter-applied" id="filter-applied"></div>
+    </div>
+
+    <!-- 表格 -->
+    <div class="list-table-wrap">
+      <table class="list-data-table">
+        <thead>
+          <tr>
+            <th style="width:120px;">需求类型</th>
+            <th style="width:60px;">站点</th>
+            <th style="width:100px;">品牌</th>
+            <th style="width:80px;">子品类</th>
+            <th style="width:170px;">产品名称</th>
+            <th style="width:120px;">SKU</th>
+            <th style="width:80px;">优先级</th>
+            <th style="width:110px;">事业部</th>
+            <th style="width:80px;">BU长</th>
+            <th style="width:100px;">运营人员</th>
+            <th style="width:100px;">文案人员</th>
+            <th style="width:160px;">提出时间</th>
+            <th style="width:120px;">期望交付时间</th>
+            <th style="width:90px;">状态</th>
+            <th style="width:200px;">操作</th>
+          </tr>
+        </thead>
+        <tbody id="list-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- 分页 -->
+    <div class="list-pagination">
+      <span>共 <strong id="pg-total">300</strong> 条</span>
+      <button class="pg-btn" id="pg-prev" onclick="changePage(-1)">‹</button>
+      <button class="pg-btn active">2</button>
+      <span>/ 15</span>
+      <button class="pg-btn" id="pg-next" onclick="changePage(1)">›</button>
+      <select class="pg-size" id="pg-size" onchange="changePageSize()">
+        <option value="20">20条/页</option>
+        <option value="50">50条/页</option>
+        <option value="100">100条/页</option>
+      </select>
+    </div>
+
+    <!-- ===== 文案管理（独立列表）===== -->
+    <section id="demand-mgr-view" class="demand-mgr-view" style="display:none;">
+      <div class="list-filter-bar">
+        <div class="list-filter-row">
+          <div class="filter-group">
+            <select class="filter-select" id="cf-req-type" onchange="applyCopyFilters()">
+              <option value="">全部需求类型</option>
+              <option value="新品Listing">新品 Listing</option>
+              <option value="老品Title">老品 Title</option>
+              <option value="老品TD">老品 TD</option>
+              <option value="老品Title TD">老品 Title TD</option>
+              <option value="新品Title">新品 Title</option>
+              <option value="新品TD">新品 TD</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <select class="filter-select" id="cf-site" onchange="applyCopyFilters()">
+              <option value="">全部站点</option>
+              <option value="US">🇺🇸 US</option>
+              <option value="UK">🇬🇧 UK</option>
+              <option value="DE">🇩🇪 DE</option>
+              <option value="JP">🇯🇵 JP</option>
+              <option value="CA">🇨🇦 CA</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <select class="filter-select" id="cf-brand" onchange="applyCopyFilters()">
+              <option value="">全部品牌</option>
+              <option value="AUVON">AUVON</option>
+              <option value="ZIKEE">ZIKEE</option>
+              <option value="AMOOS">AMOOS</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <select class="filter-select" id="cf-subcategory" onchange="applyCopyFilters()">
+              <option value="">全部子品类</option>
+              <option value="药盒">药盒</option>
+              <option value="电疗">电疗</option>
+              <option value="贴片">贴片</option>
+              <option value="夜灯">夜灯</option>
+            </select>
+          </div>
+          <div class="filter-group filter-sku-wrap" data-cf="1">
+            <button type="button" class="filter-select filter-sku-trigger" id="cf-sku-trigger" onclick="toggleCfFilterSkuDropdown(event)">
+              <span id="cf-sku-text" class="f-sku-placeholder">SKU</span>
+            </button>
+            <div class="f-sku-dropdown" id="cf-sku-dropdown">
+              <div class="f-sku-search-bar">
+                <input
+                  type="text"
+                  class="f-sku-search-input"
+                  id="cf-sku-search"
+                  placeholder="🔍 搜索 SKU 编号或名称..."
+                  oninput="filterCfSkuDropdownOptions()"
+                  onclick="event.stopPropagation()"
+                />
+              </div>
+              <div class="f-sku-toolbar">
+                <span style="font-size:12px;color:var(--text-muted);">共 <span id="cf-sku-total">0</span> 个</span>
+                <button type="button" class="sku-toolbar-btn" onclick="clearCfFilterSku(event)">清除</button>
+              </div>
+              <div class="f-sku-list" id="cf-sku-list"></div>
+            </div>
+          </div>
+          <div class="filter-group filter-group-wide">
+            <div class="combo-select">
+              <select class="combo-select-left" id="cf-person-type" onchange="onCfPersonTypeChange()">
+                <option value="writer">文案人员</option>
+                <option value="op">运营人员</option>
+                <option value="bu">事业部</option>
+                <option value="bu_lead">BU长</option>
+              </select>
+              <select class="combo-select-right" id="cf-person-value" onchange="applyCopyFilters()"></select>
+            </div>
+          </div>
+          <div class="filter-group">
+            <select class="filter-select" id="cf-status" onchange="applyCopyFilters()">
+              <option value="">全部状态</option>
+              <option value="待处理">待处理</option>
+              <option value="待审核">待审核</option>
+              <option value="已驳回">已驳回</option>
+              <option value="已通过">已通过</option>
+            </select>
+          </div>
+          <div class="filter-actions">
+            <button class="filter-btn" onclick="resetCopyFilters()">重置</button>
+          </div>
+        </div>
+        <div class="filter-applied" id="cf-applied"></div>
+      </div>
+
+      <div class="list-table-wrap">
+        <table class="list-data-table">
+          <thead>
+            <tr>
+              <th style="width:120px;">需求类型</th>
+              <th style="width:60px;">站点</th>
+              <th style="width:100px;">品牌</th>
+              <th style="width:80px;">子品类</th>
+              <th style="width:170px;">产品名称</th>
+              <th style="width:120px;">SKU</th>
+              <th style="width:80px;">优先级</th>
+              <th style="width:100px;">运营人员</th>
+              <th style="width:100px;">文案人员</th>
+              <th style="width:160px;">需求提交时间</th>
+              <th style="width:120px;">期望交付时间</th>
+              <th style="width:160px;">审核时间</th>
+              <th style="width:90px;">状态</th>
+              <th style="width:200px;">操作</th>
+            </tr>
+          </thead>
+          <tbody id="cf-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="list-pagination">
+        <span>共 <strong id="cf-pg-total">0</strong> 条</span>
+        <button class="pg-btn">‹</button>
+        <button class="pg-btn active">2</button>
+        <span>/ 15</span>
+        <button class="pg-btn">›</button>
+        <select class="pg-size">
+          <option value="20">20条/页</option>
+          <option value="50">50条/页</option>
+          <option value="100">100条/页</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- ===== 需求审核（独立列表）===== -->
+    <section id="review-mgr-view" class="demand-mgr-view" style="display:none;"></section>
+
+    <!-- ===== 文案审核（独立列表）===== -->
+    <section id="copy-review-view" class="demand-mgr-view" style="display:none;"></section>
+
+    <!-- ===== 工作台 ===== -->
+    <section id="workbench-view" class="workbench-view" style="display:none;">
+      <div class="wb-toolbar">
+        <div class="wb-date">
+          <span>数据月份</span>
+          <select id="wb-month-select" class="wb-month-select" onchange="refreshWorkbench()"></select>
+        </div>
+        <button class="wb-anomaly-toggle" id="wb-anomaly-toggle" onclick="toggleWorkbenchAnomalyOnly()">只看异常</button>
+      </div>
+
+      <div class="wb-health-layout">
+        <section class="wb-health-hero" onclick="openWorkbenchRiskOverview()">
+          <div class="health-eyebrow">本月经营健康度</div>
+          <div class="health-status">需关注</div>
+          <p>需求量持续上升，整体交付达标，但风险需求高于安全线。建议先处理 3 个已逾期需求，并控制 Listing 图片文案积压。</p>
+          <div class="health-facts">
+            <span class="static">需求总量 86</span>
+            <span onclick="event.stopPropagation(); openWorkbenchRiskOverview()">风险需求 12</span>
+            <span class="danger" onclick="event.stopPropagation(); openWorkbenchRiskOverview()">已逾期 3</span>
+            <span class="warn" onclick="event.stopPropagation(); openWorkbenchRiskOverview()">即将逾期 9</span>
+          </div>
+        </section>
+        <div class="wb-health-metrics">
+          <div class="health-metric" onclick="openWorkbenchKpiDetail('delivery')">
+            <span>准时交付率</span>
+            <strong>92%</strong>
+            <em>整体达标</em>
+          </div>
+          <div class="health-metric" onclick="openWorkbenchKpiDetail('draft')">
+            <span>一稿通过率</span>
+            <strong>84%</strong>
+            <em>低于 90% 目标</em>
+          </div>
+          <div class="health-metric" onclick="openWorkbenchKpiDetail('grammar')">
+            <span>语法准确率</span>
+            <strong>96.8%</strong>
+            <em>基础质量稳定</em>
+          </div>
+          <div class="health-metric" onclick="openWorkbenchKpiDetail('ai')">
+            <span>AI 采纳率</span>
+            <strong>76%</strong>
+            <em>视频脚本偏低</em>
+          </div>
+        </div>
+      </div>
+
+      <section class="wb-panel">
+        <div class="wb-panel-head">
+          <div>
+            <h2>业务分布看板</h2>
+          </div>
+        </div>
+        <div class="wb-filter-chips" id="wb-filter-chips">
+          <span>当前：全部 BU / 全部需求类型</span>
+          <button onclick="clearWorkbenchDistributionFilter()">清除筛选</button>
+        </div>
+        <div class="wb-chart-board">
+          <div class="chart-panel">
+            <div class="chart-panel-head">
+              <div>
+                <h3>BU 需求分布</h3>
+                <p>条形长度代表需求总量，颜色占比代表风险结构。</p>
+              </div>
+              <div class="chart-legend"><span class="normal"></span>进行中 <span class="warn"></span>即将逾期 <span class="danger"></span>已逾期</div>
+            </div>
+            <div class="chart-bar-list">
+              <div class="chart-bar-row risk-warn" data-bu="物理治疗" data-risk="true" onclick="applyWorkbenchBuFilter('物理治疗')">
+                <div class="chart-label"><strong>物理治疗</strong><em>新品 Listing 集中，关注审核排期</em></div>
+                <div class="chart-stack-wrap"><div class="stacked-bar"><span class="normal" style="width:76.9%;"></span><span class="warn" style="width:15.4%;"></span><span class="danger" style="width:7.7%;"></span></div><div class="chart-segment-counts"><span class="normal">进行中 20</span><span class="warn">即将逾期 4</span><span class="danger">已逾期 2</span></div></div>
+                <div class="chart-kpi"><b>26</b><span>风险 6</span></div>
+              </div>
+              <div class="chart-bar-row risk-high" data-bu="慢病耗材" data-risk="true" onclick="applyWorkbenchBuFilter('慢病耗材')">
+                <div class="chart-label"><strong>慢病耗材</strong><em>资料缺失较多，先补齐输入质量</em></div>
+                <div class="chart-stack-wrap"><div class="stacked-bar"><span class="normal" style="width:72.2%;"></span><span class="warn" style="width:16.7%;"></span><span class="danger" style="width:11.1%;"></span></div><div class="chart-segment-counts"><span class="normal">进行中 13</span><span class="warn">即将逾期 3</span><span class="danger">已逾期 2</span></div></div>
+                <div class="chart-kpi"><b>18</b><span>风险 5</span></div>
+              </div>
+              <div class="chart-bar-row risk-warn" data-bu="家居关怀" data-risk="true" onclick="applyWorkbenchBuFilter('家居关怀')">
+                <div class="chart-label"><strong>家居关怀</strong><em>图片文案积压，建议协调生成资源</em></div>
+                <div class="chart-stack-wrap"><div class="stacked-bar"><span class="normal" style="width:70.6%;"></span><span class="warn" style="width:23.5%;"></span><span class="danger" style="width:5.9%;"></span></div><div class="chart-segment-counts"><span class="normal">进行中 12</span><span class="warn">即将逾期 4</span><span class="danger">已逾期 1</span></div></div>
+                <div class="chart-kpi"><b>17</b><span>风险 5</span></div>
+              </div>
+              <div class="chart-bar-row risk-warn" data-bu="北美市场" data-risk="true" onclick="applyWorkbenchBuFilter('北美市场')">
+                <div class="chart-label"><strong>北美市场</strong><em>新品占比高，需提前锁定开卖节奏</em></div>
+                <div class="chart-stack-wrap"><div class="stacked-bar"><span class="normal" style="width:71.4%;"></span><span class="warn" style="width:21.4%;"></span><span class="danger" style="width:7.2%;"></span></div><div class="chart-segment-counts"><span class="normal">进行中 10</span><span class="warn">即将逾期 3</span><span class="danger">已逾期 1</span></div></div>
+                <div class="chart-kpi"><b>14</b><span>风险 4</span></div>
+              </div>
+              <div class="chart-bar-row risk-good" data-bu="健康家访" data-risk="false" onclick="applyWorkbenchBuFilter('健康家访')">
+                <div class="chart-label"><strong>健康家访</strong><em>交付稳定，保持当前节奏</em></div>
+                <div class="chart-stack-wrap"><div class="stacked-bar"><span class="normal" style="width:81.8%;"></span><span class="warn" style="width:18.2%;"></span><span class="danger" style="width:0%;"></span></div><div class="chart-segment-counts"><span class="normal">进行中 9</span><span class="warn">即将逾期 2</span><span class="danger">已逾期 0</span></div></div>
+                <div class="chart-kpi"><b>11</b><span>风险 2</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="chart-panel">
+            <div class="chart-panel-head">
+              <div>
+                <h3>需求类型分布</h3>
+                <p>点击任一类型查看 5 条需求进度明细。</p>
+              </div>
+              <div class="chart-legend"><span class="normal"></span>进行中 <span class="warn"></span>即将逾期 <span class="danger"></span>已逾期</div>
+            </div>
+            <div class="chart-bar-list">
+              <div class="chart-bar-row risk-warn" data-demand-card="新品 Listing" data-bu-match="物理治疗,北美市场" data-risk="true" onclick="openWorkbenchDemandOverview('新品 Listing')">
+                <div class="chart-label"><strong>新品 Listing</strong><em>关联开卖时间，需提前预警</em></div>
+                <div class="chart-stack-wrap"><div class="stacked-bar"><span class="normal" style="width:75%;"></span><span class="warn" style="width:16.7%;"></span><span class="danger" style="width:8.3%;"></span></div><div class="chart-segment-counts"><span class="normal">进行中 18</span><span class="warn">即将逾期 4</span><span class="danger">已逾期 2</span></div></div>
+                <div class="chart-kpi"><b>24</b><span>风险 6</span></div>
+              </div>
+              <div class="chart-bar-row risk-high" data-demand-card="Listing 图片文案" data-bu-match="家居关怀,北美市场" data-risk="true" onclick="openWorkbenchDemandOverview('Listing 图片文案')">
+                <div class="chart-label"><strong>Listing 图片文案</strong><em>风险最高，优先看审核队列</em></div>
+                <div class="chart-stack-wrap"><div class="stacked-bar"><span class="normal" style="width:61.5%;"></span><span class="warn" style="width:23.1%;"></span><span class="danger" style="width:15.4%;"></span></div><div class="chart-segment-counts"><span class="normal">进行中 8</span><span class="warn">即将逾期 3</span><span class="danger">已逾期 2</span></div></div>
+                <div class="chart-kpi"><b>13</b><span>风险 5</span></div>
+              </div>
+              <div class="chart-bar-row risk-warn" data-demand-card="说明书" data-bu-match="慢病耗材,物理治疗" data-risk="true" onclick="openWorkbenchDemandOverview('说明书')">
+                <div class="chart-label"><strong>说明书</strong><em>资料完整性影响交付质量</em></div>
+                <div class="chart-stack-wrap"><div class="stacked-bar"><span class="normal" style="width:71.4%;"></span><span class="warn" style="width:14.3%;"></span><span class="danger" style="width:14.3%;"></span></div><div class="chart-segment-counts"><span class="normal">进行中 5</span><span class="warn">即将逾期 1</span><span class="danger">已逾期 1</span></div></div>
+                <div class="chart-kpi"><b>7</b><span>风险 2</span></div>
+              </div>
+              <div class="chart-bar-row risk-warn" data-demand-card="视频脚本文案" data-bu-match="家居关怀,慢病耗材" data-risk="true" onclick="openWorkbenchDemandOverview('视频脚本文案')">
+                <div class="chart-label"><strong>视频脚本文案</strong><em>生成周期偏长，关注产能占用</em></div>
+                <div class="chart-stack-wrap"><div class="stacked-bar"><span class="normal" style="width:66.7%;"></span><span class="warn" style="width:33.3%;"></span><span class="danger" style="width:0%;"></span></div><div class="chart-segment-counts"><span class="normal">进行中 4</span><span class="warn">即将逾期 2</span><span class="danger">已逾期 0</span></div></div>
+                <div class="chart-kpi"><b>6</b><span>风险 2</span></div>
+              </div>
+              <div class="chart-bar-row risk-good" data-demand-card="FAQ" data-bu-match="健康家访,家居关怀" data-risk="false" onclick="openWorkbenchDemandOverview('FAQ')">
+                <div class="chart-label"><strong>FAQ</strong><em>低风险，可作为弹性承接类型</em></div>
+                <div class="chart-stack-wrap"><div class="stacked-bar"><span class="normal" style="width:80%;"></span><span class="warn" style="width:20%;"></span><span class="danger" style="width:0%;"></span></div><div class="chart-segment-counts"><span class="normal">进行中 4</span><span class="warn">即将逾期 1</span><span class="danger">已逾期 0</span></div></div>
+                <div class="chart-kpi"><b>5</b><span>风险 1</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="wb-manager-grid wb-manager-grid-single">
+        <section class="wb-panel">
+          <div class="wb-panel-head">
+            <div>
+              <h2>人的看板</h2>
+            </div>
+          </div>
+          <div class="wb-team-table">
+            <div class="team-table-head">
+              <span>人员</span><span>语法准确率</span><span>一稿通过率</span><span>AI采纳率</span><span>人效</span><span>当前负载</span><span>管理建议</span>
+            </div>
+            <div class="team-table-row" onclick="openWorkbenchPersonDetail('Mason')">
+              <strong>Mason</strong><span class="metric-good">98%</span><span>88%</span><span>80%</span><b>18</b><i><em style="width:88%;"></em></i><p>高负载，少接急单</p>
+            </div>
+            <div class="team-table-row" onclick="openWorkbenchPersonDetail('Yumi')">
+              <strong>Yumi</strong><span class="metric-good">97%</span><span>84%</span><span>76%</span><b>15</b><i><em style="width:76%;"></em></i><p>可承接 FAQ</p>
+            </div>
+            <div class="team-table-row attention" onclick="openWorkbenchPersonDetail('Brian')">
+              <strong>Brian</strong><span class="metric-warn">94%</span><span class="metric-danger">76%</span><span class="metric-danger">68%</span><b>12</b><i><em style="width:62%;"></em></i><p>一稿偏低，暂缓复杂需求</p>
+            </div>
+            <div class="team-table-row" onclick="openWorkbenchPersonDetail('Suki')">
+              <strong>Suki</strong><span>96%</span><span>82%</span><span>74%</span><b>10</b><i><em style="width:54%;"></em></i><p>可承接慢病耗材</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="wb-manager-grid">
+        <section class="wb-panel">
+          <div class="wb-panel-head">
+            <div>
+              <h2>质量问题分布</h2>
+            </div>
+          </div>
+          <div class="wb-quality-list">
+            <div class="wb-quality-row"><span>信息错误</span><b>38%</b><i style="width:38%;"></i></div>
+            <div class="wb-quality-row"><span>因果链不完整</span><b>24%</b><i style="width:24%;"></i></div>
+            <div class="wb-quality-row"><span>卖点表达不清</span><b>18%</b><i style="width:18%;"></i></div>
+            <div class="wb-quality-row"><span>GEO/本地化不匹配</span><b>12%</b><i style="width:12%;"></i></div>
+            <div class="wb-quality-row"><span>SEO 覆盖不足</span><b>8%</b><i style="width:8%;"></i></div>
+          </div>
+        </section>
+
+        <section class="wb-panel">
+          <div class="wb-panel-head">
+            <div>
+              <h2>管理关注项</h2>
+            </div>
+          </div>
+          <div class="wb-focus-list">
+            <div class="wb-focus-item high">Listing 图片文案有 2 个已逾期，建议优先协调审核资源。</div>
+            <div class="wb-focus-item">Brian 一稿通过率低于团队均值，需要复盘需求理解偏差。</div>
+            <div class="wb-focus-item">Mason 当前负载最高，后续新增需求建议分流给 Suki。</div>
+            <div class="wb-focus-item good">FAQ 与新闻稿交付稳定，可保持当前节奏。</div>
+          </div>
+        </section>
+      </div>
+
+      <div class="wb-person-modal" id="wb-person-modal" onclick="closeWorkbenchPersonDetail()">
+        <div class="wb-person-modal-box" onclick="event.stopPropagation();">
+          <div class="wb-demand-modal-head">
+            <div>
+              <h2 id="wb-person-title">人员详情</h2>
+              <p id="wb-person-subtitle">查看个人处理量、质量表现、风险需求和管理建议。</p>
+            </div>
+            <button class="wb-demand-modal-close" onclick="closeWorkbenchPersonDetail()">×</button>
+          </div>
+          <div class="wb-person-body" id="wb-person-body"></div>
+        </div>
+      </div>
+
+      <div class="wb-person-modal" id="wb-risk-modal" onclick="closeWorkbenchRiskOverview()">
+        <div class="wb-person-modal-box" onclick="event.stopPropagation();">
+          <div class="wb-demand-modal-head">
+            <div>
+              <h2>风险需求来源</h2>
+              <p>拆解 12 个风险需求来自哪个 BU、需求类型和负责人，帮助管理者直接定位问题。</p>
+            </div>
+            <button class="wb-demand-modal-close" onclick="closeWorkbenchRiskOverview()">×</button>
+          </div>
+          <div class="wb-person-body">
+            <div class="wb-risk-summary-strip">
+              <div><span>风险需求</span><strong>12</strong></div>
+              <div><span>已逾期</span><strong class="danger">3</strong></div>
+              <div><span>即将逾期</span><strong class="warn">9</strong></div>
+              <p>先处理已逾期需求；新品 Listing 需结合产品开卖时间倒排优先级。</p>
+            </div>
+            <div class="wb-risk-detail-table">
+              <div class="risk-detail-head">
+                <span>需求类型</span><span>BU组</span><span>提出人</span><span>处理人</span><span>预期交付时间</span><span>产品开卖时间</span><span>状态</span>
+              </div>
+              <div class="risk-detail-row danger">
+                <strong>Listing 图片文案</strong><span>家居关怀</span><span>Yumi</span><span>Brian</span><span>2026/05/07</span><span>2026/05/10</span><em>已逾期 · 距离开卖 3 天</em>
+              </div>
+              <div class="risk-detail-row danger">
+                <strong>新品 Listing</strong><span>北美市场</span><span>Mason</span><span>Mason</span><span>2026/05/06</span><span>2026/05/11</span><em>已逾期 · 开卖倒排风险</em>
+              </div>
+              <div class="risk-detail-row danger">
+                <strong>说明书</strong><span>慢病耗材</span><span>Suki</span><span>Brian</span><span>2026/05/05</span><span>—</span><em>已逾期</em>
+              </div>
+              <div class="risk-detail-row warn">
+                <strong>新品 Listing</strong><span>物理治疗</span><span>Mason</span><span>Yumi</span><span>2026/05/09</span><span>2026/05/14</span><em>即将逾期 · 建议优先处理</em>
+              </div>
+              <div class="risk-detail-row warn">
+                <strong>Listing 图片文案</strong><span>北美市场</span><span>Brian</span><span>Suki</span><span>2026/05/10</span><span>2026/05/16</span><em>即将逾期</em>
+              </div>
+              <div class="risk-detail-row warn">
+                <strong>优化 Listing</strong><span>物理治疗</span><span>Yumi</span><span>Mason</span><span>2026/05/10</span><span>—</span><em>即将逾期</em>
+              </div>
+              <div class="risk-detail-row warn">
+                <strong>视频脚本文案</strong><span>家居关怀</span><span>Suki</span><span>Brian</span><span>2026/05/11</span><span>—</span><em>即将逾期 · 生成周期偏长</em>
+              </div>
+              <div class="risk-detail-row warn">
+                <strong>新品 Listing</strong><span>慢病耗材</span><span>Brian</span><span>Yumi</span><span>2026/05/12</span><span>2026/05/18</span><em>即将逾期</em>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wb-person-modal" id="wb-kpi-modal" onclick="closeWorkbenchKpiDetail()">
+        <div class="wb-person-modal-box" onclick="event.stopPropagation();">
+          <div class="wb-demand-modal-head">
+            <div>
+              <h2 id="wb-kpi-title">指标详情</h2>
+              <p id="wb-kpi-subtitle">解释指标来源，帮助管理者判断是否需要介入。</p>
+            </div>
+            <button class="wb-demand-modal-close" onclick="closeWorkbenchKpiDetail()">×</button>
+          </div>
+          <div class="wb-person-body" id="wb-kpi-body"></div>
+        </div>
+      </div>
+
+      <div class="wb-demand-modal" id="wb-demand-modal" onclick="closeWorkbenchDemandOverview()">
+        <div class="wb-demand-modal-box" onclick="event.stopPropagation();">
+          <div class="wb-demand-modal-head">
+            <div>
+              <h2>需求总量全局概览</h2>
+              <p>从需求类型、全局进度和当前卡点理解本月 86 个需求的整体情况。</p>
+            </div>
+            <button class="wb-demand-modal-close" onclick="closeWorkbenchDemandOverview()">×</button>
+          </div>
+
+          <div class="wb-demand-summary">
+            <div class="wb-demand-type-card active" data-demand-type="新品 Listing" onclick="filterWorkbenchDemandType('新品 Listing')">
+              <span>新品 Listing</span>
+              <strong>24</strong>
+              <div class="demand-risk-mini"><b>正常 18</b><b class="warn">即将逾期 4</b><b class="danger">已逾期 2</b></div>
+            </div>
+            <div class="wb-demand-type-card" data-demand-type="优化 Title/TD" onclick="filterWorkbenchDemandType('优化 Title/TD')">
+              <span>优化 Title/TD</span>
+              <strong>18</strong>
+              <div class="demand-risk-mini"><b>正常 14</b><b class="warn">即将逾期 3</b><b class="danger">已逾期 1</b></div>
+            </div>
+            <div class="wb-demand-type-card" data-demand-type="Listing 图片文案" onclick="filterWorkbenchDemandType('Listing 图片文案')">
+              <span>Listing 图片文案</span>
+              <strong>13</strong>
+              <div class="demand-risk-mini"><b>正常 8</b><b class="warn">即将逾期 3</b><b class="danger">已逾期 2</b></div>
+            </div>
+            <div class="wb-demand-type-card" data-demand-type="包装盒" onclick="filterWorkbenchDemandType('包装盒')">
+              <span>包装盒</span>
+              <strong>9</strong>
+              <div class="demand-risk-mini"><b>正常 7</b><b class="warn">即将逾期 2</b><b class="danger">已逾期 0</b></div>
+            </div>
+            <div class="wb-demand-type-card" data-demand-type="说明书" onclick="filterWorkbenchDemandType('说明书')">
+              <span>说明书</span>
+              <strong>7</strong>
+              <div class="demand-risk-mini"><b>正常 5</b><b class="warn">即将逾期 1</b><b class="danger">已逾期 1</b></div>
+            </div>
+            <div class="wb-demand-type-card" data-demand-type="视频脚本文案" onclick="filterWorkbenchDemandType('视频脚本文案')">
+              <span>视频脚本文案</span>
+              <strong>6</strong>
+              <div class="demand-risk-mini"><b>正常 4</b><b class="warn">即将逾期 2</b><b class="danger">已逾期 0</b></div>
+            </div>
+            <div class="wb-demand-type-card" data-demand-type="FAQ" onclick="filterWorkbenchDemandType('FAQ')">
+              <span>FAQ</span>
+              <strong>5</strong>
+              <div class="demand-risk-mini"><b>正常 4</b><b class="warn">即将逾期 1</b><b class="danger">已逾期 0</b></div>
+            </div>
+            <div class="wb-demand-type-card" data-demand-type="新闻稿" onclick="filterWorkbenchDemandType('新闻稿')">
+              <span>新闻稿</span>
+              <strong>4</strong>
+              <div class="demand-risk-mini"><b>正常 3</b><b class="warn">即将逾期 1</b><b class="danger">已逾期 0</b></div>
+            </div>
+          </div>
+
+          <div class="wb-demand-stage-overview">
+            <div class="stage-kpi">
+              <span>需求提交</span>
+              <strong>86</strong>
+            </div>
+            <div class="stage-kpi">
+              <span>需求审核</span>
+              <strong>18</strong>
+            </div>
+            <div class="stage-kpi">
+              <span>文案生成</span>
+              <strong>20</strong>
+            </div>
+            <div class="stage-kpi warn">
+              <span>文案审核</span>
+              <strong>9</strong>
+            </div>
+            <div class="stage-kpi done">
+              <span>已完成</span>
+              <strong>39</strong>
+            </div>
+          </div>
+
+          <div class="wb-demand-detail-head">
+            <h3 id="wb-demand-detail-title">新品 Listing 进度明细</h3>
+            <button onclick="showDemandMgrView();closeWorkbenchDemandOverview();">进入需求管理</button>
+          </div>
+          <div class="wb-demand-list">
+            <div class="wb-demand-row" data-demand-type="新品 Listing">
+              <div class="demand-main">
+                <strong>新品 Listing：EB1520023</strong>
+                <span>健康护理 BU · 美国站 · 20片装白色针孔贴片</span>
+              </div>
+              <div class="demand-progress current-review">
+                <span class="done">需求提交</span>
+                <span class="done">需求审核</span>
+                <span class="done">文案生成</span>
+                <span class="active">文案审核</span>
+                <span>已完成</span>
+              </div>
+              <em class="demand-status warn">即将逾期 · 当前：文案审核</em>
+            </div>
+            <div class="wb-demand-row" data-demand-type="新品 Listing">
+              <div class="demand-main">
+                <strong>新品 Listing：EB1541020</strong>
+                <span>健康护理 BU · 美国站 · 便携冷敷理疗贴</span>
+              </div>
+              <div class="demand-progress current-done">
+                <span class="done">需求提交</span>
+                <span class="done">需求审核</span>
+                <span class="done">文案生成</span>
+                <span class="done">文案审核</span>
+                <span class="active done">已完成</span>
+              </div>
+              <em class="demand-status good">正常 · 当前：已完成</em>
+            </div>
+            <div class="wb-demand-row is-hidden" data-demand-type="优化 Title/TD">
+              <div class="demand-main">
+                <strong>优化 Title/TD：PO17X4011</strong>
+                <span>健康护理 BU · 英国站 · 7格便携药盒</span>
+              </div>
+              <div class="demand-progress current-generate">
+                <span class="done">需求提交</span>
+                <span class="done">需求审核</span>
+                <span class="active">文案生成</span>
+                <span>文案审核</span>
+                <span>已完成</span>
+              </div>
+              <em class="demand-status">正常 · 当前：文案生成</em>
+            </div>
+            <div class="wb-demand-row is-hidden" data-demand-type="优化 Title/TD">
+              <div class="demand-main">
+                <strong>优化 Title/TD：N001A4022</strong>
+                <span>健康护理 BU · 加拿大站 · 智能温控药盒</span>
+              </div>
+              <div class="demand-progress current-review">
+                <span class="done">需求提交</span>
+                <span class="done">需求审核</span>
+                <span class="done">文案生成</span>
+                <span class="active">文案审核</span>
+                <span>已完成</span>
+              </div>
+              <em class="demand-status warn">即将逾期 · 当前：文案审核</em>
+            </div>
+            <div class="wb-demand-row is-hidden" data-demand-type="Listing 图片文案">
+              <div class="demand-main">
+                <strong>Listing 图片文案：PB7DAY002</strong>
+                <span>家居生活 BU · 德国站 · 彩虹便携药盒</span>
+              </div>
+              <div class="demand-progress current-demand-review">
+                <span class="done">需求提交</span>
+                <span class="active">需求审核</span>
+                <span>文案生成</span>
+                <span>文案审核</span>
+                <span>已完成</span>
+              </div>
+              <em class="demand-status danger">已逾期 · 当前：需求审核</em>
+            </div>
+            <div class="wb-demand-row is-hidden" data-demand-type="Listing 图片文案">
+              <div class="demand-main">
+                <strong>Listing 图片文案：PX2021045</strong>
+                <span>家居生活 BU · 美国站 · 收纳药盒套装</span>
+              </div>
+              <div class="demand-progress current-generate">
+                <span class="done">需求提交</span>
+                <span class="done">需求审核</span>
+                <span class="active">文案生成</span>
+                <span>文案审核</span>
+                <span>已完成</span>
+              </div>
+              <em class="demand-status">正常 · 当前：文案生成</em>
+            </div>
+            <div class="wb-demand-row is-hidden" data-demand-type="包装盒">
+              <div class="demand-main">
+                <strong>包装盒：N001A4022</strong>
+                <span>健康护理 BU · 加拿大站 · 智能温控药盒</span>
+              </div>
+              <div class="demand-progress current-done">
+                <span class="done">需求提交</span>
+                <span class="done">需求审核</span>
+                <span class="done">文案生成</span>
+                <span class="done">文案审核</span>
+                <span class="active done">已完成</span>
+              </div>
+              <em class="demand-status good">正常 · 当前：已完成</em>
+            </div>
+            <div class="wb-demand-row is-hidden" data-demand-type="包装盒">
+              <div class="demand-main">
+                <strong>包装盒：BX2209011</strong>
+                <span>家居生活 BU · 日本站 · 颈椎按摩仪</span>
+              </div>
+              <div class="demand-progress current-generate">
+                <span class="done">需求提交</span>
+                <span class="done">需求审核</span>
+                <span class="active">文案生成</span>
+                <span>文案审核</span>
+                <span>已完成</span>
+              </div>
+              <em class="demand-status">正常 · 当前：文案生成</em>
+            </div>
+            <div class="wb-demand-row is-hidden" data-demand-type="说明书">
+              <div class="demand-main">
+                <strong>说明书：MN3001022</strong>
+                <span>健康护理 BU · 美国站 · 家用理疗仪 Pro</span>
+              </div>
+              <div class="demand-progress current-review">
+                <span class="done">需求提交</span>
+                <span class="done">需求审核</span>
+                <span class="done">文案生成</span>
+                <span class="active">文案审核</span>
+                <span>已完成</span>
+              </div>
+              <em class="demand-status warn">即将逾期 · 当前：文案审核</em>
+            </div>
+            <div class="wb-demand-row is-hidden" data-demand-type="说明书">
+              <div class="demand-main">
+                <strong>说明书：MN3001099</strong>
+                <span>家居生活 BU · 德国站 · 智能血压仪</span>
+              </div>
+              <div class="demand-progress current-done">
+                <span class="done">需求提交</span>
+                <span class="done">需求审核</span>
+                <span class="done">文案生成</span>
+                <span class="done">文案审核</span>
+                <span class="active done">已完成</span>
+              </div>
+              <em class="demand-status good">正常 · 当前：已完成</em>
+            </div>
+            <div class="wb-demand-row is-hidden" data-demand-type="视频脚本文案">
+              <div class="demand-main">
+                <strong>视频脚本文案：AS8012041</strong>
+                <span>家居生活 BU · 日本站 · 家用按摩枪</span>
+              </div>
+              <div class="demand-progress current-submit">
+                <span class="active">需求提交</span>
+                <span>需求审核</span>
+                <span>文案生成</span>
+                <span>文案审核</span>
+                <span>已完成</span>
+              </div>
+              <em class="demand-status">正常 · 当前：需求提交</em>
+            </div>
+            <div class="wb-demand-row is-hidden" data-demand-type="视频脚本文案">
+              <div class="demand-main">
+                <strong>视频脚本文案：AS8012077</strong>
+                <span>家居生活 BU · 美国站 · 便携按摩枪</span>
+              </div>
+              <div class="demand-progress current-generate">
+                <span class="done">需求提交</span>
+                <span class="done">需求审核</span>
+                <span class="active">文案生成</span>
+                <span>文案审核</span>
+                <span>已完成</span>
+              </div>
+              <em class="demand-status">正常 · 当前：文案生成</em>
+            </div>
+            <div class="wb-demand-row is-hidden" data-demand-type="FAQ">
+              <div class="demand-main">
+                <strong>FAQ：FQ8801201</strong>
+                <span>健康护理 BU · 英国站 · 便携血氧仪</span>
+              </div>
+              <div class="demand-progress current-done">
+                <span class="done">需求提交</span>
+                <span class="done">需求审核</span>
+                <span class="done">文案生成</span>
+                <span class="done">文案审核</span>
+                <span class="active done">已完成</span>
+              </div>
+              <em class="demand-status good">正常 · 当前：已完成</em>
+            </div>
+            <div class="wb-demand-row is-hidden" data-demand-type="FAQ">
+              <div class="demand-main">
+                <strong>FAQ：FQ8801216</strong>
+                <span>健康护理 BU · 美国站 · 药盒组合装</span>
+              </div>
+              <div class="demand-progress current-submit">
+                <span class="active">需求提交</span>
+                <span>需求审核</span>
+                <span>文案生成</span>
+                <span>文案审核</span>
+                <span>已完成</span>
+              </div>
+              <em class="demand-status">正常 · 当前：需求提交</em>
+            </div>
+            <div class="wb-demand-row is-hidden" data-demand-type="新闻稿">
+              <div class="demand-main">
+                <strong>新闻稿：PR240401</strong>
+                <span>健康护理 BU · 美国站 · 新品上市传播</span>
+              </div>
+              <div class="demand-progress current-review">
+                <span class="done">需求提交</span>
+                <span class="done">需求审核</span>
+                <span class="done">文案生成</span>
+                <span class="active">文案审核</span>
+                <span>已完成</span>
+              </div>
+              <em class="demand-status warn">即将逾期 · 当前：文案审核</em>
+            </div>
+            <div class="wb-demand-row is-hidden" data-demand-type="新闻稿">
+              <div class="demand-main">
+                <strong>新闻稿：PR240422</strong>
+                <span>家居生活 BU · 德国站 · 品牌活动传播</span>
+              </div>
+              <div class="demand-progress current-done">
+                <span class="done">需求提交</span>
+                <span class="done">需求审核</span>
+                <span class="done">文案生成</span>
+                <span class="done">文案审核</span>
+                <span class="active done">已完成</span>
+              </div>
+              <em class="demand-status good">正常 · 当前：已完成</em>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- 向导主体（默认隐藏，列表页点"创建需求"才显示） -->
+<div class="main" id="wizard-main" style="display:none;">
+
+  <!-- 页面头部 -->
+  <div class="page-header">
+    <h1>创建需求</h1>
+    <p>请按步骤填写需求基础信息并上传需求文件，系统将自动解析并生成需求清单</p>
+  </div>
+
+  <!-- 步骤条 -->
+  <div class="steps-bar">
+    <div class="step-item active" id="step-indicator-1">
+      <div class="step-circle">1</div>
+      <div class="step-info">
+        <div class="step-label">基础信息</div>
+        <div class="step-desc">选择需求类型与SKU</div>
+      </div>
+    </div>
+    <div class="step-item" id="step-indicator-2">
+      <div class="step-circle">2</div>
+      <div class="step-info">
+        <div class="step-label">上传文件</div>
+        <div class="step-desc">粘贴文档或导入模板</div>
+      </div>
+    </div>
+    <div class="step-item" id="step-indicator-3">
+      <div class="step-circle">✓</div>
+      <div class="step-info">
+        <div class="step-label">解析完成</div>
+        <div class="step-desc">查看需求解析结果</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STEP 1: 基础信息 ===== -->
+  <div class="step-panel active" id="step-panel-1">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon" style="background: linear-gradient(135deg, #e0e7ff, #c7d2fe);color:#6366f1;" id="step1-card-icon"></div>
+        <div>
+          <h2>SKU 基础信息</h2>
+          <p>请选择本次需求关联的产品信息</p>
+        </div>
+      </div>
+      <div class="card-body">
+
+        <!-- 需求类型选择器（独立区块） -->
+        <div class="req-type-section">
+          <div class="req-type-header">
+            <div>
+              <label class="form-label" style="margin-bottom:2px;">需求类型 <span class="required">*</span></label>
+              <p style="font-size:12px;color:var(--text-muted);">请先选择产品阶段，再选择具体的需求类型</p>
+            </div>
+            <div class="req-type-current" id="req-type-current" style="display:none;">
+              <span class="rt-current-label">已选：</span>
+              <span class="rt-current-tag" id="rt-current-tag"></span>
+              <button class="rt-current-clear" onclick="clearReqType()" title="清除选择">✕</button>
+            </div>
+          </div>
+
+          <!-- 阶段切换 -->
+          <div class="stage-tabs">
+            <button type="button" class="stage-tab active" data-stage="new" onclick="selectStage('new')">
+              <span class="stage-icon" id="stage-icon-new"></span>
+              <div class="stage-info">
+                <div class="stage-name">新品</div>
+                <div class="stage-desc">首次上市的产品</div>
+              </div>
+            </button>
+            <button type="button" class="stage-tab" data-stage="old" onclick="selectStage('old')">
+              <span class="stage-icon" id="stage-icon-old"></span>
+              <div class="stage-info">
+                <div class="stage-name">优化</div>
+                <div class="stage-desc">已上架优化的产品</div>
+              </div>
+            </button>
+          </div>
+
+          <!-- 业务卡片网格 -->
+          <div class="biz-grid" id="biz-grid"></div>
+
+          <!-- Listing 子选项 -->
+          <div class="biz-sub-wrap" id="biz-sub-wrap" style="display:none;">
+            <div class="biz-sub-arrow">▼</div>
+            <div class="biz-sub-header">
+              <span class="biz-sub-title">选择 Listing 细分类型</span>
+              <span class="biz-sub-tip">三选一</span>
+            </div>
+            <div class="biz-sub-grid" id="biz-sub-grid"></div>
+          </div>
+
+          <!-- 隐藏字段，存储最终值 -->
+          <input type="hidden" id="req-type" />
+          <div class="form-error" id="req-type-error" style="margin-top:10px;">请选择需求类型</div>
+        </div>
+
+        <div class="form-grid">
+
+          <!-- 站点 -->
+          <div class="form-group">
+            <label class="form-label">站点 <span class="required">*</span></label>
+            <select class="form-select" id="site" onchange="clearError(this)">
+              <option value="">请选择站点</option>
+              <option value="us">🇺🇸 美国站 (US)</option>
+              <option value="uk">🇬🇧 英国站 (UK)</option>
+              <option value="de">🇩🇪 德国站 (DE)</option>
+              <option value="fr">🇫🇷 法国站 (FR)</option>
+              <option value="jp">🇯🇵 日本站 (JP)</option>
+              <option value="ca">🇨🇦 加拿大站 (CA)</option>
+              <option value="au">🇦🇺 澳大利亚站 (AU)</option>
+              <option value="ae">🇦🇪 中东站 (AE)</option>
+              <option value="sg">🇸🇬 新加坡站 (SG)</option>
+              <option value="mx">🇲🇽 墨西哥站 (MX)</option>
+            </select>
+            <div class="form-error" id="site-error">请选择站点</div>
+          </div>
+
+          <!-- 子品类 -->
+          <div class="form-group">
+            <label class="form-label">子品类 <span class="required">*</span></label>
+            <select class="form-select" id="subcategory" onchange="onSubcategoryChange()">
+              <option value="">加载中...</option>
+            </select>
+            <div class="form-error" id="subcategory-error">请选择子品类</div>
+          </div>
+
+          <!-- SKU 单选下拉 -->
+          <div class="form-group">
+            <label class="form-label">SKU <span class="required">*</span></label>
+            <div class="sku-select-wrap">
+              <button
+                type="button"
+                class="form-select sku-select-trigger"
+                id="sku-trigger"
+                onclick="toggleSkuDropdown(event)"
+                disabled
+              >
+                <span id="sku-trigger-text" class="sku-trigger-placeholder">请先选择子品类</span>
+              </button>
+              <div class="sku-dropdown" id="sku-dropdown">
+                <div class="sku-dropdown-search">
+                  <input
+                    type="text"
+                    class="sku-search-input"
+                    id="sku-search"
+                    placeholder="🔍 搜索 SKU 编号或名称..."
+                    oninput="filterSkuOptions()"
+                    onclick="event.stopPropagation()"
+                  />
+                </div>
+                <div class="sku-dropdown-toolbar">
+                  <span style="font-size:12px;color:var(--text-muted);">共 <span id="sku-pool-total">0</span> 个 SKU</span>
+                  <button type="button" class="sku-toolbar-btn" onclick="clearAllSku(event)">清除选择</button>
+                </div>
+                <div class="sku-dropdown-list" id="sku-dropdown-list"></div>
+              </div>
+            </div>
+            <div class="form-error" id="sku-error">请选择 SKU</div>
+          </div>
+
+          <!-- 产品开卖时间（仅新品 Listing 展示） -->
+          <div class="form-group launch-date-group" id="launch-date-group" style="display:none;">
+            <label class="form-label">产品开卖时间 <span class="required">*</span></label>
+            <input
+              type="date"
+              class="form-input"
+              id="product-launch-date"
+              onchange="clearError(this)"
+            />
+            <div class="form-hint">用于倒推新品 Listing 的建议文案交付时间</div>
+            <div class="form-error" id="product-launch-date-error">请选择产品开卖时间</div>
+          </div>
+
+          <!-- 预期文案交付时间 -->
+          <div class="form-group">
+            <label class="form-label delivery-label">
+              <span>预期文案交付时间 <span class="required">*</span></span>
+              <button type="button" class="delivery-hint-btn" onclick="openDeliveryHint()" aria-label="查看建议交付周期">?</button>
+            </label>
+            <input
+              type="date"
+              class="form-input"
+              id="delivery-date"
+              onchange="clearError(this)"
+            />
+            <div class="form-error" id="delivery-date-error">请选择预期交付时间</div>
+          </div>
+
+        </div>
+
+        <div class="action-bar">
+          <div style="font-size:13px;color:var(--text-muted);">
+            <span style="color:var(--danger);">*</span> 为必填项
+          </div>
+          <div class="action-bar-right">
+            <button class="btn btn-secondary" onclick="resetStep1()">重置</button>
+            <button class="btn btn-primary btn-lg" onclick="goToStep2()" id="step1-next-btn"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="delivery-hint-modal" id="delivery-hint-modal" onclick="closeDeliveryHint()">
+      <div class="delivery-hint-box" onclick="event.stopPropagation();">
+        <div class="delivery-hint-head">
+          <div>
+            <h3>建议交付周期</h3>
+            <p>不同文案类型建议预留的交付时间，实际排期可结合产品优先级和审核资源调整。</p>
+          </div>
+          <button type="button" class="delivery-hint-close" onclick="closeDeliveryHint()">×</button>
+        </div>
+        <div class="delivery-hint-list delivery-hint-groups">
+          <section class="delivery-hint-group">
+            <div class="delivery-hint-group-title">
+              <strong>新品需求</strong>
+            </div>
+            <div class="delivery-hint-item primary"><strong>新品 Listing</strong><span>产品开卖前 10 个工作日完成</span></div>
+            <div class="delivery-hint-item"><strong>新品 Title</strong><span>按新品开卖排期确认</span></div>
+            <div class="delivery-hint-item"><strong>新品 TD</strong><span>按新品开卖排期确认</span></div>
+            <div class="delivery-hint-item"><strong>新品卖点图片</strong><span>按新品开卖排期确认</span></div>
+            <div class="delivery-hint-item"><strong>新品卖点视频</strong><span>按新品开卖排期确认</span></div>
+            <div class="delivery-hint-item"><strong>包装盒</strong><span>按新品开卖排期确认</span></div>
+            <div class="delivery-hint-item"><strong>产品说明书</strong><span>按新品开卖排期确认</span></div>
+            <div class="delivery-hint-item"><strong>FQA</strong><span>按新品开卖排期确认</span></div>
+            <div class="delivery-hint-item"><strong>广告创意</strong><span>按新品开卖排期确认</span></div>
+            <div class="delivery-hint-item"><strong>种草文案</strong><span>按新品开卖排期确认</span></div>
+            <div class="delivery-hint-item"><strong>新闻稿</strong><span>按新品开卖排期确认</span></div>
+          </section>
+          <section class="delivery-hint-group">
+            <div class="delivery-hint-group-title">
+              <strong>优化需求</strong>
+            </div>
+            <div class="delivery-hint-item primary"><strong>优化 Listing</strong><span>4 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>优化 Title</strong><span>1 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>优化 TD</strong><span>2 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>优化卖点图片</strong><span>1 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>优化卖点视频</strong><span>1 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>包装盒</strong><span>2 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>优化说明书</strong><span>2 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>优化 FQA</strong><span>待配置</span></div>
+            <div class="delivery-hint-item"><strong>优化广告创意</strong><span>待配置</span></div>
+            <div class="delivery-hint-item"><strong>优化种草文案</strong><span>待配置</span></div>
+            <div class="delivery-hint-item"><strong>优化新闻稿</strong><span>待配置</span></div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STEP 2: 上传文件 ===== -->
+  <div class="step-panel" id="step-panel-2">
+    <!-- 信息摘要 -->
+    <div class="card" style="margin-bottom:20px;background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-color:#ddd6fe;">
+      <div class="card-body" style="padding:16px 20px;">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <span style="font-size:13px;color:#5b21b6;font-weight:600;display:inline-flex;align-items:center;gap:6px;" id="summary-label"></span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;" id="summary-tags"></div>
+          <button class="btn btn-sm" style="margin-left:auto;border-color:#ddd6fe;color:#7c3aed;background:white;display:inline-flex;align-items:center;gap:4px;" onclick="goToStep1()" id="summary-edit-btn"></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon" style="background:linear-gradient(135deg,#d1fae5,#a7f3d0);color:#10b981;" id="step2-card-icon"></div>
+        <div>
+          <h2>上传需求文件</h2>
+          <p>选择一种方式上传需求内容，系统将自动解析为结构化数据</p>
+        </div>
+      </div>
+      <div class="card-body">
+
+        <!-- 方式选择 -->
+        <div class="upload-methods">
+          <div class="method-card selected" id="method-card-1" onclick="selectMethod(1)">
+            <div class="check" id="method-check-1"></div>
+            <div class="method-icon" id="method-icon-1"></div>
+            <div class="method-title">飞书文档链接</div>
+            <div class="method-desc">粘贴飞书文档分享链接，系统自动抓取并解析文档内容，支持多个链接</div>
+            <span class="method-badge method-badge-fast">快速</span>
+          </div>
+          <div class="method-card" id="method-card-2" onclick="selectMethod(2)">
+            <div class="check" id="method-check-2"></div>
+            <div class="method-icon" id="method-icon-2"></div>
+            <div class="method-title">下载模板填写</div>
+            <div class="method-desc">下载标准 Excel 模板，按格式填写后上传，确保数据完整规范</div>
+            <span class="method-badge method-badge-template">标准化</span>
+          </div>
+        </div>
+
+        <!-- 方式一：飞书文档链接 -->
+        <div class="method-content show" id="method-content-1">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div>
+              <p style="font-size:13px;font-weight:600;color:var(--text);">粘贴飞书文档链接</p>
+              <p style="font-size:12px;color:var(--text-muted);margin-top:2px;">支持飞书文档、飞书电子表格、飞书多维表格的分享链接</p>
+            </div>
+            <button class="btn btn-sm btn-ghost" onclick="clearAllFeishuLinks()">清空全部</button>
+          </div>
+
+          <!-- 链接输入列表 -->
+          <div id="feishu-link-list"></div>
+
+          <!-- 新增按钮 -->
+          <button class="btn-add-link" onclick="addFeishuLink()" id="add-link-btn"></button>
+
+          <!-- 提示 -->
+          <div class="feishu-link-hint">
+            <span id="feishu-hint-icon" style="color:#0ea5e9;flex-shrink:0;"></span>
+            <div>
+              <div style="font-weight:600;color:#0369a1;margin-bottom:2px;">如何获取飞书文档链接？</div>
+              <div style="color:#0c4a6e;">在飞书文档右上角点击「分享」→ 选择「复制链接」→ 粘贴到上方输入框</div>
+            </div>
+          </div>
+
+          <div class="form-error" id="feishu-error" style="margin-top:8px;">请至少添加一个有效的飞书文档链接</div>
+        </div>
+
+        <!-- 方式二：模板上传 -->
+        <div class="method-content" id="method-content-2">
+          <div class="template-download">
+            <div class="template-download-left">
+              <div class="template-download-icon" id="template-download-icon"></div>
+              <div class="template-download-info">
+                <h4>第一步：下载标准需求模板</h4>
+                <p>包含字段说明和示例数据，请按格式规范填写</p>
+              </div>
+            </div>
+            <button class="btn btn-warning btn-sm" onclick="downloadTemplate()" id="download-template-btn" style="background:#f59e0b;color:white;border-color:#f59e0b;flex-shrink:0;display:inline-flex;align-items:center;gap:4px;"></button>
+          </div>
+
+          <p style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px;">第二步：上传填写完成的文件</p>
+          <div class="upload-zone" id="upload-zone"
+            ondragover="handleDragOver(event)"
+            ondragleave="handleDragLeave(event)"
+            ondrop="handleDrop(event)">
+            <input type="file" id="file-input" accept=".xlsx,.xls" onchange="handleFileSelect(event)" />
+            <div class="upload-icon" id="upload-icon"></div>
+            <h4>点击选择文件或拖拽至此</h4>
+            <p>填写完模板后，将文件上传至此处进行解析</p>
+            <div class="upload-formats">
+              <span class="format-tag">XLSX</span>
+              <span class="format-tag">XLS</span>
+              <span style="font-size:12px;color:var(--text-light);">文件大小不超过 10MB</span>
+            </div>
+          </div>
+
+          <!-- 已选文件展示 -->
+          <div id="uploaded-file-display" style="display:none;">
+            <div class="uploaded-file">
+              <div class="uploaded-file-icon" id="uploaded-file-icon"></div>
+              <div class="uploaded-file-info">
+                <div class="fname" id="uploaded-fname">需求模板.xlsx</div>
+                <div class="fsize" id="uploaded-fsize">2.3 MB · 准备解析</div>
+              </div>
+              <button class="uploaded-file-remove" onclick="removeFile()" title="移除文件">✕</button>
+            </div>
+          </div>
+          <div class="form-error" id="file-error" style="margin-top:8px;">请上传需求文件</div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="action-bar">
+          <button class="btn btn-secondary" onclick="goToStep1()" id="step2-prev-btn"></button>
+          <div class="action-bar-right">
+            <button class="btn btn-primary btn-lg" onclick="startParsing()" id="start-parse-btn"></button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== 结果页（全宽布局）===== -->
+<div id="result-main" style="display:none;">
+
+  <div class="result-layout">
+    <!-- 左侧锚点导航 -->
+    <aside class="result-nav">
+      <div class="result-nav-inner">
+        <div class="result-nav-title">
+          <span style="display:inline-flex;align-items:center;gap:6px;" id="nav-title-text"></span>
+          <button class="result-nav-toggle" onclick="toggleAllSections()" title="展开/折叠全部">
+            <span id="toggle-all-text">折叠全部</span>
+          </button>
+        </div>
+        <ul class="result-nav-list" id="result-nav-list">
+          <!-- 动态生成 -->
+        </ul>
+      </div>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="result-content" id="result-content">
+      <!-- 动态生成各模块卡片 -->
+    </main>
+  </div>
+
+  <!-- 底部操作栏 -->
+  <div class="result-footer-bar">
+    <div class="result-footer-inner">
+      <div class="result-footer-left"></div>
+      <div class="result-footer-right">
+        <button class="btn btn-secondary" onclick="backToWizard()" id="result-footer-back-btn"></button>
+        <button class="btn btn-success btn-lg" onclick="submitRequirement()" id="result-footer-submit-btn"></button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== AI 文案对话页面 ===== -->
+<div id="ai-chat-view" style="display:none;">
+  <header class="aichat-header">
+    <div class="aichat-header-left">
+      <button class="aichat-back-btn" onclick="closeAiChat()" title="返回">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        <span>返回</span>
+      </button>
+      <div class="aichat-title">
+        <span class="aichat-title-icon" id="aichat-title-icon"></span>
+        <div>
+          <div class="aichat-title-text">AI 文案生成</div>
+        </div>
+      </div>
+    </div>
+    <div class="aichat-header-right" id="aichat-header-actions" aria-label="对话公共操作">
+      <!-- 由 renderAiHeaderActions() 注入：AI 评测打分、提交审核 -->
+    </div>
+  </header>
+
+  <div class="aichat-layout" id="aichat-layout">
+    <!-- 左侧：待处理任务 / 历史对话 -->
+    <aside class="aichat-side aichat-left" id="aichat-left">
+      <div class="aichat-side-head">
+        <span id="aichat-left-title"></span>
+        <div style="display:inline-flex;align-items:center;gap:6px;">
+          <button class="aichat-collapse aichat-new-chat" onclick="startNewAiChat()" title="开启新对话" id="aichat-newchat-btn"></button>
+          <button class="aichat-collapse" onclick="toggleAiPanel('left')" title="收起">‹</button>
+        </div>
+      </div>
+      <div class="aichat-tabs">
+        <button class="aichat-tab active" data-left-tab="info"    onclick="switchAiLeftTab(this,'info')">待处理任务</button>
+        <button class="aichat-tab"        data-left-tab="history" onclick="switchAiLeftTab(this,'history')">历史对话</button>
+      </div>
+      <div class="aichat-side-body" id="aichat-left-body">
+        <!-- 动态渲染：待处理任务 / 历史对话 -->
+      </div>
+    </aside>
+
+    <!-- 拖拽分隔条 -->
+    <div class="aichat-resizer" data-side="left" onmousedown="startAiResize(event, 'left')"></div>
+
+    <!-- 中间：AI 对话 -->
+    <main class="aichat-main">
+      <div class="aichat-messages" id="aichat-messages">
+        <!-- 动态渲染消息列表 -->
+      </div>
+      <div class="aichat-input-wrap">
+        <div class="aichat-skills" id="aichat-skills">
+          <!-- 动态渲染 Skills 选项 -->
+        </div>
+        <div class="aichat-input-box">
+          <textarea
+            id="aichat-input"
+            class="aichat-input"
+            rows="3"
+            placeholder="输入消息... (Shift+Enter 换行, 可粘贴图片)"
+            onkeydown="onAiInputKey(event)"
+          ></textarea>
+          <div class="aichat-input-toolbar">
+            <div class="aichat-toolbar-left">
+              <button class="aichat-tool-icon-btn" title="上传图片" onclick="document.getElementById('aichat-img-upload').click()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              </button>
+              <input type="file" id="aichat-img-upload" accept="image/*" style="display:none;" onchange="onAiImageUpload(event)" />
+            </div>
+            <div class="aichat-toolbar-right">
+              <button class="aichat-feature-btn" title="开启深度研究模式" onclick="toggleAiFeature(this,'research')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <span>深度研究</span>
+              </button>
+              <button class="aichat-feature-btn" title="生成图片" onclick="toggleAiFeature(this,'image')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span>生成图片</span>
+              </button>
+              <div class="aichat-model-wrap">
+                <button class="aichat-model-btn" id="aichat-model-btn" onclick="toggleAiModelMenu(event)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  <span id="aichat-model-name">Fast</span>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div class="aichat-model-menu" id="aichat-model-menu">
+                  <div class="aichat-model-item" onclick="selectAiModel('Fast', 'GPT-4o · 快速响应')">
+                    <span class="model-name">⚡ Fast</span>
+                    <span class="model-desc">快速响应，低延迟</span>
+                  </div>
+                  <div class="aichat-model-item" onclick="selectAiModel('Pro', 'Claude 3.5 Sonnet · 平衡')">
+                    <span class="model-name">⚖️ Pro</span>
+                    <span class="model-desc">质量与速度平衡</span>
+                  </div>
+                  <div class="aichat-model-item" onclick="selectAiModel('Max', 'GPT-4 Turbo · 深度推理')">
+                    <span class="model-name">🚀 Max</span>
+                    <span class="model-desc">深度推理，长文本</span>
+                  </div>
+                </div>
+              </div>
+              <button class="aichat-send-icon-btn" onclick="sendAiMessage()" id="aichat-send-btn" title="发送">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- 拖拽分隔条 -->
+    <div class="aichat-resizer" data-side="right" onmousedown="startAiResize(event, 'right')"></div>
+
+    <!-- 右侧：工具 + 已生成内容 -->
+    <aside class="aichat-side aichat-right" id="aichat-right">
+      <div class="aichat-side-head">
+        <span id="aichat-right-title"></span>
+        <div class="aichat-side-actions">
+          <button class="aichat-collapse aichat-settings-btn" onclick="openAiSkillHub()" title="配置 Skills" id="aichat-skill-settings-btn"></button>
+          <button class="aichat-collapse" onclick="toggleAiPanel('right')" title="收起">›</button>
+        </div>
+      </div>
+      <div class="aichat-tabs">
+        <button class="aichat-tab active" data-tab="knowledge" onclick="switchAiRightTab(this,'knowledge')">背景知识</button>
+        <button class="aichat-tab"        data-tab="tools"     onclick="switchAiRightTab(this,'tools')">工具</button>
+      </div>
+      <div class="aichat-side-body" id="aichat-right-body">
+        <!-- 动态渲染 -->
+      </div>
+    </aside>
+  </div>
+
+  <!-- 浮动按钮：当左/右侧已收起时显示一个展开按钮 -->
+  <button class="aichat-floating-toggle floating-left" id="aichat-toggle-left" style="display:none;" onclick="toggleAiPanel('left')" title="展开左侧">›</button>
+  <button class="aichat-floating-toggle floating-right" id="aichat-toggle-right" style="display:none;" onclick="toggleAiPanel('right')" title="展开右侧">‹</button>
+
+  <!-- AI 评测结果弹框 -->
+  <div
+    class="aichat-score-modal-overlay"
+    id="aichat-score-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="aichat-score-modal-title"
+    onclick="if(event.target===this)closeAiScoreModal()"
+  >
+    <div class="aichat-score-modal-box" onclick="event.stopPropagation()">
+      <div class="aichat-score-modal-head">
+        <div>
+          <h3 id="aichat-score-modal-title">AI 评测结果</h3>
+          <p class="aichat-score-modal-sub">基于当前文案的规则化评分（演示）</p>
+        </div>
+        <button type="button" class="aichat-score-modal-close" onclick="closeAiScoreModal()" title="关闭">×</button>
+      </div>
+      <div class="aichat-score-modal-body" id="aichat-score-modal-body"></div>
+      <div class="aichat-score-modal-foot">
+        <button type="button" class="btn btn-secondary" onclick="closeAiScoreModal()">关闭</button>
+        <button type="button" class="btn btn-primary" onclick="regenerateFromAiScoreModal()">根据建议重新生成</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skills Hub 设置弹框 -->
+  <div
+    class="skill-hub-overlay"
+    id="skill-hub-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="skill-hub-title"
+    onclick="if(event.target===this)closeAiSkillHub()"
+  >
+    <div class="skill-hub-shell" onclick="event.stopPropagation()">
+      <div class="skill-hub-top">
+        <div>
+          <h2 id="skill-hub-title">Skills Hub</h2>
+          <p>配置 AI 文案生成时可调用的 Skills 能力</p>
+        </div>
+        <button type="button" class="skill-hub-close" onclick="closeAiSkillHub()" title="关闭">×</button>
+      </div>
+      <div class="skill-hub-body" id="skill-hub-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 详情查看弹窗 ===== -->
+<div class="modal-overlay" id="detail-modal" onclick="closeDetailModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h3 id="modal-title">查看详情</h3>
+        <p id="modal-subtitle" style="font-size:12px;color:var(--text-muted);margin-top:2px;"></p>
+      </div>
+      <button class="modal-close" onclick="closeDetailModal()" id="modal-close-btn"></button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeDetailModal()">关闭</button>
+      <button class="btn btn-primary" onclick="copyModalContent()" id="modal-copy-btn"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 解析中遮罩 ===== -->
+<div class="parsing-overlay" id="parsing-overlay">
+  <div class="parsing-box">
+    <div class="parsing-spinner">
+      <div class="parsing-icon-inner" id="parsing-icon-inner"></div>
+    </div>
+    <div class="parsing-title">AI 正在解析中...</div>
+    <div class="parsing-desc">正在识别文档结构，提取需求字段<br>请稍候，通常不超过 5 秒</div>
+    <div class="parsing-progress">
+      <div class="parsing-progress-bar" id="progress-bar"></div>
+    </div>
+    <div class="parsing-steps">
+      <div class="parsing-step-item pending" id="pstep-1">
+        <div class="psi-dot">1</div>
+        <span>文档内容预处理</span>
+      </div>
+      <div class="parsing-step-item pending" id="pstep-2">
+        <div class="psi-dot">2</div>
+        <span>识别需求字段结构</span>
+      </div>
+      <div class="parsing-step-item pending" id="pstep-3">
+        <div class="psi-dot">3</div>
+        <span>提取 SKU 与优先级信息</span>
+      </div>
+      <div class="parsing-step-item pending" id="pstep-4">
+        <div class="psi-dot">4</div>
+        <span>生成结构化需求数据</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast 容器 -->
+<div class="toast-container" id="toast-container"></div>
+
+
+
+
+
+<!-- 开发期自动刷新（仅 http(s) 生效，file:// 自动跳过）-->
+<script src="scripts/core/livereload.js"></script>
+</body>
+</html>

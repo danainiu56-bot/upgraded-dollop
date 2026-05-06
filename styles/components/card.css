@@ -1,0 +1,35 @@
+/* ============================================
+   卡片 .card
+   ============================================ */
+
+  /* ===== 卡片 ===== */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-header-icon {
+    width: 36px; height: 36px;
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .card-header h2 {
+    font-size: 16px; font-weight: 700; color: var(--text);
+  }
+  .card-header p {
+    font-size: 13px; color: var(--text-muted); margin-top: 1px;
+  }
+  .card-body {
+    padding: 28px 24px;
+  }
+
