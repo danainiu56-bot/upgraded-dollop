@@ -74,9 +74,26 @@ function isFaqDemand() {
   return getCurrentResultType().biz === 'faq';
 }
 
+function isSellingVideoDemand() {
+  const { biz, sub } = getCurrentResultType();
+  return biz === 'video' && sub === 'selling';
+}
+
+function isOperationVideoDemand() {
+  const { biz, sub } = getCurrentResultType();
+  return biz === 'video' && sub === 'operation';
+}
+
+function isOptimizationListingDemand() {
+  const { stage, biz, sub } = getCurrentResultType();
+  return stage === 'old' && biz === 'titletd' && ['title', 'td', 'titletd'].includes(sub);
+}
+
 function getActiveResultModules() {
   const { biz, sub } = getCurrentResultType();
   const listingModules = ['mod-basic', 'mod-product', 'mod-seo', 'mod-competitor', 'mod-selling', 'mod-audience', 'mod-pain', 'mod-stp'];
+  if (isSellingVideoDemand()) return ['mod-basic', 'mod-competitor', 'mod-selling', 'mod-video-display'].map(id => RESULT_MODULES.find(m => m.id === id)).filter(Boolean);
+  if (isOperationVideoDemand()) return ['mod-basic', 'mod-competitor', 'mod-video-display'].map(id => RESULT_MODULES.find(m => m.id === id)).filter(Boolean);
   const moduleMap = {
     title: listingModules,
     td: listingModules,
@@ -91,7 +108,8 @@ function getActiveResultModules() {
     news: ['mod-basic', 'mod-product', 'mod-selling', 'mod-audience'],
   };
   const profile = biz === 'titletd' ? sub : biz;
-  const ids = moduleMap[profile] || moduleMap.titletd;
+  const ids = [...(moduleMap[profile] || moduleMap.titletd)];
+  if (isOptimizationListingDemand()) ids.splice(1, 0, 'mod-optimization');
   return ids.map(id => RESULT_MODULES.find(m => m.id === id)).filter(Boolean);
 }
 
@@ -132,10 +150,12 @@ function renderModuleCard(m) {
   let bodyHtml = '';
   switch (m.id) {
     case 'mod-basic':      bodyHtml = renderBasic(); break;
+    case 'mod-optimization': bodyHtml = renderOptimization(); break;
     case 'mod-product':    bodyHtml = renderProduct(); break;
     case 'mod-seo':        bodyHtml = renderSEO(); break;
     case 'mod-competitor': bodyHtml = renderCompetitor(); break;
     case 'mod-selling':    bodyHtml = renderSelling(); break;
+    case 'mod-video-display': bodyHtml = renderVideoDisplay(); break;
     case 'mod-audience':   bodyHtml = renderAudience(); break;
     case 'mod-pain':       bodyHtml = renderPain(); break;
     case 'mod-stp':        bodyHtml = renderSTP(); break;
@@ -166,6 +186,7 @@ function renderModuleCard(m) {
 function getModuleMeta(id) {
   switch (id) {
     case 'mod-basic':      return [{ text: `${getResultBasicRows().length} 字段`, cls: 'ok' }];
+    case 'mod-optimization': return [{ text: '4 类信息', cls: 'ok' }, { text: '仅优化需求', cls: '' }];
     case 'mod-product':
       if (isFaqDemand()) return [{ text: '2 类资料', cls: 'ok' }];
       if (isSellingPointImageDemand()) return [{ text: '5 类资料', cls: 'ok' }, { text: `${MOCK_DATA.imageProduct.competitorAdvantages.length} 个优势差异`, cls: '' }];
@@ -177,8 +198,17 @@ function getModuleMeta(id) {
     }
     case 'mod-competitor':
       if (isFaqDemand()) return [{ text: `${MOCK_DATA.faqCompetitors.length} 个来源`, cls: 'ok' }, { text: '每个 5 条 FQA', cls: '' }];
+      if (isSellingVideoDemand() || isOperationVideoDemand()) return [{ text: `${MOCK_DATA.sellingVideo.competitors.length} 个参考链接`, cls: 'ok' }, { text: `${MOCK_DATA.sellingVideo.models.length} 条模特建议`, cls: '' }];
       return [{ text: `${MOCK_DATA.competitor.length} 个竞品`, cls: '' }];
     case 'mod-selling': {
+      if (isSellingVideoDemand()) {
+        const sv = MOCK_DATA.sellingVideo;
+        return [
+          { text: `USP ${sv.usp.length}`, cls: 'ok' },
+          { text: `KSP ${sv.ksp.length}`, cls: 'warn' },
+          { text: `OSP ${sv.osp.length}`, cls: '' },
+        ];
+      }
       const s = MOCK_DATA.selling;
       return [
         { text: `USP ${s.usp.length}`, cls: 'ok' },
@@ -190,6 +220,7 @@ function getModuleMeta(id) {
     case 'mod-pain':       return [{ text: `${MOCK_DATA.pain.length} 个痛点`, cls: '' }];
     case 'mod-stp':        return [{ text: `${MOCK_DATA.stp.columns.length - 1} 个竞品`, cls: 'ok' }, { text: `${MOCK_DATA.stp.rows.length} 项拼比`, cls: '' }];
     case 'mod-image-creative': return [{ text: `${MOCK_DATA.imageCreative.gallery.length} 张图`, cls: 'ok' }, { text: `${MOCK_DATA.imageCreative.richText.length} 段富文本`, cls: '' }];
+    case 'mod-video-display': return [{ text: `${MOCK_DATA.sellingVideo.displays.length} 个展示镜头`, cls: 'ok' }];
     case 'mod-faq-extra':  return [{ text: 'GEO 助手', cls: 'ok' }, { text: 'Rufus 补充', cls: '' }];
     default: return [];
   }
@@ -210,6 +241,44 @@ function renderBasic() {
       </div>`
     ).join('')}
   </div>`;
+}
+
+// ===== 1.1 优化信息 =====
+function getOptimizationOriginals() {
+  const { sub } = getCurrentResultType();
+  const o = MOCK_DATA.optimization.originals;
+  const key = sub === 'title' ? 'title' : (sub === 'td' ? 'td' : 'listing');
+  return { key, items: o[key] };
+}
+
+function renderOptimization() {
+  const data = MOCK_DATA.optimization;
+  const originals = getOptimizationOriginals();
+  return `
+    <div class="optimization-layout">
+      <div class="optimization-panel">
+        <div class="prod-section-label">优化的原文</div>
+        <div class="optimization-original-list">
+          ${originals.items.map((item, i) => `
+            <div class="optimization-original-item">
+              <div class="optimization-original-label">${item.label}</div>
+              <div class="optimization-original-text editable">${editableField(`optimization.originals.${originals.key}.${i}.value`, item.value, { cls: 'edit-block', multiline: true })}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="optimization-panel">
+        <div class="prod-section-label">优化的理由</div>
+        <ul class="optimization-reason-list">
+          ${data.reasons.map((reason, i) => `<li>${editableField(`optimization.reasons.${i}`, reason, { cls: 'edit-inline-value' })}</li>`).join('')}
+        </ul>
+        <div class="prod-section-label optimization-sub-label">优化的地方</div>
+        <div class="optimization-tag-list">
+          ${data.areas.map((area, i) => `<span>${editableField(`optimization.areas.${i}`, area, { cls: 'edit-inline-value' })}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 // ===== 2. 产品信息 =====
@@ -306,6 +375,18 @@ function renderImageProduct() {
     </div>
     <div class="prod-section image-product-follow-section">
       <div class="prod-section-label">竞争对手对比-优势差异点 <span class="prod-section-hint">(${img.competitorAdvantages.length} 项)</span></div>
+      <div class="image-competitor-source-list">
+        ${img.competitorSources.map((it, i) => `
+          <div class="image-competitor-source-card">
+            <div class="image-competitor-source-head">
+              <strong>${editableField(`imageProduct.competitorSources.${i}.brand`, it.brand, { cls: 'edit-inline-value' })}</strong>
+              <span>${editableField(`imageProduct.competitorSources.${i}.asin`, it.asin, { cls: 'edit-inline-value' })}</span>
+            </div>
+            <div class="image-competitor-source-focus">${editableField(`imageProduct.competitorSources.${i}.focus`, it.focus, { cls: 'edit-inline-value' })}</div>
+            <a href="${it.link}" target="_blank" rel="noopener" onclick="event.stopPropagation()">查看 Amazon</a>
+          </div>
+        `).join('')}
+      </div>
       <div class="image-insight-list">
         ${img.competitorAdvantages.map((it, i) => `
           <div class="image-insight-item">
@@ -367,6 +448,7 @@ function renderSEO() {
 // ===== 4. 竞对信息 =====
 function renderCompetitor() {
   if (isFaqDemand()) return renderFaqCompetitor();
+  if (isSellingVideoDemand() || isOperationVideoDemand()) return renderVideoCompetitor();
   return `<div class="competitor-list">
     ${MOCK_DATA.competitor.map((c, i) => `
       <div class="competitor-card">
@@ -408,6 +490,40 @@ function renderCompetitor() {
   </div>`;
 }
 
+function renderVideoCompetitor() {
+  const data = MOCK_DATA.sellingVideo;
+  return `
+    <div class="video-ref-grid">
+      <div class="video-ref-panel">
+        <div class="video-section-title">参考链接</div>
+        <div class="video-ref-list">
+          ${data.competitors.map((it, i) => `
+            <div class="video-ref-item">
+              <div class="video-ref-head">
+                <span>${editableField(`sellingVideo.competitors.${i}.label`, it.label, { cls: 'edit-inline-value' })}</span>
+                <strong>${editableField(`sellingVideo.competitors.${i}.source`, it.source, { cls: 'edit-inline-value' })}</strong>
+              </div>
+              <a href="${it.link}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${editableField(`sellingVideo.competitors.${i}.link`, it.link, { cls: 'edit-inline-value' })}</a>
+              <div class="video-ref-point">${editableField(`sellingVideo.competitors.${i}.point`, it.point, { cls: 'edit-inline-value', multiline: true })}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="video-model-panel">
+        <div class="video-section-title">模特</div>
+        <div class="video-model-list">
+          ${data.models.map((it, i) => `
+            <div class="video-model-item">
+              <span>${String(i + 1).padStart(2, '0')}</span>
+              <div>${editableField(`sellingVideo.models.${i}`, it, { cls: 'edit-inline-value', multiline: true })}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function renderFaqCompetitor() {
   return `<div class="faq-competitor-list">
     ${MOCK_DATA.faqCompetitors.map((c, i) => `
@@ -422,12 +538,19 @@ function renderFaqCompetitor() {
           <a href="${c.link}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${editableField(`faqCompetitors.${i}.link`, c.link, { cls: 'edit-inline-value' })}</a>
         </div>
         <div class="faq-question-list">
-          ${c.faqs.map((item, fi) => `
+          ${c.faqs.map((item, fi) => {
+            const aIdx = item.search(/ A: /);
+            const q = aIdx > -1 ? item.slice(0, aIdx).replace(/^Q\d+:\s*/, '') : item;
+            const a = aIdx > -1 ? item.slice(aIdx + 4) : '';
+            return `
             <div class="faq-question-item">
               <b>FQA${fi + 1}</b>
-              <div>${editableField(`faqCompetitors.${i}.faqs.${fi}`, item, { cls: 'edit-inline-value', multiline: true })}</div>
+              <div class="faq-qa-body">
+                <div class="faq-q">${editableField(`faqCompetitors.${i}.faqs.${fi}#q`, q, { cls: 'edit-inline-value', multiline: true })}</div>
+                ${a ? `<div class="faq-a">${editableField(`faqCompetitors.${i}.faqs.${fi}#a`, a, { cls: 'edit-inline-value', multiline: true })}</div>` : ''}
+              </div>
             </div>
-          `).join('')}
+          `}).join('')}
         </div>
       </div>
     `).join('')}
@@ -436,6 +559,7 @@ function renderFaqCompetitor() {
 
 // ===== 5. 卖点信息 =====
 function renderSelling() {
+  if (isSellingVideoDemand()) return renderVideoSelling();
   const s = MOCK_DATA.selling;
   const groups = [
     { key: 'usp', code: 'USP', name: '独特卖点', cls: 'sell-usp' },
@@ -473,6 +597,70 @@ function renderSelling() {
       <div class="text-block editable">${editableField('selling.summary', s.summary, { cls: 'edit-block', multiline: true })}</div>
     </div>
   ` : ''}`;
+}
+
+function renderVideoSelling() {
+  const s = MOCK_DATA.sellingVideo;
+  const groups = [
+    { key: 'usp', code: 'USP', name: '独特卖点', cls: 'sell-usp' },
+    { key: 'ksp', code: 'KSP', name: '核心卖点', cls: 'sell-ksp' },
+    { key: 'osp', code: 'OSP', name: '补充卖点', cls: 'sell-osp' },
+  ];
+  return `<div class="sell-groups">
+    ${groups.map(g => `
+      <div class="sell-group ${g.cls}">
+        <div class="sell-group-head">
+          <div class="sell-group-badge">${g.code}</div>
+          <div class="sell-group-meta">
+            <div class="sell-group-name">${g.name} <span class="prod-section-hint">(${s[g.key].length} 条)</span></div>
+          </div>
+        </div>
+        <div class="selling-list">
+          ${s[g.key].map((it, i) => `
+            <div class="selling-item">
+              <div class="selling-num">${String(i + 1).padStart(2, '0')}</div>
+              <div class="selling-body">
+                <div class="selling-row">
+                  <span class="selling-title">${editableField(`sellingVideo.${g.key}.${i}.title`, it.title, { cls: 'edit-inline-value' })}</span>
+                </div>
+                <div class="selling-desc">${editableField(`sellingVideo.${g.key}.${i}.desc`, it.desc, { cls: 'edit-inline-value', multiline: true })}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('')}
+  </div>`;
+}
+
+function renderVideoDisplay() {
+  const hidePoint = isOperationVideoDemand();
+  return `<div class="video-display-list">
+    ${MOCK_DATA.sellingVideo.displays.map((it, i) => `
+      <div class="video-display-card">
+        <div class="video-display-no">${String(it.no).padStart(2, '0')}</div>
+        <div class="video-display-content ${hidePoint ? 'no-point' : ''}">
+          ${hidePoint ? '' : `
+          <div class="video-display-point">
+            <label>卖点</label>
+            <strong>${editableField(`sellingVideo.displays.${i}.point`, it.point, { cls: 'edit-inline-value' })}</strong>
+          </div>`}
+          <div class="video-display-visual">
+            <label>画面展示</label>
+            <div>${editableField(`sellingVideo.displays.${i}.visual`, it.visual, { cls: 'edit-inline-value', multiline: true })}</div>
+          </div>
+          <div class="video-display-copy">
+            <label>中文文案</label>
+            <div>${editableField(`sellingVideo.displays.${i}.copy`, it.copy, { cls: 'edit-inline-value', multiline: true })}</div>
+          </div>
+          <div class="video-display-time">
+            <label>时间戳</label>
+            <strong>${editableField(`sellingVideo.displays.${i}.timestamp`, it.timestamp, { cls: 'edit-inline-value' })}</strong>
+          </div>
+        </div>
+      </div>
+    `).join('')}
+  </div>`;
 }
 
 function renderImageCreative() {
@@ -797,6 +985,34 @@ function openDetailModal(id) {
       </tbody></table>`;
       copyText = getResultBasicRows().map(b => `${b.label}: ${b.value}`).join('\n');
       break;
+    case 'mod-optimization': {
+      const data = MOCK_DATA.optimization;
+      const originals = getOptimizationOriginals();
+      html = `
+        <p><strong>优化目标：</strong>${data.summary.target}</p>
+        <p style="margin-top:8px;"><strong>优化范围：</strong>${data.summary.scope}</p>
+        <p style="margin-top:12px;"><strong>优化的原文：</strong></p>
+        <table class="compact-table"><tbody>
+          ${originals.items.map(item => `<tr><td style="width:32%;color:var(--text-muted);">${item.label}</td><td>${item.value}</td></tr>`).join('')}
+        </tbody></table>
+        <p style="margin-top:12px;"><strong>优化的理由：</strong></p>
+        <ol style="padding-left:20px;line-height:1.7;">${data.reasons.map(t => `<li>${t}</li>`).join('')}</ol>
+        <p style="margin-top:12px;"><strong>优化的地方：</strong>${data.areas.join('、')}</p>
+        <p style="margin-top:12px;"><strong>如何优化：</strong></p>
+        <table class="compact-table">
+          <thead><tr><th>问题</th><th>优化动作</th><th>预期效果</th></tr></thead>
+          <tbody>${data.actions.map(a => `<tr><td>${a.problem}</td><td>${a.action}</td><td>${a.effect}</td></tr>`).join('')}</tbody>
+        </table>`;
+      copyText = [
+        `优化目标：${data.summary.target}`,
+        `优化范围：${data.summary.scope}`,
+        `优化的原文：${originals.items.map(item => `${item.label}: ${item.value}`).join('；')}`,
+        `优化的理由：${data.reasons.join('；')}`,
+        `优化的地方：${data.areas.join('、')}`,
+        `如何优化：${data.actions.map(a => `${a.problem} -> ${a.action} -> ${a.effect}`).join('；')}`,
+      ].join('\n');
+      break;
+    }
     case 'mod-product': {
       const p = MOCK_DATA.product;
       if (isSellingPointImageDemand()) {

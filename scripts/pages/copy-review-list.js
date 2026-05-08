@@ -6,6 +6,7 @@ let crFilterSkuValue = '';
 let crFilterSkuQuery = '';
 let copyReviewCurrentFilters = {};
 let copyReviewCurrentListData = [];
+let copyAuditIssueMarks = [];
 const COPY_REVIEW_DECISIONS_KEY = '__cursor_copy_review_decisions';
 
 const COPY_REVIEW_LIST_DATA = [
@@ -484,6 +485,7 @@ function renderCopyReviewActions(row) {
 function closeCopyAuditModal() {
   const modal = ensureCopyAuditModal();
   if (modal) modal.classList.remove('show', 'copy-audit-drawer-mode');
+  stopCopyAuditResize();
 }
 
 function ensureCopyAuditModal() {
@@ -523,15 +525,17 @@ function openCopyAuditModal(encodedKey, mode = 'audit', opts = {}) {
   const body = document.getElementById('copy-audit-body');
   const foot = document.getElementById('copy-audit-foot');
   if (!modal || !body || !foot) return;
-  const isAuditDrawer = mode === 'audit' && row.review_status === '待审核';
-  modal.classList.toggle('copy-audit-drawer-mode', isAuditDrawer);
+  modal.classList.remove('copy-audit-drawer-mode');
+  copyAuditIssueMarks = [];
   title.textContent = opts.title || (mode === 'audit' ? '文案审核' : '查看详情');
-  subtitle.textContent = `${row.type} · ${row.sku} · ${row.name}`;
-  body.innerHTML = (row.review_status === '已驳回' ? renderCopyAuditRecord(row) : '') + renderCopyAuditDetail(row, { hideInfo: opts.hideInfo === true });
+  const auditPayload = getCopyAuditPayload(row);
+  subtitle.innerHTML = renderCopyAuditHeaderSummary(row, auditPayload);
+  body.innerHTML = (row.review_status === '已驳回' ? renderCopyAuditRecord(row) : '') + renderCopyAuditDetail(row, { hideInfo: opts.hideInfo === true, payload: auditPayload });
   foot.innerHTML = mode === 'audit' && row.review_status === '待审核'
     ? `<div class="review-audit-panel">
          <div class="copy-quick-review">
            <span>5. 审核结论</span>
+           <em>已标记 <strong id="copy-marked-count">0</strong> 个问题</em>
            <button type="button" onclick="selectCopyQuickReview('通过')">通过</button>
            <button type="button" onclick="selectCopyQuickReview('因果链不完整')">因果链不完整</button>
            <button type="button" onclick="selectCopyQuickReview('卖点没有表达出来')">卖点没有表达出来</button>
@@ -548,6 +552,7 @@ function openCopyAuditModal(encodedKey, mode = 'audit', opts = {}) {
          <button type="button" class="btn btn-primary" onclick="approveCopyAudit('${encodedKey}')">通过</button>
        </div>`
     : '';
+  resetCopyAuditSplit();
   modal.classList.add('show');
 }
 
@@ -651,9 +656,33 @@ function getCopyAuditPayload(row) {
   };
 }
 
+function getCopyAuditRiskMeta(payload) {
+  const total = payload && payload.score ? payload.score.total : 0;
+  if (total >= 90) return { text: '低风险', cls: 'low' };
+  if (total >= 82) return { text: '中风险', cls: 'mid' };
+  return { text: '高风险', cls: 'high' };
+}
+
+function renderCopyAuditHeaderSummary(row, payload) {
+  const esc = copyReviewEscape;
+  const risk = getCopyAuditRiskMeta(payload);
+  const priority = typeof getRowPriority === 'function' ? getRowPriority({ type: row.type }) : 'P1';
+  return `
+    <span class="copy-audit-head-summary">
+      <span>${esc(row.type)} · ${esc(row.sku)} · ${esc(row.name)}</span>
+      <span>站点 ${esc(row.site || '—')}</span>
+      <span>优先级 ${esc(priority)}</span>
+      <span>文案 ${esc(row.writer || '—')}</span>
+      <span>交付 ${esc(row.date || '—')}</span>
+      <span>AI ${esc(payload.score.total)} 分</span>
+      <span class="risk-${risk.cls}">${risk.text}</span>
+    </span>
+  `;
+}
+
 function renderCopyAuditDetail(row, opts = {}) {
   const esc = copyReviewEscape;
-  const payload = getCopyAuditPayload(row);
+  const payload = opts.payload || getCopyAuditPayload(row);
   const categoryModule = payload.modules.find(m => m.id === 'copy-cat');
   const backgroundModules = payload.modules.filter(m => m.id !== 'copy-cat');
   return `
@@ -665,16 +694,6 @@ function renderCopyAuditDetail(row, opts = {}) {
             ${categoryModule.body.map(([label, value]) => `<div class="review-info-cell"><span>${esc(label)}</span><strong>${esc(value || '—')}</strong></div>`).join('')}
           </div>
         </div>` : ''}
-        <div class="copy-audit-card">
-          <div class="copy-audit-card-title">2. 提交内容：Title</div>
-          <div class="copy-title-text">${esc(payload.title)}</div>
-        </div>
-        <div class="copy-audit-card">
-          <div class="copy-audit-card-title">2. 提交内容：TD</div>
-          <ol class="copy-td-list">
-            ${payload.tds.map(td => `<li>${esc(td)}</li>`).join('')}
-          </ol>
-        </div>
         <div class="copy-audit-summary">
           <div>
             <span>AI 综合评分</span>
@@ -700,11 +719,76 @@ function renderCopyAuditDetail(row, opts = {}) {
             ${payload.score.suggestions.map((s, i) => `<div><span>${i + 1}</span>${esc(s)}</div>`).join('')}
           </div>
         </div>
+        ${opts.hideInfo ? '' : renderCopyAuditModuleBrowser(backgroundModules, esc)}
       </section>
-      ${opts.hideInfo ? '' : `<section class="copy-audit-right">
-        ${renderCopyAuditModuleBrowser(backgroundModules, esc)}
-      </section>`}
+      ${opts.hideInfo ? '' : '<div class="copy-audit-resizer" title="拖动调整左右宽度" onmousedown="startCopyAuditResize(event)" ondblclick="resetCopyAuditSplit()"></div>'}
+      <section class="copy-audit-right copy-audit-submission">
+        <div class="copy-audit-card copy-submission-card">
+          <div class="copy-audit-card-title">2. 提交内容：Title</div>
+          <div class="copy-title-text">${esc(payload.title)}</div>
+          ${renderCopyAuditIssueButtons('Title', 'Title')}
+        </div>
+        <div class="copy-audit-card copy-submission-card">
+          <div class="copy-audit-card-title">2. 提交内容：TD</div>
+          <div class="copy-td-review-list">
+            ${payload.tds.map((td, i) => `
+              <div class="copy-td-review-item">
+                <div class="copy-td-index">TD-${i + 1}</div>
+                <div class="copy-td-text">${esc(td)}</div>
+                ${renderCopyAuditIssueButtons(`TD-${i + 1}`, `TD-${i + 1}`)}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </section>
     </div>`;
+}
+
+function renderCopyAuditIssueButtons(target, label) {
+  const issues = ['表达不清', '信息错误', '关键词问题', '证据不足', '合规风险'];
+  return `<div class="copy-issue-actions" data-target="${copyReviewEscape(target)}">
+    <span>${copyReviewEscape(label)} 快捷标记</span>
+    ${issues.map(issue => `<button type="button" onclick="toggleCopyAuditIssue(this, '${copyReviewEscape(target)}', '${copyReviewEscape(issue)}')">${copyReviewEscape(issue)}</button>`).join('')}
+  </div>`;
+}
+
+let copyAuditResizeState = null;
+
+function startCopyAuditResize(e) {
+  const layout = document.querySelector('#copy-audit-modal .copy-audit-layout');
+  if (!layout || layout.classList.contains('copy-audit-layout-single')) return;
+  e.preventDefault();
+  const rect = layout.getBoundingClientRect();
+  copyAuditResizeState = { layout, left: rect.left, width: rect.width };
+  document.body.classList.add('copy-audit-resizing');
+  document.addEventListener('mousemove', onCopyAuditResizeMove);
+  document.addEventListener('mouseup', stopCopyAuditResize);
+}
+
+function onCopyAuditResizeMove(e) {
+  if (!copyAuditResizeState) return;
+  const { layout, left, width } = copyAuditResizeState;
+  const minLeft = 320;
+  const minRight = 460;
+  const resizer = 10;
+  const rawLeft = e.clientX - left;
+  const nextLeft = Math.max(minLeft, Math.min(rawLeft, width - minRight - resizer));
+  const nextRight = Math.max(minRight, width - nextLeft - resizer);
+  layout.style.gridTemplateColumns = `${nextLeft}px ${resizer}px ${nextRight}px`;
+}
+
+function stopCopyAuditResize() {
+  if (!copyAuditResizeState) return;
+  copyAuditResizeState = null;
+  document.body.classList.remove('copy-audit-resizing');
+  document.removeEventListener('mousemove', onCopyAuditResizeMove);
+  document.removeEventListener('mouseup', stopCopyAuditResize);
+}
+
+function resetCopyAuditSplit() {
+  const layout = document.querySelector('#copy-audit-modal .copy-audit-layout');
+  if (!layout) return;
+  layout.style.gridTemplateColumns = '';
 }
 
 function renderCopyAuditModuleBrowser(modules, esc) {
@@ -770,6 +854,11 @@ function scrollCopyAuditModule(id) {
   const body = document.getElementById('copy-audit-body');
   const el = document.getElementById(id);
   if (!body || !el) return;
+  const leftPane = document.querySelector('#copy-audit-modal .copy-audit-left');
+  if (leftPane && leftPane.contains(el)) {
+    leftPane.scrollTo({ top: el.offsetTop - leftPane.offsetTop - 16, behavior: 'smooth' });
+    return;
+  }
   body.scrollTo({ top: el.offsetTop - 16, behavior: 'smooth' });
 }
 
@@ -779,6 +868,38 @@ function toggleCopyAuditOutline() {
   outline.classList.toggle('collapsed');
   const browser = outline.closest('.copy-module-browser');
   if (browser) browser.classList.toggle('outline-collapsed', outline.classList.contains('collapsed'));
+}
+
+function toggleCopyAuditIssue(btn, target, issue) {
+  if (!btn) return;
+  const key = `${target}|${issue}`;
+  const exists = copyAuditIssueMarks.some(item => item.key === key);
+  if (exists) {
+    copyAuditIssueMarks = copyAuditIssueMarks.filter(item => item.key !== key);
+    btn.classList.remove('active');
+  } else {
+    copyAuditIssueMarks.push({ key, target, issue });
+    btn.classList.add('active');
+  }
+  syncCopyAuditMarkedReason();
+}
+
+function syncCopyAuditMarkedReason() {
+  const reasonEl = document.getElementById('copy-audit-reject-reason');
+  const reasonWrap = document.getElementById('copy-reject-reason-wrap');
+  const countEl = document.getElementById('copy-marked-count');
+  if (countEl) countEl.textContent = copyAuditIssueMarks.length;
+  if (!reasonEl) return;
+  if (!copyAuditIssueMarks.length) return;
+  if (reasonWrap) reasonWrap.style.display = '';
+  const grouped = copyAuditIssueMarks.reduce((acc, item) => {
+    if (!acc[item.target]) acc[item.target] = [];
+    if (!acc[item.target].includes(item.issue)) acc[item.target].push(item.issue);
+    return acc;
+  }, {});
+  reasonEl.value = Object.keys(grouped)
+    .map(target => `${target}：${grouped[target].join('、')}`)
+    .join('；');
 }
 
 function renderCopyAuditRecord(row) {
@@ -858,12 +979,16 @@ function selectCopyQuickReview(value) {
   if (!reasonEl) return;
   const reasonWrap = document.getElementById('copy-reject-reason-wrap');
   if (value === '通过') {
+    copyAuditIssueMarks = [];
+    document.querySelectorAll('#copy-audit-modal .copy-issue-actions button.active').forEach(btn => btn.classList.remove('active'));
+    const countEl = document.getElementById('copy-marked-count');
+    if (countEl) countEl.textContent = '0';
     reasonEl.value = '';
     if (reasonWrap) reasonWrap.style.display = 'none';
     return;
   }
   if (reasonWrap) reasonWrap.style.display = '';
-  reasonEl.value = value;
+  reasonEl.value = copyAuditIssueMarks.length ? `${reasonEl.value}；${value}` : value;
   reasonEl.focus();
 }
 

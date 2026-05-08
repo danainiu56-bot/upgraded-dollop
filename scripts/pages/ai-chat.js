@@ -16,6 +16,13 @@ let skillHubState = { scope: 'all', category: 'all', query: '' };
 const AI_STREAM_INTERVAL_MS = 24;
 const AI_STREAM_CHUNK_SIZE = 5;
 let aiStreamTimers = {};
+let copyDraftPickerState = {
+  row: null,
+  drafts: [],
+  selectedId: '',
+  ratings: {},
+  regenRound: 0,
+};
 
 function onAiScoreModalKeydown(e) {
   if (e.key === 'Escape') closeAiScoreModal();
@@ -40,7 +47,7 @@ let aiChatState = {
   outputs: [],
 };
 
-function openAiChat(sku, name) {
+function openAiChat(sku, name, opts = {}) {
   // 隐藏其它视图
   document.getElementById('list-page').classList.remove('show');
   document.getElementById('wizard-main').style.display  = 'none';
@@ -56,6 +63,11 @@ function openAiChat(sku, name) {
   aiChatState.sku = sku || aiChatState.sku || 'PO17X4011';
   aiChatState.productName = name || aiChatState.productName || '7格便携药盒';
   syncAiTaskFromContext();
+  if (opts.draft) {
+    clearAiStreamTimers();
+    aiChatState.messages = [];
+    aiChatState.outputs = [];
+  }
   // 副标题已移除
   // 顶部 / 侧栏图标
   const titleIcon = document.getElementById('aichat-title-icon');
@@ -75,6 +87,9 @@ function openAiChat(sku, name) {
   renderAiSkills();
   renderAiMessages();
   renderAiRightPanel();
+  if (opts.draft) {
+    appendSelectedCopyDraft(opts.draft, opts.row || null);
+  }
   // 持久化视图
   if (typeof saveView === 'function') saveView('ai-chat');
 }
@@ -89,6 +104,172 @@ function closeAiChat() {
   const topbar = document.querySelector('.topbar');
   if (topbar) topbar.style.display = 'flex';
   if (typeof showDemandMgrView === 'function') showDemandMgrView();
+}
+
+// ---- 文案生成：3 个候选初稿选择 ----
+function getCopyDraftRowKey(row) {
+  return [row.sku, row.type, row.submit_time].join('|');
+}
+
+function findCopyDraftRow(encodedKey) {
+  const key = decodeURIComponent(encodedKey || '');
+  const list = typeof COPY_LIST_DATA !== 'undefined' ? COPY_LIST_DATA : [];
+  return list.find(row => getCopyDraftRowKey(row) === key) || null;
+}
+
+function openCopyDraftPicker(encodedKey) {
+  const row = findCopyDraftRow(encodedKey);
+  if (!row) {
+    showToast('未找到对应文案需求', 'warning');
+    return;
+  }
+  copyDraftPickerState = {
+    row,
+    drafts: buildCopyDraftCandidates(row, 0),
+    selectedId: '',
+    ratings: {},
+    regenRound: 0,
+  };
+  const best = copyDraftPickerState.drafts.reduce((a, b) => (b.score > a.score ? b : a), copyDraftPickerState.drafts[0]);
+  copyDraftPickerState.selectedId = best.id;
+  renderCopyDraftPicker();
+  const modal = document.getElementById('copy-draft-picker');
+  if (modal) modal.classList.add('show');
+}
+
+function closeCopyDraftPicker() {
+  const modal = document.getElementById('copy-draft-picker');
+  if (modal) modal.classList.remove('show');
+}
+
+function regenerateCopyDrafts() {
+  const row = copyDraftPickerState.row;
+  if (!row) return;
+  copyDraftPickerState.regenRound += 1;
+  copyDraftPickerState.drafts = buildCopyDraftCandidates(row, copyDraftPickerState.regenRound);
+  copyDraftPickerState.ratings = {};
+  const best = copyDraftPickerState.drafts.reduce((a, b) => (b.score > a.score ? b : a), copyDraftPickerState.drafts[0]);
+  copyDraftPickerState.selectedId = best.id;
+  renderCopyDraftPicker();
+  showToast('已重新生成 3 个候选版本', 'success');
+}
+
+function buildCopyDraftCandidates(row, round = 0) {
+  const name = row.name || '产品';
+  const brand = row.brand || 'AUVON';
+  const site = row.site || 'US';
+  const keyword = row.type && row.type.includes('Title') ? 'Title' : (row.type && row.type.includes('TD') ? 'TD' : 'Listing');
+  const scoreShift = round % 3;
+  return [
+    {
+      id: 'conversion',
+      title: '转化导向版',
+      tag: '推荐购买理由',
+      score: 88 + scoreShift,
+      content: `【Title】\n${brand} ${name}, Practical ${keyword} Copy for Daily Use, Portable and Easy to Understand\n\n【TD-1】\n突出用户最关心的使用场景：日常使用、便携收纳和快速识别，让用户第一眼知道产品解决什么问题。\n\n【TD-2】\n将容量、安全和使用便利性放在前 3 个卖点，降低用户决策成本。\n\n【TD-3】\n结尾强化适用人群与购买信心，适合 ${site} 站点用户的浏览习惯。`,
+      reasons: ['卖点顺序清晰，先回答购买理由', '适合进入对话后继续补强场景细节', '关键词覆盖中等，后续可再加强 SEO'],
+    },
+    {
+      id: 'seo',
+      title: 'SEO 覆盖版',
+      tag: '推荐搜索承接',
+      score: 91 - scoreShift,
+      content: `【Title】\n${brand} ${name}, Weekly Pill Organizer, 7 Day Pill Box, Portable Travel Medicine Case for Vitamins and Daily Use\n\n【TD-1】\n自然覆盖 weekly pill organizer、7 day pill box、travel medicine case 等核心搜索词。\n\n【TD-2】\n用标题前半段承接高意图关键词，Bullet 中补充容量、便携、安全等转化信息。\n\n【TD-3】\n整体结构适合作为第一版 Listing 初稿，再根据合规和品牌语气精修。`,
+      reasons: ['核心关键词前置，搜索承接更强', 'Title 和 TD 结构完整，适合快速进入审核', '语言略偏功能型，可在对话中调得更自然'],
+    },
+    {
+      id: 'geo',
+      title: '本地化表达版',
+      tag: '推荐语言自然度',
+      score: 86 + (scoreShift > 1 ? 1 : 0),
+      content: `【Title】\n${brand} ${name}, Easy Daily Organizer for Home, Office and Travel, Simple Storage for Vitamins and Medicine\n\n【TD-1】\nUse clear, direct wording that matches ${site} shoppers' reading habits and avoids exaggerated medical claims.\n\n【TD-2】\nFocus on practical benefits: easy planning, portable storage, clear compartments and daily convenience.\n\n【TD-3】\nKeep claims verifiable and friendly, making the copy easier to adapt for FAQ, image text and Rufus style answers.`,
+      reasons: ['表达更自然，适合美区用户阅读', '合规风险较低，避免医疗功效承诺', 'SEO 强度略低，后续可补关键词'],
+    },
+  ];
+}
+
+function renderCopyDraftPicker() {
+  const body = document.getElementById('copy-draft-body');
+  const row = copyDraftPickerState.row;
+  if (!body || !row) return;
+  const esc = typeof escapeAiHtml === 'function' ? escapeAiHtml : (x) => String(x || '');
+  body.innerHTML = `
+    <div class="copy-draft-context">
+      <span><b>SKU</b>${esc(row.sku)}</span>
+      <span><b>产品</b>${esc(row.name)}</span>
+      <span><b>需求类型</b>${esc(row.type)}</span>
+      <span><b>站点</b>${esc(row.site)}</span>
+      <span><b>优先级</b>${typeof getRowPriority === 'function' ? getRowPriority(row) : 'P1'}</span>
+    </div>
+    <div class="copy-draft-grid">
+      ${copyDraftPickerState.drafts.map(draft => renderCopyDraftCard(draft, esc)).join('')}
+    </div>
+  `;
+}
+
+function renderCopyDraftCard(draft, esc) {
+  const selected = copyDraftPickerState.selectedId === draft.id;
+  const rating = copyDraftPickerState.ratings[draft.id] || '';
+  const ratingBtns = ['好', '一般', '不可用'].map(item => `
+    <button type="button" class="${rating === item ? 'active' : ''}" onclick="rateCopyDraft('${draft.id}', '${item}')">${item}</button>
+  `).join('');
+  return `
+    <article class="copy-draft-card ${selected ? 'selected' : ''}" onclick="selectCopyDraft('${draft.id}')">
+      <div class="copy-draft-card-head">
+        <div>
+          <h4>${esc(draft.title)}</h4>
+          <p>${esc(draft.tag)}</p>
+        </div>
+        <div class="copy-draft-score">
+          <strong>${draft.score}</strong>
+          <span>/100</span>
+        </div>
+      </div>
+      <div class="copy-draft-preview">${esc(draft.content)}</div>
+      <div class="copy-draft-reasons">
+        <div class="copy-draft-label">AI 自评理由</div>
+        <ul>${draft.reasons.map(reason => `<li>${esc(reason)}</li>`).join('')}</ul>
+      </div>
+      <div class="copy-draft-rating" onclick="event.stopPropagation()">
+        <span>人工评分</span>
+        <div>${ratingBtns}</div>
+      </div>
+      <button type="button" class="copy-draft-select" onclick="event.stopPropagation();selectCopyDraft('${draft.id}')">
+        ${selected ? '已选择' : '选择此版本'}
+      </button>
+    </article>
+  `;
+}
+
+function selectCopyDraft(id) {
+  copyDraftPickerState.selectedId = id;
+  renderCopyDraftPicker();
+}
+
+function rateCopyDraft(id, rating) {
+  copyDraftPickerState.ratings[id] = rating;
+  renderCopyDraftPicker();
+}
+
+function enterAiChatWithSelectedDraft() {
+  const row = copyDraftPickerState.row;
+  const draft = copyDraftPickerState.drafts.find(item => item.id === copyDraftPickerState.selectedId);
+  if (!row || !draft) {
+    showToast('请先选择一个候选版本', 'warning');
+    return;
+  }
+  closeCopyDraftPicker();
+  openAiChat(row.sku, row.name, { row, draft });
+}
+
+function appendSelectedCopyDraft(draft, row) {
+  const rating = copyDraftPickerState.ratings[draft.id] || '未评分';
+  const text = `已选择：${draft.title} · AI 自评分 ${draft.score}\n人工评分：${rating}\n\n${draft.content}\n\n【AI 自评理由】\n${draft.reasons.map((reason, i) => `${i + 1}. ${reason}`).join('\n')}\n\n你可以继续告诉我：加强关键词、调整语气、降低合规风险，或改成更适合 ${row && row.site ? row.site : '目标站点'} 的表达。`;
+  appendAiMessage('bot', text, { actions: ['copy', 'regen'], stream: false });
+  aiChatState.outputs.unshift({
+    title: `${draft.title} · 初稿`,
+    body: draft.content,
+  });
 }
 
 // ---- 左侧渲染 ----
@@ -535,10 +716,9 @@ function updateAiRightTitle() {
   const el = document.getElementById('aichat-right-title');
   if (!el) return;
   const map = {
-    tools:     { icon: 'toolbox',  text: '工具' },
     knowledge: { icon: 'database', text: '背景知识' },
   };
-  const cfg = map[aiChatState.rightTab] || map.tools;
+  const cfg = map[aiChatState.rightTab] || map.knowledge;
   el.innerHTML = `<span class="aichat-side-icon">${I(cfg.icon, 14)}</span>${cfg.text}`;
 }
 
@@ -789,8 +969,7 @@ function aiBotAvatarSvg() {
 function renderAiMessages() {
   const wrap = document.getElementById('aichat-messages');
   if (!wrap) return;
-  const hasUser = aiChatState.messages.some(m => m.role === 'user');
-  if (!hasUser) {
+  if (!aiChatState.messages.length) {
     wrap.innerHTML = renderAiWelcome();
     wrap.scrollTop = 0;
     updateAiChatGlobalActions();

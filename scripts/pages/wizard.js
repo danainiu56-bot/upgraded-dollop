@@ -246,8 +246,9 @@ function validateStep1() {
   const reqTypeVal = document.getElementById('req-type').value;
   if (!reqTypeVal) {
     document.getElementById('req-type-error').classList.add('show');
-    if (currentBiz === 'titletd' && !currentSub) {
-      document.getElementById('req-type-error').textContent = '请选择 Listing 的细分类型';
+    const currentBizItem = getCurrentBizItem();
+    if (currentBizItem && currentBizItem.hasSub && !currentSub) {
+      document.getElementById('req-type-error').textContent = `请选择${currentBizItem.name}的细分类型`;
     } else {
       document.getElementById('req-type-error').textContent = '请选择需求类型';
     }
@@ -331,26 +332,34 @@ function setStep(n) {
 
 let currentStage = 'new';   // new | old
 let currentBiz = null;      // package / manual / ...
-let currentSub = null;      // title / td / titletd
+let currentSub = null;      // title / td / titletd / selling / operation
 
+function getCurrentBizItem() {
+  return BIZ_TYPES.find(b => b.id === currentBiz);
+}
+
+function getCurrentBizSubOptions() {
+  return (currentBiz && typeof BIZ_SUB_MAP !== 'undefined' && BIZ_SUB_MAP[currentBiz]) || [];
+}
 
 function buildReqTypeKey() {
   if (!currentBiz) return '';
-  if (currentBiz === 'titletd') {
+  const biz = getCurrentBizItem();
+  if (biz && biz.hasSub) {
     if (!currentSub) return '';
-    return `${currentStage}-titletd-${currentSub}`;
+    return `${currentStage}-${currentBiz}-${currentSub}`;
   }
   return `${currentStage}-${currentBiz}`;
 }
 
 function buildReqTypeLabel() {
   if (!currentBiz) return '';
-  const biz = BIZ_TYPES.find(b => b.id === currentBiz);
+  const biz = getCurrentBizItem();
   if (!biz) return '';
-  if (currentBiz === 'titletd') {
+  if (biz.hasSub) {
     if (!currentSub) return '';
-    const sub = TITLETD_SUB.find(s => s.id === currentSub);
-    return `${stageLabels[currentStage]} · ${sub.name}`;
+    const sub = getCurrentBizSubOptions().find(s => s.id === currentSub);
+    return `${stageLabels[currentStage]} · ${sub ? sub.name : currentSub}`;
   }
   return `${stageLabels[currentStage]} · ${biz.name}`;
 }
@@ -371,9 +380,15 @@ function renderBizGrid() {
 function renderSubGrid() {
   const wrap = document.getElementById('biz-sub-wrap');
   const grid = document.getElementById('biz-sub-grid');
-  if (currentBiz === 'titletd') {
+  const biz = getCurrentBizItem();
+  const subs = getCurrentBizSubOptions();
+  if (biz && biz.hasSub && subs.length) {
     wrap.style.display = 'block';
-    grid.innerHTML = TITLETD_SUB.map(s => `
+    const titleEl = wrap.querySelector('.biz-sub-title');
+    const tipEl = wrap.querySelector('.biz-sub-tip');
+    if (titleEl) titleEl.textContent = `选择${biz.name}细分类型`;
+    if (tipEl) tipEl.textContent = `${subs.length} 选一`;
+    grid.innerHTML = subs.map(s => `
       <div class="biz-sub-card ${currentSub === s.id ? 'selected' : ''}"
            data-sub="${s.id}" onclick="selectSub('${s.id}')">
         <div class="biz-sub-icon">${IL(s.iconKey, 20)}</div>
@@ -397,13 +412,15 @@ function selectStage(stage) {
 }
 
 function selectBiz(id) {
+  const previousBiz = currentBiz;
   currentBiz = id;
-  if (id !== 'titletd') currentSub = null;
+  const biz = getCurrentBizItem();
+  if (!biz || !biz.hasSub || previousBiz !== id) currentSub = null;
   renderBizGrid();
   renderSubGrid();
   syncReqType();
-  // 自动滚动到 Listing 子选项
-  if (id === 'titletd') {
+  // 自动滚动到细分子选项
+  if (biz && biz.hasSub) {
     setTimeout(() => {
       document.getElementById('biz-sub-wrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }, 100);
@@ -440,7 +457,11 @@ function syncReqType() {
 }
 
 function isNewListingDemand() {
-  return currentStage === 'new' && currentBiz === 'titletd' && ['title', 'td', 'titletd'].includes(currentSub);
+  if (currentStage !== 'new') return false;
+  if (currentBiz === 'titletd' && ['title', 'td', 'titletd'].includes(currentSub)) return true;
+  if (currentBiz === 'listing7') return true;
+  if (currentBiz === 'video' && ['selling', 'operation'].includes(currentSub)) return true;
+  return false;
 }
 
 function updateProductLaunchField() {

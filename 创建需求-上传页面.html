@@ -1038,12 +1038,12 @@
           <!-- 业务卡片网格 -->
           <div class="biz-grid" id="biz-grid"></div>
 
-          <!-- Listing 子选项 -->
+          <!-- 需求类型细分子选项 -->
           <div class="biz-sub-wrap" id="biz-sub-wrap" style="display:none;">
             <div class="biz-sub-arrow">▼</div>
             <div class="biz-sub-header">
-              <span class="biz-sub-title">选择 Listing 细分类型</span>
-              <span class="biz-sub-tip">三选一</span>
+              <span class="biz-sub-title">选择细分类型</span>
+              <span class="biz-sub-tip">请选择</span>
             </div>
             <div class="biz-sub-grid" id="biz-sub-grid"></div>
           </div>
@@ -1177,7 +1177,7 @@
             <div class="delivery-hint-item"><strong>新品 Title</strong><span>按新品开卖排期确认</span></div>
             <div class="delivery-hint-item"><strong>新品 TD</strong><span>按新品开卖排期确认</span></div>
             <div class="delivery-hint-item"><strong>新品卖点图片</strong><span>按新品开卖排期确认</span></div>
-            <div class="delivery-hint-item"><strong>新品卖点视频</strong><span>按新品开卖排期确认</span></div>
+            <div class="delivery-hint-item"><strong>新品视频脚本</strong><span>按新品开卖排期确认</span></div>
             <div class="delivery-hint-item"><strong>包装盒</strong><span>按新品开卖排期确认</span></div>
             <div class="delivery-hint-item"><strong>产品说明书</strong><span>按新品开卖排期确认</span></div>
             <div class="delivery-hint-item"><strong>FQA</strong><span>按新品开卖排期确认</span></div>
@@ -1193,7 +1193,7 @@
             <div class="delivery-hint-item"><strong>优化 Title</strong><span>1 个工作日</span></div>
             <div class="delivery-hint-item"><strong>优化 TD</strong><span>2 个工作日</span></div>
             <div class="delivery-hint-item"><strong>优化卖点图片</strong><span>1 个工作日</span></div>
-            <div class="delivery-hint-item"><strong>优化卖点视频</strong><span>1 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>优化视频脚本</strong><span>1 个工作日</span></div>
             <div class="delivery-hint-item"><strong>包装盒</strong><span>2 个工作日</span></div>
             <div class="delivery-hint-item"><strong>优化说明书</strong><span>2 个工作日</span></div>
             <div class="delivery-hint-item"><strong>优化 FQA</strong><span>待配置</span></div>
@@ -1489,7 +1489,6 @@
       </div>
       <div class="aichat-tabs">
         <button class="aichat-tab active" data-tab="knowledge" onclick="switchAiRightTab(this,'knowledge')">背景知识</button>
-        <button class="aichat-tab"        data-tab="tools"     onclick="switchAiRightTab(this,'tools')">工具</button>
       </div>
       <div class="aichat-side-body" id="aichat-right-body">
         <!-- 动态渲染 -->
@@ -1562,6 +1561,32 @@
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeDetailModal()">关闭</button>
       <button class="btn btn-primary" onclick="copyModalContent()" id="modal-copy-btn"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 文案生成候选选择弹窗 ===== -->
+<div
+  class="copy-draft-overlay"
+  id="copy-draft-picker"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="copy-draft-title"
+  onclick="if(event.target===this)closeCopyDraftPicker()"
+>
+  <div class="copy-draft-modal" onclick="event.stopPropagation()">
+    <div class="copy-draft-head">
+      <div>
+        <h3 id="copy-draft-title">选择一个初稿方向</h3>
+        <p id="copy-draft-subtitle">AI 已生成 3 个候选版本，选择最接近目标的版本后进入对话调优。</p>
+      </div>
+      <button type="button" class="copy-draft-close" onclick="closeCopyDraftPicker()" title="关闭">×</button>
+    </div>
+    <div class="copy-draft-body" id="copy-draft-body"></div>
+    <div class="copy-draft-foot">
+      <button type="button" class="btn btn-secondary" onclick="closeCopyDraftPicker()">取消</button>
+      <button type="button" class="btn btn-secondary" onclick="regenerateCopyDrafts()">重新生成</button>
+      <button type="button" class="btn btn-primary" onclick="enterAiChatWithSelectedDraft()">选择此版本并进入调优</button>
     </div>
   </div>
 </div>

@@ -8,7 +8,7 @@ const BIZ_TYPES = [
   { id: 'manual',   iconKey: 'manual',   name: '产品说明书',     desc: '使用说明 / 介绍' },
   { id: 'listing7', iconKey: 'image',    name: '卖点图片',         desc: '主图卖点文案' },
   { id: 'titletd',  iconKey: 'titletd',  name: 'Listing',        desc: '标题与描述',  hasSub: true },
-  { id: 'video',    iconKey: 'video',    name: '卖点视频',       desc: '卖点视频文案' },
+  { id: 'video',    iconKey: 'video',    name: '视频脚本',       desc: '卖点/操作视频文案', hasSub: true },
   { id: 'faq',      iconKey: 'faq',      name: 'FQA',            desc: '常见问题解答' },
   { id: 'ad',       iconKey: 'ad',       name: '广告创意',       desc: '广告文案 / 素材' },
   { id: 'grass',    iconKey: 'spark',    name: '种草文案',       desc: '社媒种草内容' },
@@ -20,6 +20,16 @@ const TITLETD_SUB = [
   { id: 'td',       iconKey: 'td',      name: 'TD',        desc: '仅描述' },
   { id: 'titletd',  iconKey: 'titletd', name: 'Listing',   desc: '标题 + 描述' },
 ];
+
+const VIDEO_SUB = [
+  { id: 'selling',   iconKey: 'video',  name: '卖点视频', desc: '产品卖点展示 / 种草短视频脚本' },
+  { id: 'operation', iconKey: 'manual', name: '操作视频', desc: '安装步骤 / 使用方法 / 操作演示脚本' },
+];
+
+const BIZ_SUB_MAP = {
+  titletd: TITLETD_SUB,
+  video: VIDEO_SUB,
+};
 
 const stageLabels = { new: '新品', old: '优化' };
 
@@ -33,9 +43,9 @@ const reqTypeLabels = new Proxy({}, {
     const biz = parts[1];
     const sub = parts[2];
     const stageLabel = stageLabels[stage] || stage;
-    if (biz === 'titletd' && sub) {
-      const subItem = TITLETD_SUB.find(s => s.id === sub);
-      return `${stageLabel} · ${subItem ? subItem.name : 'Listing'}`;
+    if (sub && BIZ_SUB_MAP[biz]) {
+      const subItem = BIZ_SUB_MAP[biz].find(s => s.id === sub);
+      return `${stageLabel} · ${subItem ? subItem.name : biz}`;
     }
     const bizItem = BIZ_TYPES.find(b => b.id === biz);
     return `${stageLabel} · ${bizItem ? bizItem.name : biz}`;

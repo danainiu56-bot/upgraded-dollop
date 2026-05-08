@@ -5,10 +5,12 @@
 
 const RESULT_MODULES = [
   { id: 'mod-basic',     iconKey: 'basic',   iconBg: 'blue',   title: '基础信息',  desc: 'SKU、站点、品类等核心字段' },
+  { id: 'mod-optimization', iconKey: 'keyword', iconBg: 'purple', title: '优化信息', desc: '原文、原因与优化动作' },
   { id: 'mod-product',   iconKey: 'package', iconBg: 'orange', title: '产品信息',  desc: '产品名称、规格、特性' },
   { id: 'mod-seo',       iconKey: 'keyword', iconBg: 'pink',   title: 'SEO 信息', desc: 'SEO 关键词与搜索频率' },
   { id: 'mod-competitor',iconKey: 'compete', iconBg: 'blue',   title: '竞对信息',  desc: '主要竞品' },
   { id: 'mod-selling',   iconKey: 'bullets', iconBg: 'green',  title: '卖点信息',  desc: '核心卖点排序与说明' },
+  { id: 'mod-video-display', iconKey: 'video', iconBg: 'orange', title: '卖点展示', desc: '7 个卖点的视频画面 brief' },
   { id: 'mod-image-creative', iconKey: 'image', iconBg: 'pink', title: '卖点创意信息', desc: '主图、图2-图7与富文本创意方向' },
   { id: 'mod-audience',  iconKey: 'user',    iconBg: 'purple', title: '目标人群',  desc: '用户画像与触达渠道' },
   { id: 'mod-pain',      iconKey: 'aplus',   iconBg: 'orange', title: '用户痛点',  desc: '产品可解决的用户痛点' },
@@ -26,6 +28,40 @@ const MOCK_DATA = {
     { label: '品牌',         value: 'AUVON' },
     { label: '文案人员',     value: 'Mason' },
   ],
+  optimization: {
+    summary: {
+      target: '提升关键词覆盖与卖点表达效率',
+      priority: 'P1',
+      scope: 'Title / TD / Listing 内容优化',
+    },
+    originals: {
+      title: [
+        { label: '优化的原文 Title', value: 'AUVON Weekly Pill Organizer, 7 Day Pill Box for Vitamins and Medicine, Portable Travel Pill Case' },
+      ],
+      td: [
+        { label: '优化的原文 TD 1', value: '7 day pill organizer helps you plan weekly pills, vitamins and supplements.' },
+        { label: '优化的原文 TD 2', value: 'Portable pill case is suitable for travel, office and daily use.' },
+        { label: '优化的原文 TD 3', value: 'Easy to open lids and separate compartments keep pills organized.' },
+      ],
+      listing: [
+        { label: '原文 Title', value: 'AUVON Weekly Pill Organizer, 7 Day Pill Box for Vitamins and Medicine, Portable Travel Pill Case' },
+        { label: '原文 Bullet 1', value: '7 day pill organizer helps you plan weekly pills, vitamins and supplements.' },
+        { label: '原文 Bullet 2', value: 'Portable pill case is suitable for travel, office and daily use.' },
+        { label: '原文 Bullet 3', value: 'Easy to open lids and separate compartments keep pills organized.' },
+      ],
+    },
+    reasons: [
+      '核心关键词 weekly pill organizer、travel pill case 覆盖不足，标题前半段搜索承接弱。',
+      '卖点顺序偏功能罗列，未优先回答容量、防洒、老人友好等转化问题。',
+      '部分表达偏泛，缺少美区用户更习惯的直接、可验证描述。',
+    ],
+    areas: ['标题前 80 字符', '核心关键词', 'Bullet 1-3', '卖点排序', 'GEO 本地化表达'],
+    actions: [
+      { problem: '关键词位置靠后', action: '将 weekly pill organizer 与 7 day pill box 前置，并保留品牌词。', effect: '增强搜索相关性与首屏识别效率。' },
+      { problem: '卖点表达泛化', action: '按容量、防洒便携、老人友好重排 Bullet。', effect: '让用户先看到购买决策最关键的信息。' },
+      { problem: '本地化不足', action: '使用短句和场景化表达，避免医疗功效承诺。', effect: '提升可读性并降低合规风险。' },
+    ],
+  },
   product: {
     image: 'assets/product-pill-box-black.png',
     imageAlt: 'AUVON 黑色 7 天药盒主图',
@@ -51,6 +87,11 @@ const MOCK_DATA = {
     ],
   },
   imageProduct: {
+    competitorSources: [
+      { brand: 'EZY DOSE', asin: 'B07YYYY1234', link: 'https://www.amazon.com/dp/B07YYYY1234', focus: '容量表达 / 彩色分格主图' },
+      { brand: 'Sukuos', asin: 'B08ZZZZ5678', link: 'https://www.amazon.com/dp/B08ZZZZ5678', focus: '防洒客诉 / 旅行携带场景' },
+      { brand: 'Sagely', asin: 'B09WWWW9012', link: 'https://www.amazon.com/dp/B09WWWW9012', focus: '老人友好 / 高端质感表达' },
+    ],
     competitorAdvantages: [
       { label: '容量表达', value: '竞品多强调 7 天分装，本品可突出 17X4 全黑款的大容量与清晰分区，适合多药/补剂用户。' },
       { label: '品牌露出', value: '竞品主图多为纯产品展示，本品带 AUVON logo，可强化品牌可信度与专业感。' },
@@ -218,6 +259,49 @@ const MOCK_DATA = {
       { title: '终身保修',   desc: '12 个月质量保修 + 30 天无理由退换货，降低决策门槛。' },
     ],
     summary: '围绕「大容量分装 + 防洒便携 + 品牌可信」建立图片卖点主线：主图强调一眼可见的黑色质感与 AUVON 标识，后续图片逐步解释容量、防潮防洒、老人友好、旅行携带和包装清单。',
+  },
+  sellingVideo: {
+    competitors: [
+      { label: '参考链接 1', source: 'Amazon 同类药盒视频', link: 'https://www.amazon.com/dp/B07YYYY1234', point: '参考开场 3 秒容量展示，用打开药盒的俯拍画面快速建立使用场景。' },
+      { label: '参考链接 2', source: '竞品 A+ 使用场景图', link: 'https://www.amazon.com/dp/B08ZZZZ5678', point: '参考居家与旅行场景切换，突出一周用药从家里到包内的连续动线。' },
+      { label: '参考链接 3', source: '短视频种草脚本', link: 'https://www.amazon.com/dp/B09WWWW9012', point: '参考手模 close-up、字幕节奏和痛点开场，避免医疗功效化表达。' },
+    ],
+    models: [
+      '建议真人：45-70 岁用户或家庭照护者，突出日常用药管理场景。',
+      '无真人版本：手模 + 桌面/床头/旅行包场景，保证画面干净、动作清晰。',
+      '镜头风格：低饱和居家光线，产品与 AUVON logo 保持清晰露出。',
+    ],
+    corePoints: [
+      '一周用药清晰规划',
+      '大容量分格',
+      '防洒便携',
+      '老人友好',
+      'BPA-Free 安全材质',
+      '旅行/办公场景适配',
+      '品牌可信与售后保障',
+    ],
+    usp: [
+      { title: '一周用药清晰规划', desc: '用打开药盒的俯拍镜头快速展示 7 天分区，让用户一眼理解 weekly planning 的核心价值。' },
+      { title: '防洒便携', desc: '通过合盖、放入包内、打开后药片仍有序的连续镜头，强化外出携带的安全感。' },
+    ],
+    ksp: [
+      { title: '大容量分格', desc: '用维生素、鱼油和日常药片的实拍对比，说明每格可承接多种常见用药组合。' },
+      { title: '老人友好', desc: '突出易开启、清晰分区和低理解成本，让中老年用户或照护者快速建立信任。' },
+      { title: 'BPA-Free 安全材质', desc: '用材质 close-up 和合规字幕表达日常药片收纳安全，避免医疗功效承诺。' },
+    ],
+    osp: [
+      { title: '旅行/办公场景适配', desc: '通过床头、办公桌、旅行包三场景切换，扩展产品不止居家使用的购买理由。' },
+      { title: '品牌可信与售后保障', desc: '结尾展示 AUVON logo、包装、说明卡和售后卡，提升交付完整感和品牌背书。' },
+    ],
+    displays: [
+      { no: 1, timestamp: '00:00-00:04', point: '一周用药清晰规划', copy: '一周用药，提前规划，每一天都清清楚楚。', visual: '俯拍打开药盒，展示 7 天分区和已放好的药片，字幕强调 weekly planning / 7-day routine。' },
+      { no: 2, timestamp: '00:04-00:08', point: '大容量分格', copy: '维生素、鱼油、日常药片，一格也能稳稳收纳。', visual: '手部依次放入维生素、鱼油和日常药片，用近景对比普通药盒容量。' },
+      { no: 3, timestamp: '00:08-00:12', point: '防洒便携', copy: '放进包里也安心，出门携带不怕散乱。', visual: '合上卡扣后放入包中并轻晃，切到打开后药片仍有序摆放。' },
+      { no: 4, timestamp: '00:12-00:16', point: '老人友好', copy: '清晰分区，轻松打开，家人使用更省心。', visual: '老人或手模轻松打开盖子，镜头扫过清晰分区和易识别结构。' },
+      { no: 5, timestamp: '00:16-00:20', point: 'BPA-Free 安全材质', copy: 'BPA-Free 材质，适合日常药片和补剂收纳。', visual: '材质 close-up + BPA-Free 图标式字幕，只表达日常药片收纳安全，不做医疗功效承诺。' },
+      { no: 6, timestamp: '00:20-00:25', point: '旅行/办公场景适配', copy: '居家、办公、旅行，一盒满足多场景用药管理。', visual: '床头、办公桌、旅行包三个场景快速切换，强调 home / office / travel。' },
+      { no: 7, timestamp: '00:25-00:30', point: '品牌可信与售后保障', copy: 'AUVON 品牌品质，让日常收纳更有保障。', visual: 'AUVON logo、包装、说明卡和售后卡依次入镜，结尾定格产品全景。' },
+    ],
   },
   imageCreative: {
     gallery: [
