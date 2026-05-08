@@ -6,57 +6,57 @@
 <title>创建需求 - 产品营销智能助手</title>
 <!-- ===== CSS ===== -->
 <!-- 1. 设计变量 + 动画 -->
-<link rel="stylesheet" href="styles/_tokens.css?v=20260506-1742">
-<link rel="stylesheet" href="styles/_animations.css?v=20260506-1742">
+<link rel="stylesheet" href="styles/_tokens.css?v=20260508-1802">
+<link rel="stylesheet" href="styles/_animations.css?v=20260508-1802">
 <!-- 2. 通用组件 -->
-<link rel="stylesheet" href="styles/components/button.css?v=20260506-1742">
-<link rel="stylesheet" href="styles/components/card.css?v=20260506-1742">
-<link rel="stylesheet" href="styles/components/form.css?v=20260506-1742">
-<link rel="stylesheet" href="styles/components/sku-select.css?v=20260506-1742">
-<link rel="stylesheet" href="styles/components/editable.css?v=20260506-1742">
-<link rel="stylesheet" href="styles/components/divider.css?v=20260506-1742">
-<link rel="stylesheet" href="styles/components/toast.css?v=20260506-1742">
+<link rel="stylesheet" href="styles/components/button.css?v=20260508-1802">
+<link rel="stylesheet" href="styles/components/card.css?v=20260508-1802">
+<link rel="stylesheet" href="styles/components/form.css?v=20260508-1802">
+<link rel="stylesheet" href="styles/components/sku-select.css?v=20260508-1802">
+<link rel="stylesheet" href="styles/components/editable.css?v=20260508-1802">
+<link rel="stylesheet" href="styles/components/divider.css?v=20260508-1802">
+<link rel="stylesheet" href="styles/components/toast.css?v=20260508-1802">
 <!-- 3. 页面级样式（按业务模块） -->
-<link rel="stylesheet" href="styles/pages/topbar.css?v=20260506-1742">
-<link rel="stylesheet" href="styles/pages/layout.css?v=20260506-1742">
-<link rel="stylesheet" href="styles/pages/wizard.css?v=20260506-1742">
-<link rel="stylesheet" href="styles/pages/result.css?v=20260506-1742">
-<link rel="stylesheet" href="styles/pages/demand-list.css?v=20260506-1742">
-<link rel="stylesheet" href="styles/pages/copy-list.css?v=20260506-1742">
-<link rel="stylesheet" href="styles/pages/workbench.css?v=20260506-1742">
-<link rel="stylesheet" href="styles/pages/ai-chat.css?v=20260506-1742">
+<link rel="stylesheet" href="styles/pages/topbar.css?v=20260508-1802">
+<link rel="stylesheet" href="styles/pages/layout.css?v=20260508-1802">
+<link rel="stylesheet" href="styles/pages/wizard.css?v=20260508-1802">
+<link rel="stylesheet" href="styles/pages/result.css?v=20260508-1802">
+<link rel="stylesheet" href="styles/pages/demand-list.css?v=20260508-1802">
+<link rel="stylesheet" href="styles/pages/copy-list.css?v=20260508-1802">
+<link rel="stylesheet" href="styles/pages/workbench.css?v=20260508-1802">
+<link rel="stylesheet" href="styles/pages/ai-chat.css?v=20260508-1802">
 
 <!-- ===== Mock 数据层（必须在主 script 之前加载，因为有顶层立即引用）===== -->
 <!-- 接 API 时只改这些文件 -->
-<script src="scripts/data/req-types.js?v=20260506-1742"></script>
-<script src="scripts/data/persons.js?v=20260506-1742"></script>
-<script src="scripts/data/skus.js?v=20260506-1742"></script>
-<script src="scripts/data/demand-list.js?v=20260506-1742"></script>
-<script src="scripts/data/copy-list.js?v=20260506-1742"></script>
-<script src="scripts/data/result-mock.js?v=20260506-1742"></script>
-<script src="scripts/data/ai-skills.js?v=20260506-1742"></script>
-<script src="scripts/data/ai-history.js?v=20260506-1742"></script>
-<script src="scripts/data/bg-knowledge.js?v=20260506-1742"></script>
-<script src="scripts/data/score-rules.js?v=20260506-1742"></script>
+<script src="scripts/data/req-types.js?v=20260508-1802"></script>
+<script src="scripts/data/persons.js?v=20260508-1802"></script>
+<script src="scripts/data/skus.js?v=20260508-1802"></script>
+<script src="scripts/data/demand-list.js?v=20260508-1802"></script>
+<script src="scripts/data/copy-list.js?v=20260508-1802"></script>
+<script src="scripts/data/result-mock.js?v=20260508-1802"></script>
+<script src="scripts/data/ai-skills.js?v=20260508-1802"></script>
+<script src="scripts/data/ai-history.js?v=20260508-1802"></script>
+<script src="scripts/data/bg-knowledge.js?v=20260508-1802"></script>
+<script src="scripts/data/score-rules.js?v=20260508-1802"></script>
 
 <!-- ===== Core 基础设施（在数据之后、主 inline 脚本之前加载）===== -->
-<script src="scripts/core/icons.js?v=20260506-1742"></script>
-<script src="scripts/core/utils.js?v=20260506-1742"></script>
-<script src="scripts/core/toast.js?v=20260506-1742"></script>
-<script src="scripts/core/router.js?v=20260506-1742"></script>
+<script src="scripts/core/icons.js?v=20260508-1802"></script>
+<script src="scripts/core/utils.js?v=20260508-1802"></script>
+<script src="scripts/core/toast.js?v=20260508-1802"></script>
+<script src="scripts/core/router.js?v=20260508-1802"></script>
 
 <!-- ===== 页面级 JS（按业务模块） ===== -->
-<script src="scripts/pages/topbar.js?v=20260506-1742"></script>
-<script src="scripts/pages/wizard.js?v=20260506-1742"></script>
-<script src="scripts/pages/result.js?v=20260506-1742"></script>
-<script src="scripts/pages/demand-list.js?v=20260506-1742"></script>
-<script src="scripts/pages/copy-list.js?v=20260506-1742"></script>
-<script src="scripts/pages/review-list.js?v=20260506-1742"></script>
-<script src="scripts/pages/copy-review-list.js?v=20260506-1742"></script>
-<script src="scripts/pages/ai-chat.js?v=20260506-1742"></script>
+<script src="scripts/pages/topbar.js?v=20260508-1802"></script>
+<script src="scripts/pages/wizard.js?v=20260508-1802"></script>
+<script src="scripts/pages/result.js?v=20260508-1802"></script>
+<script src="scripts/pages/demand-list.js?v=20260508-1802"></script>
+<script src="scripts/pages/copy-list.js?v=20260508-1802"></script>
+<script src="scripts/pages/review-list.js?v=20260508-1802"></script>
+<script src="scripts/pages/copy-review-list.js?v=20260508-1802"></script>
+<script src="scripts/pages/ai-chat.js?v=20260508-1802"></script>
 
 <!-- ===== 入口（DOMContentLoaded 初始化）===== -->
-<script src="scripts/main.js?v=20260506-1742"></script>
+<script src="scripts/main.js?v=20260508-1802"></script>
 </head>
 <body>
 
