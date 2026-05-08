@@ -1004,6 +1004,91 @@
     align-items: center;
     gap: 8px;
     max-width: 100%;
+    position: relative;
+  }
+  .prod-img-upload {
+    cursor: default;
+  }
+  .prod-img-upload.compact {
+    padding: 6px;
+  }
+  .prod-img-upload.compact .product-image {
+    max-width: 110px;
+    max-height: 110px;
+  }
+  .prod-img-upload.compact .prod-img-upload-zone {
+    width: 110px;
+    height: 110px;
+    font-size: 11px;
+    gap: 6px;
+  }
+  .prod-img-upload.compact .prod-img-upload-zone svg {
+    width: 20px;
+    height: 20px;
+  }
+  .prod-img-upload.compact .prod-img-btn {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+  .prod-img-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.38);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    opacity: 0;
+    transition: opacity 0.18s;
+    pointer-events: none;
+  }
+  .prod-img-upload:hover .prod-img-overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .prod-img-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1.5px solid rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    transition: background 0.15s;
+  }
+  .prod-img-btn:hover {
+    background: rgba(255,255,255,0.28);
+  }
+  .prod-img-del:hover {
+    background: rgba(239,68,68,0.55);
+    border-color: rgba(239,68,68,0.8);
+  }
+  .prod-img-upload-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 240px;
+    height: 200px;
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    background: var(--bg);
+  }
+  .prod-img-upload-zone:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary);
   }
   .product-image {
     max-width: 240px;
@@ -1241,15 +1326,11 @@
   .stp-compare-table .stp-col-self { background: #fff7ed; }
   .stp-col-name { font-weight: 700; color: var(--text); font-size: 13px; }
   .stp-col-sub { font-size: 11px; color: var(--text-light); margin-top: 2px; }
-  .stp-img-cell { padding: 8px 12px; }
+  .stp-img-cell { padding: 8px 12px; text-align: center; }
   .stp-img-wrap {
-    width: 100px;
-    height: 100px;
-    margin: 0 auto;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: white;
-    overflow: hidden;
+    width: 100px; height: 100px; margin: 0 auto;
+    border: 1px solid var(--border); border-radius: 6px;
+    background: white; overflow: hidden;
     display: flex; align-items: center; justify-content: center;
   }
   .stp-img { width: 100%; height: 100%; object-fit: contain; }
@@ -1258,6 +1339,24 @@
     color: var(--text-light); font-size: 12px;
     align-items: center; justify-content: center;
   }
+  /* STP 表格内的图片上传组件覆盖 */
+  .stp-img-cell .product-image-wrap {
+    width: 100px; height: 100px;
+    margin: 0 auto; padding: 0;
+    display: flex; align-items: center; justify-content: center;
+    overflow: visible;
+  }
+  .stp-img-cell .product-image {
+    width: 100%; height: 100%;
+    max-width: none; max-height: none;
+    object-fit: contain; border-radius: 6px;
+  }
+  .stp-img-cell .prod-img-upload-zone {
+    width: 100px; height: 100px;
+    font-size: 11px; gap: 4px;
+  }
+  .stp-img-cell .prod-img-upload-zone svg { width: 18px; height: 18px; }
+  .stp-img-cell .prod-img-btn { padding: 4px 8px; font-size: 11px; gap: 3px; }
 
   .stp-card {
     background: white;
@@ -1505,6 +1604,44 @@
   .image-competitor-source-card a:hover {
     text-decoration: underline;
   }
+  .image-competitor-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .image-competitor-link-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--bg);
+    font-size: 12px;
+    color: var(--text);
+  }
+  .image-competitor-link-brand {
+    font-weight: 600;
+    color: var(--text);
+  }
+  .image-competitor-link-asin {
+    color: var(--text-muted);
+    font-family: monospace;
+    font-size: 11px;
+  }
+  .image-competitor-link-url {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .image-competitor-link-url:hover {
+    text-decoration: underline;
+  }
   .image-insight-list {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1520,8 +1657,25 @@
     display: block;
     color: var(--text);
     font-size: 13px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
+  .image-insight-source {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .image-insight-source a {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .image-insight-source a:hover { text-decoration: underline; }
   .image-insight-text {
     color: var(--text-muted);
     font-size: 13px;
@@ -1890,22 +2044,36 @@
     font-weight: 700;
   }
   .faq-competitor-img-wrap {
-    width: 100%;
-    height: 120px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
+    width: 100%; height: 120px;
+    border: 1px solid var(--border); border-radius: 12px;
     background: #f8fafc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    margin-bottom: 10px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; margin-bottom: 10px;
   }
-  .faq-competitor-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  .faq-competitor-img { width: 100%; height: 100%; object-fit: cover; }
+  /* FAQ 竞品图上传组件覆盖 */
+  .prod-img-upload.faq-img {
+    width: 100%; height: 120px;
+    margin-bottom: 10px; padding: 0;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
   }
+  .prod-img-upload.faq-img .product-image {
+    width: 100%; height: 100%;
+    max-width: none; max-height: none;
+    object-fit: cover; border-radius: 12px;
+  }
+  .prod-img-upload.faq-img .product-image-fallback {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: var(--text-light);
+  }
+  .prod-img-upload.faq-img .prod-img-upload-zone {
+    width: 100%; height: 120px; border-radius: 12px;
+    font-size: 12px; gap: 6px;
+  }
+  .prod-img-upload.faq-img .prod-img-upload-zone svg { width: 20px; height: 20px; }
+  .prod-img-upload.faq-img .prod-img-btn { padding: 5px 10px; font-size: 12px; }
   .faq-competitor-side strong {
     display: block;
     color: var(--text);

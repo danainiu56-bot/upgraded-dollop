@@ -259,7 +259,7 @@ function switchTab(tab) {
 }
 
 function sortDemandListByStatus(list) {
-  const order = { '待审核': 1, '已驳回': 2, '已通过': 3, '处理中': 4, '已完成': 5 };
+  const order = { '待审核': 1, '待处理': 2, '已驳回': 3, '已通过': 4, '处理中': 5, '已完成': 6 };
   return (list || []).slice().sort((a, b) => (order[a.status] || 99) - (order[b.status] || 99));
 }
 
@@ -373,13 +373,15 @@ function renderListTable() {
     return;
   }
   tbody.innerHTML = currentListData.map(r => {
+    const rowIdx = LIST_DATA.indexOf(r);
     const typeCls = REQ_TYPE_STYLES[r.type] || 'req-type-listing';
     const brandCls = r.brand === 'ZIKEE' ? 'brand-zikee' : (r.brand === 'AMOOS' ? 'brand-amoos' : '');
     const statusClsMap = {
       '待审核': 'status-review',
+      '待处理': 'status-doing',
+      '处理中': 'status-doing',
       '已通过': 'status-pass',
       '已驳回': 'status-reject',
-      '处理中': 'status-doing',
       '已完成': 'status-done',
     };
     const statusCls = statusClsMap[r.status] || 'status-doing';
@@ -399,7 +401,7 @@ function renderListTable() {
       <td>${renderLaunchDate(r)}</td>
       <td>${r.date}</td>
       <td><span class="status-pill ${statusCls}">${r.status || '—'}</span></td>
-      <td onclick="event.stopPropagation()">${renderRowActions(r)}</td>
+      <td onclick="event.stopPropagation()">${renderRowActions(r, rowIdx)}</td>
     </tr>`;
   }).join('');
   document.getElementById('pg-total').textContent = currentListData.length || LIST_DATA.length;

@@ -9,7 +9,7 @@ const BIZ_TYPES = [
   { id: 'listing7', iconKey: 'image',    name: '卖点图片',         desc: '主图卖点文案' },
   { id: 'titletd',  iconKey: 'titletd',  name: 'Listing',        desc: '标题与描述',  hasSub: true },
   { id: 'video',    iconKey: 'video',    name: '视频脚本',       desc: '卖点/操作视频文案', hasSub: true },
-  { id: 'faq',      iconKey: 'faq',      name: 'FQA',            desc: '常见问题解答' },
+  { id: 'faq',      iconKey: 'faq',      name: 'FAQ',            desc: '常见问题解答' },
   { id: 'ad',       iconKey: 'ad',       name: '广告创意',       desc: '广告文案 / 素材' },
   { id: 'grass',    iconKey: 'spark',    name: '种草文案',       desc: '社媒种草内容' },
   { id: 'news',     iconKey: 'news',     name: '新闻稿',         desc: '品牌 / 产品新闻发布' },
@@ -65,12 +65,16 @@ const subLabels = {
 };
 
 const REQ_TYPE_STYLES = {
-  '新品Listing':  'req-type-new',
-  '新品Title':    'req-type-new',
-  '新品TD':       'req-type-new',
-  '新品Title TD': 'req-type-new',
-  '老品Title':    'req-type-old',
-  '老品TD':       'req-type-old',
-  '老品Title TD': 'req-type-old',
+  '新品Listing':   'req-type-new',     // 紫
+  '新品Title':     'req-type-indigo',  // 靛蓝
+  '新品TD':        'req-type-sky',     // 天蓝
+  '新品Title TD':  'req-type-violet',  // 浅紫
+  '新品图片文案':  'req-type-td',      // 玫红
+  '新品FAQ':       'req-type-title',   // 琥珀
+  '新品卖点视频':  'req-type-orange',  // 橙
+  '老品Title':     'req-type-teal',    // 青绿
+  '老品TD':        'req-type-cyan',    // 青
+  '老品Title TD':  'req-type-old',     // 石板灰
+  '卖点视频':      'req-type-listing', // 绿
 };
 

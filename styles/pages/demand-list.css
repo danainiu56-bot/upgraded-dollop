@@ -588,11 +588,17 @@
     font-size: 11px;
     font-weight: 600;
   }
-  .req-type-new { background: #ede9fe; color: #5b21b6; }
-  .req-type-old { background: #dbeafe; color: #1e40af; }
-  .req-type-listing { background: #d1fae5; color: #065f46; }
-  .req-type-title { background: #fef3c7; color: #92400e; }
-  .req-type-td { background: #fce7f3; color: #831843; }
+  .req-type-new     { background: #ede9fe; color: #5b21b6; }  /* 新品Listing  紫 */
+  .req-type-indigo  { background: #e0e7ff; color: #3730a3; }  /* 新品Title    靛 */
+  .req-type-sky     { background: #e0f2fe; color: #0369a1; }  /* 新品TD       天蓝 */
+  .req-type-violet  { background: #f5f3ff; color: #6d28d9; }  /* 新品Listing全套 浅紫 */
+  .req-type-td      { background: #ffe4e6; color: #9f1239; }  /* 新品图片文案 玫红 */
+  .req-type-title   { background: #fef3c7; color: #92400e; }  /* 新品FAQ      琥珀 */
+  .req-type-orange  { background: #ffedd5; color: #9a3412; }  /* 新品卖点视频 橙 */
+  .req-type-teal    { background: #ccfbf1; color: #0f766e; }  /* 老品Title    青绿 */
+  .req-type-cyan    { background: #cffafe; color: #0e7490; }  /* 老品TD       青 */
+  .req-type-old     { background: #e2e8f0; color: #475569; }  /* 老品Title TD 石板 */
+  .req-type-listing { background: #d1fae5; color: #065f46; }  /* 卖点视频     绿 */
 
   .brand-tag {
     display: inline-flex;
@@ -933,3 +939,123 @@
     .filter-group { min-width: 110px; }
   }
 
+
+
+/* ===== 变更需求弹窗 ===== */
+  .change-modal-box {
+    max-width: 960px;
+    max-height: 90vh;
+  }
+
+  .change-modal-box .modal-body {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .cm-section {
+    padding: 20px 24px;
+  }
+
+  .cm-section + .cm-section {
+    border-top: 1px solid var(--border);
+  }
+
+  .cm-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cm-section-badge {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--primary);
+    background: #eef2ff;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  .cm-modules {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cm-modules .module-card {
+    box-shadow: none;
+    border: 1px solid var(--border);
+  }
+
+  .change-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 20px;
+  }
+
+  .change-form-row {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .change-form-row-textarea {
+    grid-column: 1 / -1;
+    align-items: flex-start;
+  }
+
+  .change-form-row-textarea .change-form-label {
+    padding-top: 8px;
+  }
+
+  .change-form-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .change-form-input {
+    width: 100%;
+  }
+
+  .change-form-readonly {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 10px;
+    display: block;
+  }
+
+  .change-form-textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 13px;
+    color: var(--text);
+    resize: vertical;
+    outline: none;
+    font-family: inherit;
+    line-height: 1.6;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+  }
+
+  .change-form-textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+  }
+
+  .change-form-textarea::placeholder {
+    color: var(--text-muted);
+  }

@@ -230,14 +230,72 @@ function getModuleMeta(id) {
 // path 形如 "basic.0.value" 或 "product.name" / "seo.title"
 // 内联可编辑字段渲染：单击编辑，失焦保存
 
+// ===== 产品图：带上传 / 删除功能 =====
+function renderProductImageUpload(imgSrc, imgAlt, imgKey, extraCls = '') {
+  const hasImg = !!imgSrc;
+  return `
+    <div class="product-image-wrap prod-img-upload ${extraCls}" data-img-key="${imgKey}">
+      ${hasImg ? `
+        <img class="product-image" src="${imgSrc}" alt="${imgAlt || ''}"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+        <div class="product-image-fallback" style="display:none;">暂无产品图</div>
+        <div class="prod-img-overlay">
+          <label class="prod-img-btn" title="替换图片" onclick="event.stopPropagation()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            替换
+            <input type="file" accept="image/*" style="display:none;" onchange="onProductImgChange(event,'${imgKey}')">
+          </label>
+          <button class="prod-img-btn prod-img-del" title="删除图片" onclick="onProductImgDelete('${imgKey}')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            删除
+          </button>
+        </div>
+      ` : `
+        <label class="prod-img-upload-zone" title="点击上传图片">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span>点击上传图片</span>
+          <input type="file" accept="image/*" style="display:none;" onchange="onProductImgChange(event,'${imgKey}')">
+        </label>
+      `}
+    </div>`;
+}
+
+function onProductImgChange(event, imgKey) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const wrap = document.querySelector(`.prod-img-upload[data-img-key="${imgKey}"]`);
+    if (!wrap) return;
+    // 更新 MOCK_DATA
+    const keys = imgKey.split('.');
+    let obj = MOCK_DATA;
+    for (let i = 0; i < keys.length - 1; i++) obj = obj[keys[i]];
+    obj[keys[keys.length - 1]] = e.target.result;
+    // 局部重渲染图片区
+    wrap.outerHTML = renderProductImageUpload(e.target.result, '', imgKey);
+  };
+  reader.readAsDataURL(file);
+}
+
+function onProductImgDelete(imgKey) {
+  const wrap = document.querySelector(`.prod-img-upload[data-img-key="${imgKey}"]`);
+  if (!wrap) return;
+  const keys = imgKey.split('.');
+  let obj = MOCK_DATA;
+  for (let i = 0; i < keys.length - 1; i++) obj = obj[keys[i]];
+  obj[keys[keys.length - 1]] = '';
+  wrap.outerHTML = renderProductImageUpload('', '', imgKey);
+}
+
 // ===== 1. 基础信息 =====
 function renderBasic() {
   const rows = getResultBasicRows();
   return `<div class="info-grid-2">
-    ${rows.map((b, i) =>
+    ${rows.map(b =>
       `<div class="info-grid-item">
         <div class="label">${b.label}</div>
-        <div class="value">${editableField(`basic.${i}.value`, b.value, { cls: 'edit-inline-value' })}</div>
+        <div class="value">${b.value}</div>
       </div>`
     ).join('')}
   </div>`;
@@ -289,11 +347,7 @@ function renderProduct() {
   return `
     <div class="prod-section">
       <div class="prod-section-label">产品图</div>
-      <div class="product-image-wrap">
-        <img class="product-image" src="${p.image}" alt="${p.imageAlt || ''}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
-        <div class="product-image-fallback" style="display:none;">暂无产品图</div>
-        <div class="product-image-cap">${editableField('product.imageAlt', p.imageAlt || '', { cls: 'edit-inline-value' })}</div>
-      </div>
+      ${renderProductImageUpload(p.image, p.imageAlt || '', 'product.image')}
     </div>
     <div class="prod-section">
       <div class="prod-section-label">产品定位</div>
@@ -342,11 +396,7 @@ function renderFaqProduct() {
     <div class="image-product-grid faq-product-grid">
       <div class="prod-section image-product-main">
         <div class="prod-section-label">产品图</div>
-        <div class="product-image-wrap">
-          <img class="product-image" src="${p.image}" alt="${p.imageAlt || ''}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
-          <div class="product-image-fallback" style="display:none;">暂无产品图</div>
-          <div class="product-image-cap">${editableField('product.imageAlt', p.imageAlt || '', { cls: 'edit-inline-value' })}</div>
-        </div>
+        ${renderProductImageUpload(p.image, p.imageAlt || '', 'product.image')}
         <div class="image-product-position">
           <div class="prod-section-label">产品定位</div>
           <div class="text-block editable">${editableField('product.positioning', p.positioning, { cls: 'edit-block', multiline: true })}</div>
@@ -362,11 +412,7 @@ function renderImageProduct() {
     <div class="image-product-grid">
       <div class="prod-section image-product-main">
         <div class="prod-section-label">产品图</div>
-        <div class="product-image-wrap">
-          <img class="product-image" src="${p.image}" alt="${p.imageAlt || ''}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
-          <div class="product-image-fallback" style="display:none;">暂无产品图</div>
-          <div class="product-image-cap">${editableField('product.imageAlt', p.imageAlt || '', { cls: 'edit-inline-value' })}</div>
-        </div>
+        ${renderProductImageUpload(p.image, p.imageAlt || '', 'product.image')}
         <div class="image-product-position">
           <div class="prod-section-label">产品定位</div>
           <div class="text-block editable">${editableField('product.positioning', p.positioning, { cls: 'edit-block', multiline: true })}</div>
@@ -375,25 +421,22 @@ function renderImageProduct() {
     </div>
     <div class="prod-section image-product-follow-section">
       <div class="prod-section-label">竞争对手对比-优势差异点 <span class="prod-section-hint">(${img.competitorAdvantages.length} 项)</span></div>
-      <div class="image-competitor-source-list">
-        ${img.competitorSources.map((it, i) => `
-          <div class="image-competitor-source-card">
-            <div class="image-competitor-source-head">
-              <strong>${editableField(`imageProduct.competitorSources.${i}.brand`, it.brand, { cls: 'edit-inline-value' })}</strong>
-              <span>${editableField(`imageProduct.competitorSources.${i}.asin`, it.asin, { cls: 'edit-inline-value' })}</span>
-            </div>
-            <div class="image-competitor-source-focus">${editableField(`imageProduct.competitorSources.${i}.focus`, it.focus, { cls: 'edit-inline-value' })}</div>
-            <a href="${it.link}" target="_blank" rel="noopener" onclick="event.stopPropagation()">查看 Amazon</a>
-          </div>
-        `).join('')}
-      </div>
       <div class="image-insight-list">
-        ${img.competitorAdvantages.map((it, i) => `
+        ${img.competitorAdvantages.map((it, i) => {
+          const src = img.competitorSources[i];
+          return `
           <div class="image-insight-item">
             <strong>${editableField(`imageProduct.competitorAdvantages.${i}.label`, it.label, { cls: 'edit-inline-value' })}</strong>
+            ${src ? `<div class="image-insight-source">
+              <span>${editableField(`imageProduct.competitorSources.${i}.brand`, src.brand, { cls: 'edit-inline-value' })}</span>
+              <a href="${src.link}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Amazon
+              </a>
+            </div>` : ''}
             <div class="image-insight-text">${editableField(`imageProduct.competitorAdvantages.${i}.value`, it.value, { cls: 'edit-inline-value', multiline: true })}</div>
-          </div>
-        `).join('')}
+          </div>`;
+        }).join('')}
       </div>
     </div>
     <div class="prod-section">
@@ -453,10 +496,7 @@ function renderCompetitor() {
     ${MOCK_DATA.competitor.map((c, i) => `
       <div class="competitor-card">
         <div class="competitor-card-head">
-          <div class="competitor-image-wrap">
-            <img class="competitor-image" src="${c.image}" alt="${c.brand}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
-            <div class="competitor-image-fallback" style="display:none;">无图</div>
-          </div>
+          ${renderProductImageUpload(c.image, c.brand, `competitor.${i}.image`, 'compact')}
           <div class="competitor-meta">
             <div class="competitor-brand">
               <span class="competitor-index">竞品 ${i + 1}</span>
@@ -500,11 +540,9 @@ function renderVideoCompetitor() {
           ${data.competitors.map((it, i) => `
             <div class="video-ref-item">
               <div class="video-ref-head">
-                <span>${editableField(`sellingVideo.competitors.${i}.label`, it.label, { cls: 'edit-inline-value' })}</span>
-                <strong>${editableField(`sellingVideo.competitors.${i}.source`, it.source, { cls: 'edit-inline-value' })}</strong>
+                <span>${it.label}</span>
               </div>
               <a href="${it.link}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${editableField(`sellingVideo.competitors.${i}.link`, it.link, { cls: 'edit-inline-value' })}</a>
-              <div class="video-ref-point">${editableField(`sellingVideo.competitors.${i}.point`, it.point, { cls: 'edit-inline-value', multiline: true })}</div>
             </div>
           `).join('')}
         </div>
@@ -530,10 +568,7 @@ function renderFaqCompetitor() {
       <div class="faq-competitor-card">
         <div class="faq-competitor-side">
           <span>${editableField(`faqCompetitors.${i}.label`, c.label, { cls: 'edit-inline-value' })}</span>
-          <div class="faq-competitor-img-wrap">
-            <img class="faq-competitor-img" src="${c.image}" alt="${c.brand}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
-            <div class="competitor-image-fallback" style="display:none;">无图</div>
-          </div>
+          ${renderProductImageUpload(c.image, c.brand, `faqCompetitors.${i}.image`, 'faq-img')}
           <strong>${editableField(`faqCompetitors.${i}.brand`, c.brand, { cls: 'edit-inline-value' })}</strong>
           <a href="${c.link}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${editableField(`faqCompetitors.${i}.link`, c.link, { cls: 'edit-inline-value' })}</a>
         </div>
@@ -866,10 +901,7 @@ function renderSTP() {
           <td class="stp-col-key">图片</td>
           ${stp.columns.map((c, ci) => `
             <td class="${ci === 0 ? 'stp-col-self' : ''} stp-img-cell">
-              <div class="stp-img-wrap">
-                <img class="stp-img" src="${c.image}" alt="${c.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
-                <div class="stp-img-fallback" style="display:none;">无图</div>
-              </div>
+              ${renderProductImageUpload(c.image, c.name, `stp.columns.${ci}.image`, 'compact')}
             </td>
           `).join('')}
         </tr>

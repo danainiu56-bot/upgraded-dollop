@@ -1630,6 +1630,72 @@
 
 
 
+<!-- ===== 变更需求弹窗 ===== -->
+<div id="change-modal" class="modal-overlay" onclick="closeChangeModal()" style="display:none;">
+  <div class="modal-box change-modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h3 id="change-modal-title">变更需求</h3>
+        <p id="change-modal-subtitle" style="font-size:12px;color:var(--text-muted);margin-top:2px;"></p>
+      </div>
+      <button class="modal-close" onclick="closeChangeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="cm-section">
+        <div class="cm-section-title">变更信息</div>
+        <div class="change-form">
+          <div class="change-form-row">
+            <span class="change-form-label">需求类型</span>
+            <span class="change-form-readonly" id="cm-type-label"></span>
+          </div>
+          <div class="change-form-row">
+            <span class="change-form-label">站点</span>
+            <select class="form-select change-form-input" id="cm-site">
+              <option value="us">🇺🇸 美国站 (US)</option>
+              <option value="uk">🇬🇧 英国站 (UK)</option>
+              <option value="de">🇩🇪 德国站 (DE)</option>
+              <option value="fr">🇫🇷 法国站 (FR)</option>
+              <option value="jp">🇯🇵 日本站 (JP)</option>
+              <option value="ca">🇨🇦 加拿大站 (CA)</option>
+              <option value="au">🇦🇺 澳大利亚站 (AU)</option>
+              <option value="ae">🇦🇪 中东站 (AE)</option>
+              <option value="sg">🇸🇬 新加坡站 (SG)</option>
+              <option value="mx">🇲🇽 墨西哥站 (MX)</option>
+            </select>
+          </div>
+          <div class="change-form-row">
+            <span class="change-form-label">子品类</span>
+            <select class="form-select change-form-input" id="cm-subcategory"></select>
+          </div>
+          <div class="change-form-row">
+            <span class="change-form-label">SKU</span>
+            <span class="change-form-readonly" id="cm-sku-label"></span>
+          </div>
+          <div class="change-form-row">
+            <span class="change-form-label">期望交付时间</span>
+            <input type="date" class="form-select change-form-input" id="cm-date">
+          </div>
+          <div class="change-form-row" id="cm-launch-row" style="display:none;">
+            <span class="change-form-label">产品开卖时间</span>
+            <input type="date" class="form-select change-form-input" id="cm-launch-date">
+          </div>
+          <div class="change-form-row change-form-row-textarea">
+            <span class="change-form-label">变更原因</span>
+            <textarea class="change-form-textarea" id="cm-reason" placeholder="请输入变更原因（选填）" rows="3"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="cm-section">
+        <div class="cm-modules" id="cm-modules"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeChangeModal()">取消</button>
+      <button class="btn btn-primary" onclick="submitChangeModal()">确认变更</button>
+    </div>
+  </div>
+</div>
+
 <!-- 开发期自动刷新（仅 http(s) 生效，file:// 自动跳过）-->
 <script src="scripts/core/livereload.js"></script>
 </body>

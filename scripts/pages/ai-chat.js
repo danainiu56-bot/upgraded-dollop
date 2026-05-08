@@ -1638,19 +1638,22 @@ function stopAiResize() {
 }
 
 // 行内操作（按状态决定按钮）
-function renderRowActions(r) {
+function renderRowActions(r, rowIdx) {
   const sku = r.sku;
+  const idx = rowIdx != null ? rowIdx : -1;
   const div = `<span class="row-action-divider"></span>`;
   const detailBtn = `<button class="row-action-btn" onclick="rowAction('detail','${sku}')">详情</button>`;
   let extra = '';
   switch (r.status) {
     case '待审核':
-      return `<div class="row-actions"><button class="row-action-btn warn" onclick="rowAction('change','${sku}')">变更</button></div>`;
+      return `<div class="row-actions"><button class="row-action-btn warn" onclick="rowAction('change','${sku}',${idx})">变更</button></div>`;
     case '已驳回':
       return `<div class="row-actions"><button class="row-action-btn danger" onclick="rowAction('reject_log','${sku}')">驳回记录</button></div>`;
     case '已通过':
       extra = `${div}<button class="row-action-btn" onclick="rowAction('reject_log_readonly','${sku}')">驳回记录</button>`;
       break;
+    case '待处理':
+      return `<div class="row-actions"><button class="row-action-btn warn" onclick="event.stopPropagation();openAiChat('${sku}', '')">文案生成</button></div>`;
     case '处理中':
       extra = '';
       break;
@@ -1660,7 +1663,7 @@ function renderRowActions(r) {
   return `<div class="row-actions">${detailBtn}${extra}</div>`;
 }
 
-function rowAction(act, sku) {
+function rowAction(act, sku, rowIdx) {
   if (act === 'reject_log' && typeof openReviewRejectRecordBySku === 'function') {
     openReviewRejectRecordBySku(sku);
     return;
@@ -1669,22 +1672,129 @@ function rowAction(act, sku) {
     openReviewRejectRecordBySku(sku, { showEdit: false });
     return;
   }
+  if (act === 'change') {
+    openChangeModal(sku, rowIdx);
+    return;
+  }
   const messages = {
     detail: `查看需求详情：${sku}`,
-    change: `打开变更弹窗：${sku}`,
     reject_log: `查看驳回记录：${sku}`,
     reject_log_readonly: `查看驳回记录：${sku}`,
     view_copy: `查看已生成的文案：${sku}`,
     copy_copy: `文案已复制到剪贴板：${sku}`,
   };
   const types = {
-    detail: 'success', change: 'warning', reject_log: 'warning',
+    detail: 'success', reject_log: 'warning',
     view_copy: 'success', copy_copy: 'success'
   };
   if (act === 'copy_copy') {
     try { navigator.clipboard.writeText(`【${sku}】文案内容`); } catch(e) {}
   }
   showToast(messages[act] || act, types[act] || 'success');
+}
+
+// ===== 变更需求弹窗 =====
+const TYPE_TO_RESULT_KEY = {
+  '新品Listing':   'new-titletd-titletd',
+  '新品Title':     'new-titletd-title',
+  '新品TD':        'new-titletd-td',
+  '新品Title TD':  'new-titletd-titletd',
+  '新品图片文案':  'new-listing7',
+  '新品FAQ':       'new-faq',
+  '新品卖点视频':  'new-video-selling',
+  '新品操作视频':  'new-video-operation',
+  '老品Title':     'old-titletd-title',
+  '老品TD':        'old-titletd-td',
+  '老品Title TD':  'old-titletd-titletd',
+};
+
+let _changeRowRef = null;
+
+function openChangeModal(sku, rowIdx) {
+  const row = (rowIdx >= 0 && LIST_DATA[rowIdx])
+           ? LIST_DATA[rowIdx]
+           : LIST_DATA.find(r => r.sku === sku && r.status === '待审核') || LIST_DATA.find(r => r.sku === sku);
+  if (!row) { showToast('未找到需求数据', 'warning'); return; }
+  _changeRowRef = row;
+
+  document.getElementById('change-modal-subtitle').textContent = `${row.type} · ${sku}`;
+  document.getElementById('cm-type-label').textContent = row.type;
+  document.getElementById('cm-sku-label').textContent = sku;
+
+  const siteSelect = document.getElementById('cm-site');
+  siteSelect.value = (row.site || '').toLowerCase();
+
+  const subSel = document.getElementById('cm-subcategory');
+  const cats = typeof subCategoriesData !== 'undefined' ? subCategoriesData : [];
+  subSel.innerHTML = cats.map(s => `<option value="${s.value}">${s.label}</option>`).join('');
+  const matchedSub = cats.find(s => s.label === row.sub);
+  if (matchedSub) subSel.value = matchedSub.value;
+
+  document.getElementById('cm-date').value = (row.date || '').replace(/\//g, '-');
+
+  const needLaunch = /新品.*(Listing|图片文案|卖点视频|操作视频)/.test(row.type) || row.type === '新品Listing';
+  const launchRow = document.getElementById('cm-launch-row');
+  launchRow.style.display = needLaunch ? '' : 'none';
+  if (needLaunch) {
+    document.getElementById('cm-launch-date').value = (row.launch_date || '').replace(/\//g, '-');
+  }
+
+  document.getElementById('cm-reason').value = '';
+
+  _renderChangeModules(row.type);
+
+  const modal = document.getElementById('change-modal');
+  modal.style.display = 'flex';
+}
+
+function _renderChangeModules(type) {
+  const container = document.getElementById('cm-modules');
+  const resultKey = TYPE_TO_RESULT_KEY[type];
+  if (!resultKey || typeof getActiveResultModules !== 'function' || typeof renderModuleCard !== 'function') {
+    container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">该需求类型暂无解析内容</div>';
+    return;
+  }
+
+  const reqTypeEl = document.getElementById('req-type');
+  const savedVal = reqTypeEl ? reqTypeEl.value : '';
+
+  if (reqTypeEl) reqTypeEl.value = resultKey;
+
+  try {
+    const modules = getActiveResultModules();
+    container.innerHTML = modules.map(m => renderModuleCard(m)).join('');
+  } catch (e) {
+    container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px;">渲染失败</div>';
+  }
+
+  if (reqTypeEl) reqTypeEl.value = savedVal;
+}
+
+function closeChangeModal() {
+  document.getElementById('change-modal').style.display = 'none';
+  _changeRowRef = null;
+}
+
+function submitChangeModal() {
+  if (!_changeRowRef) return;
+  const row = _changeRowRef;
+
+  const siteVal = document.getElementById('cm-site').value;
+  const subSel = document.getElementById('cm-subcategory');
+  const subLabel = subSel.options[subSel.selectedIndex] ? subSel.options[subSel.selectedIndex].text : row.sub;
+  const dateVal = document.getElementById('cm-date').value.replace(/-/g, '/');
+  const launchRow = document.getElementById('cm-launch-row');
+  const showLaunch = launchRow.style.display !== 'none';
+  const launchVal = showLaunch ? document.getElementById('cm-launch-date').value.replace(/-/g, '/') : undefined;
+
+  row.site = siteVal.toUpperCase();
+  row.sub = subLabel;
+  row.date = dateVal;
+  if (showLaunch && launchVal) row.launch_date = launchVal;
+
+  if (typeof renderListTable === 'function') renderListTable();
+  closeChangeModal();
+  showToast('需求变更已保存', 'success');
 }
 
 function changePage(dir) {
