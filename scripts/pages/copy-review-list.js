@@ -449,7 +449,7 @@ function renderCopyReviewTable() {
     const brandCls = row.brand === 'ZIKEE' ? 'brand-zikee' : (row.brand === 'AMOOS' ? 'brand-amoos' : '');
     const statusCls = row.review_status === '已通过' ? 'status-pass' : (row.review_status === '已驳回' ? 'status-reject' : 'status-review');
     const key = encodeURIComponent(row.review_key);
-    return `<tr onclick="openCopyAuditModal('${key}', 'detail')">
+    return `<tr onclick="openCopyAuditModal('${key}', 'detail', { auditView: true })">
       <td><span class="req-type-pill ${typeCls}">${row.type}</span></td>
       <td>${row.site}</td>
       <td><span class="brand-tag ${brandCls}">${row.brand}</span></td>
@@ -474,8 +474,8 @@ function renderCopyReviewTable() {
 
 function renderCopyReviewActions(row) {
   const key = encodeURIComponent(row.review_key);
-  const detail = `<button class="row-action-btn" onclick="event.stopPropagation();openCopyAuditModal('${key}', 'detail')">详情</button>`;
-  const audit = `<button class="row-action-btn warn" onclick="event.stopPropagation();openCopyAuditModal('${key}', 'audit')">审核</button>`;
+  const detail = `<button class="row-action-btn" onclick="event.stopPropagation();openCopyAuditModal('${key}', 'detail', { auditView: true })">详情</button>`;
+  const audit = `<button class="row-action-btn warn" onclick="event.stopPropagation();openCopyAuditModal('${key}', 'audit', { auditView: true })">审核</button>`;
   const rejectLog = `<button class="row-action-btn danger" onclick="event.stopPropagation();openCopyAuditRecord('${key}')">驳回记录</button>`;
   if (row.review_status === '待审核') return `<div class="row-actions">${audit}</div>`;
   if (row.review_status === '已驳回') return `<div class="row-actions">${rejectLog}</div>`;
@@ -530,7 +530,15 @@ function openCopyAuditModal(encodedKey, mode = 'audit', opts = {}) {
   title.textContent = opts.title || (mode === 'audit' ? '文案审核' : '查看详情');
   const auditPayload = getCopyAuditPayload(row);
   subtitle.innerHTML = renderCopyAuditHeaderSummary(row, auditPayload);
-  body.innerHTML = (row.review_status === '已驳回' ? renderCopyAuditRecord(row) : '') + renderCopyAuditDetail(row, { hideInfo: opts.hideInfo === true, payload: auditPayload });
+  let showRejectEdit;
+  if (opts.auditView) {
+    showRejectEdit = false;
+  } else if (opts.callerStatus) {
+    showRejectEdit = opts.callerStatus === '已驳回';
+  } else {
+    showRejectEdit = row.review_status === '已驳回';
+  }
+  body.innerHTML = (row.review_status === '已驳回' ? renderCopyAuditRecord(row, showRejectEdit) : '') + renderCopyAuditDetail(row, { hideInfo: opts.hideInfo === true, payload: auditPayload });
   foot.innerHTML = mode === 'audit' && row.review_status === '待审核'
     ? `<div class="review-audit-panel">
          <div class="copy-quick-review">
@@ -563,10 +571,10 @@ function openCopyAuditRecord(encodedKey) {
     showToast('未找到驳回记录', 'warning');
     return;
   }
-  openCopyAuditModal(encodedKey, 'detail', { title: '驳回记录', hideInfo: true });
+  openCopyAuditModal(encodedKey, 'detail', { title: '驳回记录', hideInfo: true, auditView: true });
 }
 
-function openCopyAuditRecordBySku(sku) {
+function openCopyAuditRecordBySku(sku, callerStatus) {
   const list = getCopyReviewListData();
   const row = list.find(item => item.sku === sku && item.review_status === '已驳回')
     || list.find(item => item.sku === sku)
@@ -575,7 +583,7 @@ function openCopyAuditRecordBySku(sku) {
     showToast(`暂无文案审核记录：${sku}`, 'warning');
     return;
   }
-  openCopyAuditModal(encodeURIComponent(row.review_key), 'detail', { title: '驳回记录', hideInfo: true });
+  openCopyAuditModal(encodeURIComponent(row.review_key), 'detail', { title: '驳回记录', hideInfo: true, callerStatus: callerStatus });
 }
 
 function getCopyAuditPayload(row) {
@@ -694,31 +702,7 @@ function renderCopyAuditDetail(row, opts = {}) {
             ${categoryModule.body.map(([label, value]) => `<div class="review-info-cell"><span>${esc(label)}</span><strong>${esc(value || '—')}</strong></div>`).join('')}
           </div>
         </div>` : ''}
-        <div class="copy-audit-summary">
-          <div>
-            <span>AI 综合评分</span>
-            <strong>${payload.score.total}</strong>
-            <em>/ 100</em>
-          </div>
-          <p>评分基于 SEO 覆盖、卖点完整度、GEO 本地化、竞品差异和合规风险，供人工审核时快速定位问题。</p>
-        </div>
-        <div class="copy-audit-card">
-          <div class="copy-audit-card-title">3. AI 质量评分</div>
-          <div class="copy-score-grid">
-            ${payload.score.items.map(([label, score, desc]) => `
-              <div class="copy-score-item">
-                <div><strong>${esc(label)}</strong><span>${score} 分</span></div>
-                <p>${esc(desc)}</p>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-        <div class="copy-audit-card">
-          <div class="copy-audit-card-title">4. 风险与优化建议</div>
-          <div class="copy-suggest-list">
-            ${payload.score.suggestions.map((s, i) => `<div><span>${i + 1}</span>${esc(s)}</div>`).join('')}
-          </div>
-        </div>
+        
         ${opts.hideInfo ? '' : renderCopyAuditModuleBrowser(backgroundModules, esc)}
       </section>
       ${opts.hideInfo ? '' : '<div class="copy-audit-resizer" title="拖动调整左右宽度" onmousedown="startCopyAuditResize(event)" ondblclick="resetCopyAuditSplit()"></div>'}
@@ -882,6 +866,26 @@ function toggleCopyAuditIssue(btn, target, issue) {
     btn.classList.add('active');
   }
   syncCopyAuditMarkedReason();
+  syncCopyAuditHighlight();
+}
+
+function syncCopyAuditHighlight() {
+  const modal = document.getElementById('copy-audit-modal');
+  if (!modal) return;
+  modal.querySelectorAll('.copy-submission-highlight').forEach(el => el.classList.remove('copy-submission-highlight'));
+  const markedTargets = new Set(copyAuditIssueMarks.map(m => m.target));
+  markedTargets.forEach(target => {
+    const actionEl = modal.querySelector(`.copy-issue-actions[data-target="${target}"]`);
+    if (!actionEl) return;
+    const card = actionEl.closest('.copy-submission-card');
+    if (target === 'Title') {
+      const textEl = card && card.querySelector('.copy-title-text');
+      if (textEl) textEl.classList.add('copy-submission-highlight');
+    } else {
+      const item = actionEl.closest('.copy-td-review-item');
+      if (item) item.classList.add('copy-submission-highlight');
+    }
+  });
 }
 
 function syncCopyAuditMarkedReason() {
@@ -902,18 +906,37 @@ function syncCopyAuditMarkedReason() {
     .join('；');
 }
 
-function renderCopyAuditRecord(row) {
+function renderCopyAuditRecord(row, showEditBtn) {
+  if (showEditBtn === undefined) showEditBtn = row.review_status === '已驳回';
   const esc = copyReviewEscape;
-  const record = row.decision_record || {};
   const encodedKey = encodeURIComponent(row.review_key || getCopyReviewRowKey(row, 0));
+
+  let records = [];
+  if (row.reject_history && row.reject_history.length) {
+    records = row.reject_history.slice().sort((a, b) => (b.time || '').localeCompare(a.time || ''));
+  } else {
+    const record = row.decision_record || {};
+    records = [{ reason: row.reject_reason || record.reason || '驳回原因未填写', time: record.time || row.review_time || '—', reviewer: record.reviewer || 'Mason' }];
+  }
+
+  const items = records.map((r, i) => {
+    const isLatest = i === 0;
+    return `<div class="copy-reject-item ${isLatest ? 'latest' : ''}">
+      <div class="copy-reject-dot"></div>
+      <div class="copy-reject-content">
+        <div class="copy-reject-head">
+          <span class="copy-reject-reviewer">${esc(r.reviewer || '—')}</span>
+          <span class="copy-reject-time">${esc(r.time || '—')}</span>
+          ${isLatest && showEditBtn ? `<button type="button" class="review-record-edit-btn" onclick="goToCopyRejectedEdit('${encodedKey}')">去修改</button>` : ''}
+        </div>
+        <div class="copy-reject-reason">${esc(r.reason || '—')}</div>
+      </div>
+    </div>`;
+  }).join('');
+
   return `<div class="review-record-card">
-    <div class="review-record-title">
-      <span>驳回记录</span>
-      <button type="button" class="review-record-edit-btn" onclick="goToCopyRejectedEdit('${encodedKey}')">去修改</button>
-    </div>
-    <div class="review-record-row"><span>驳回人</span><strong>${esc(record.reviewer || 'Mason')}</strong></div>
-    <div class="review-record-row"><span>驳回时间</span><strong>${esc(record.time || row.review_time || '—')}</strong></div>
-    <div class="review-record-reason">${esc(row.reject_reason || record.reason || 'Title 关键词覆盖不足，TD 中产品证据与竞品差异表达还需要补充。')}</div>
+    <div class="review-record-title"><span>驳回记录</span><span class="copy-reject-count">${records.length} 条</span></div>
+    <div class="copy-reject-timeline">${items}</div>
   </div>`;
 }
 
@@ -921,11 +944,27 @@ function goToCopyRejectedEdit(encodedKey) {
   const key = decodeCopyReviewKey(encodedKey);
   const row = findCopyReviewRowByKey(key);
   closeCopyAuditModal();
-  if (typeof openAiChat === 'function') {
-    openAiChat(row ? row.sku : 'PO17X4011', row ? row.name : '7格便携药盒');
-  } else {
+  if (typeof openAiChat !== 'function') {
     showToast('文案生成页面暂不可用', 'warning');
+    return;
   }
+  if (!row) {
+    openAiChat('PO17X4011', '7格便携药盒');
+    return;
+  }
+  const payload = (typeof getCopyAuditPayload === 'function') ? getCopyAuditPayload(row) : { title: '', tds: [] };
+  const sorted = (row.reject_history && row.reject_history.length)
+    ? row.reject_history.slice().sort((a, b) => (b.time || '').localeCompare(a.time || ''))
+    : [{ reason: row.reject_reason || '驳回原因未填写', time: row.review_time || '—', reviewer: 'Mason' }];
+  const latest = sorted[0];
+  openAiChat(row.sku, row.name, {
+    rejectContext: {
+      row,
+      title: payload.title || '',
+      tds: payload.tds || [],
+      latest,
+    },
+  });
 }
 
 function approveCopyAudit(encodedKey) {

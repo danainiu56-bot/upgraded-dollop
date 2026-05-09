@@ -218,7 +218,7 @@ function renderCopyRowActions(r) {
   //   查看文案  → success（绿，强调"已完成可查看"）
   //   驳回记录  → danger（红）
   const detail   = `<button class="row-action-btn" onclick="event.stopPropagation();showToast('查看详情：${sku}','success')">详情</button>`;
-  const reject   = `<button class="row-action-btn danger" onclick="event.stopPropagation();openCopyAuditRecordBySku('${sku}')">驳回记录</button>`;
+  const reject   = `<button class="row-action-btn danger" onclick="event.stopPropagation();openCopyAuditRecordBySku('${sku}','${r.status}')">驳回记录</button>`;
   const generate = `<button class="row-action-btn warn" onclick="event.stopPropagation();openCopyDraftPicker('${draftKey}')">文案生成</button>`;
   const view     = `<button class="row-action-btn success" onclick="event.stopPropagation();showToast('查看文案：${sku}','success')">查看文案</button>`;
   let extra = '';

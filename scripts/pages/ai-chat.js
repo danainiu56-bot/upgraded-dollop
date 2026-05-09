@@ -39,7 +39,6 @@ function onAiSkillHubKeydown(e) {
 let aiChatState = {
   sku: '',
   productName: '',
-  activeTaskIndex: null,
   activeSkill: '',
   leftTab: 'info',
   rightTab: 'knowledge',
@@ -62,8 +61,7 @@ function openAiChat(sku, name, opts = {}) {
   // 写入上下文
   aiChatState.sku = sku || aiChatState.sku || 'PO17X4011';
   aiChatState.productName = name || aiChatState.productName || '7格便携药盒';
-  syncAiTaskFromContext();
-  if (opts.draft) {
+  if (opts.draft || opts.rejectContext) {
     clearAiStreamTimers();
     aiChatState.messages = [];
     aiChatState.outputs = [];
@@ -75,7 +73,7 @@ function openAiChat(sku, name, opts = {}) {
   const leftTitle = document.getElementById('aichat-left-title');
   if (leftTitle) leftTitle.innerHTML = aiChatState.leftTab === 'history'
     ? `<span class="aichat-side-icon">${I('history', 14)}</span>历史对话`
-    : `<span class="aichat-side-icon">${I('database', 14)}</span>待处理任务`;
+    : `<span class="aichat-side-icon">${I('database', 14)}</span>任务数据`;
   updateAiRightTitle();
   const newChatBtn = document.getElementById('aichat-newchat-btn');
   if (newChatBtn) newChatBtn.innerHTML = I('newChat', 14);
@@ -89,6 +87,10 @@ function openAiChat(sku, name, opts = {}) {
   renderAiRightPanel();
   if (opts.draft) {
     appendSelectedCopyDraft(opts.draft, opts.row || null);
+  }
+  if (opts.rejectContext) {
+    appendRejectContextBubble(opts.rejectContext);
+    prefillRejectPrompt(opts.rejectContext);
   }
   // 持久化视图
   if (typeof saveView === 'function') saveView('ai-chat');
@@ -130,11 +132,9 @@ function openCopyDraftPicker(encodedKey) {
     ratings: {},
     regenRound: 0,
   };
-  const isVideo = copyDraftPickerState.drafts.some(d => d.htmlContent);
-  if (!isVideo) {
-    const best = copyDraftPickerState.drafts.reduce((a, b) => (b.score > a.score ? b : a), copyDraftPickerState.drafts[0]);
-    copyDraftPickerState.selectedId = best.id;
-  }
+  const best = copyDraftPickerState.drafts.reduce((a, b) => (b.score > a.score ? b : a), copyDraftPickerState.drafts[0]);
+  copyDraftPickerState.selectedId = best.id;
+  copyDraftPickerState._videoTab = best.id;
   renderCopyDraftPicker();
   const modal = document.getElementById('copy-draft-picker');
   if (modal) modal.classList.add('show');
@@ -151,13 +151,9 @@ function regenerateCopyDrafts() {
   copyDraftPickerState.regenRound += 1;
   copyDraftPickerState.drafts = buildCopyDraftCandidates(row, copyDraftPickerState.regenRound);
   copyDraftPickerState.ratings = {};
-  const isVideoRegen = copyDraftPickerState.drafts.some(d => d.htmlContent);
-  if (!isVideoRegen) {
-    const best = copyDraftPickerState.drafts.reduce((a, b) => (b.score > a.score ? b : a), copyDraftPickerState.drafts[0]);
-    copyDraftPickerState.selectedId = best.id;
-  } else {
-    copyDraftPickerState.selectedId = '';
-  }
+  const best = copyDraftPickerState.drafts.reduce((a, b) => (b.score > a.score ? b : a), copyDraftPickerState.drafts[0]);
+  copyDraftPickerState.selectedId = best.id;
+  copyDraftPickerState._videoTab = best.id;
   renderCopyDraftPicker();
   showToast('已重新生成 3 个候选版本', 'success');
 }
@@ -477,11 +473,21 @@ function renderCopyDraftPicker() {
     </div>`;
   if (isVideo) {
     body.innerHTML = contextHtml + renderVideoDraftTabs(copyDraftPickerState.drafts, esc);
+    const activeId = copyDraftPickerState._videoTab || copyDraftPickerState.drafts[0].id;
+    const activeDraft = copyDraftPickerState.drafts.find(d => d.id === activeId) || copyDraftPickerState.drafts[0];
+    const idx = copyDraftPickerState.drafts.indexOf(activeDraft);
+    const hint = document.getElementById('copy-draft-foot-hint');
+    if (hint) hint.textContent = `当前选中：V${idx + 1} ${activeDraft.title}`;
   } else {
     body.innerHTML = contextHtml + `
       <div class="copy-draft-grid">
         ${copyDraftPickerState.drafts.map(draft => renderCopyDraftCard(draft, esc)).join('')}
       </div>`;
+    const hint = document.getElementById('copy-draft-foot-hint');
+    if (hint) {
+      const sel = copyDraftPickerState.drafts.find(d => d.id === copyDraftPickerState.selectedId);
+      hint.textContent = sel ? `当前选中：${sel.title}` : '';
+    }
   }
 }
 
@@ -530,6 +536,7 @@ function renderVideoDraftTabs(drafts, esc) {
 
 function switchVideoDraftTab(id) {
   copyDraftPickerState._videoTab = id;
+  copyDraftPickerState.selectedId = id;
   renderCopyDraftPicker();
 }
 
@@ -601,6 +608,70 @@ function appendSelectedCopyDraft(draft, row) {
   });
 }
 
+// ---- 驳回修改：从文案审核「去修改」入口带过来的上下文 ----
+function appendRejectContextBubble(ctx) {
+  const esc = typeof escapeAiHtml === 'function' ? escapeAiHtml : (x) => String(x || '');
+  const latest = ctx.latest || {};
+  const tds = ctx.tds || [];
+  const titleText = ctx.title || '—';
+  const tdsHtml = tds.map((td, i) => `
+        <div class="ai-reject-original-block">
+          <span class="ai-reject-original-label">TD-${i + 1}</span>
+          <div class="ai-reject-original-text">${esc(td)}</div>
+        </div>
+      `).join('');
+  const html = `
+    <div class="ai-reject-context">
+      <div class="ai-reject-latest">
+        <div class="ai-reject-latest-head">
+          <span class="ai-reject-latest-tag">最新驳回理由</span>
+          <span class="ai-reject-latest-meta">${esc(latest.reviewer || '—')} · ${esc(latest.time || '—')}</span>
+          <button type="button" class="ai-reject-latest-copy" onclick="copyRejectReasonToInput()">复制到输入框</button>
+        </div>
+        <div class="ai-reject-latest-reason">${esc(latest.reason || '驳回原因未填写')}</div>
+      </div>
+      <details class="ai-reject-original" open>
+        <summary>原稿对照（点击折叠/展开）</summary>
+        <div class="ai-reject-original-block">
+          <span class="ai-reject-original-label">Title</span>
+          <div class="ai-reject-original-text">${esc(titleText)}</div>
+        </div>
+        ${tdsHtml}
+      </details>
+    </div>`;
+  appendAiMessage('bot', html, { html: true });
+  const outputBody = `Title:\n${titleText}\n\n${tds.map((td, i) => `TD-${i + 1}:\n${td}`).join('\n\n')}`;
+  aiChatState.outputs.unshift({
+    title: '原始驳回稿（待修改）',
+    body: outputBody,
+  });
+  aiChatState._rejectContext = ctx;
+  if (typeof renderAiRightPanel === 'function') renderAiRightPanel();
+}
+
+function prefillRejectPrompt(ctx) {
+  const input = document.getElementById('aichat-input');
+  if (!input) return;
+  const reason = (ctx && ctx.latest && ctx.latest.reason) || '';
+  input.value = `请基于以下驳回意见修改文案：${reason}\n\n要求：保留原稿的核心卖点和品牌信息，针对驳回意见做精准调整。`;
+  input.focus();
+  try { input.setSelectionRange(input.value.length, input.value.length); } catch (e) {}
+}
+
+function copyRejectReasonToInput() {
+  const ctx = aiChatState._rejectContext;
+  if (!ctx) return;
+  const input = document.getElementById('aichat-input');
+  if (!input) return;
+  const reason = (ctx.latest && ctx.latest.reason) || '';
+  if (!reason) return;
+  const sep = input.value && !input.value.endsWith('\n') ? '\n' : '';
+  input.value = `${input.value}${sep}${reason}`;
+  input.focus();
+  try { input.setSelectionRange(input.value.length, input.value.length); } catch (e) {}
+  if (typeof showToast === 'function') showToast('已复制驳回理由到输入框', 'success');
+}
+
 // ---- 左侧渲染 ----
 function switchAiLeftTab(btn, tab) {
   document.querySelectorAll('#aichat-left .aichat-tab').forEach(b => b.classList.remove('active'));
@@ -610,7 +681,7 @@ function switchAiLeftTab(btn, tab) {
   if (titleEl) {
     titleEl.innerHTML = tab === 'history'
       ? `<span class="aichat-side-icon">${I('history', 14)}</span>历史对话`
-      : `<span class="aichat-side-icon">${I('database', 14)}</span>待处理任务`;
+      : `<span class="aichat-side-icon">${I('database', 14)}</span>任务数据`;
   }
   renderAiLeftPanel();
 }
@@ -629,7 +700,6 @@ function renderAiLeftPanel() {
   const seo  = (typeof MOCK_DATA !== 'undefined' && MOCK_DATA.seo) || { rows: [] };
   const comp = (typeof MOCK_DATA !== 'undefined' && MOCK_DATA.competitor) || [];
   body.innerHTML = `
-    ${renderAiTaskList()}
     ${aiSection('product', I('cube', 14), '产品信息', `
       <div class="ai-row"><span class="lab">产品图</span><span class="val">${p.image ? `<img src="${p.image}" style="width:64px;height:64px;object-fit:contain;border:1px solid var(--border);border-radius:4px;background:white;" />` : '—'}</span></div>
       <div class="ai-row"><span class="lab">SKU</span><span class="val"><span style="font-family:'SF Mono',Monaco,monospace;font-weight:600;color:var(--primary);">${aiChatState.sku || '—'}</span><span style="color:var(--text-muted);"> · </span>${aiChatState.productName || ''}</span></div>
@@ -662,74 +732,6 @@ function renderAiLeftPanel() {
       <div class="ai-row" style="padding-left:0;"><span class="lab">Title</span>${ed('competitor.' + i + '.title', c.title || '')}</div>
     `).join('') || '<div style="color:var(--text-muted);font-size:12px;">暂无竞品数据</div>')}
   `;
-}
-
-function getAiPendingTasks() {
-  if (typeof COPY_LIST_DATA === 'undefined') return [];
-  return COPY_LIST_DATA.filter(row => row.status === '待处理');
-}
-
-function syncAiTaskFromContext() {
-  const tasks = getAiPendingTasks();
-  if (!tasks.length) {
-    aiChatState.activeTaskIndex = null;
-    return;
-  }
-  const idx = tasks.findIndex(row =>
-    row.sku === aiChatState.sku &&
-    (!aiChatState.productName || row.name === aiChatState.productName)
-  );
-  if (idx >= 0) {
-    aiChatState.activeTaskIndex = idx;
-    return;
-  }
-  aiChatState.activeTaskIndex = null;
-}
-
-function renderAiTaskList() {
-  const esc = typeof escapeAiHtml === 'function' ? escapeAiHtml : (x) => String(x || '');
-  const tasks = getAiPendingTasks();
-  if (!tasks.length) {
-    return `
-      <div class="ai-task-panel">
-        <div class="ai-task-head">
-          <span class="ai-task-title">${I('basic', 14)}任务列表</span>
-          <span class="ai-task-count">0</span>
-        </div>
-        <div class="ai-task-empty">暂无待处理文案任务</div>
-      </div>`;
-  }
-  syncAiTaskFromContext();
-  return `
-    <div class="ai-task-panel">
-      <div class="ai-task-head">
-        <span class="ai-task-title">${I('basic', 14)}任务列表</span>
-        <span class="ai-task-count">${tasks.length} 个待处理</span>
-      </div>
-      <div class="ai-task-list">
-        ${tasks.map((row, idx) => `
-          <button type="button" class="ai-task-item ${idx === aiChatState.activeTaskIndex ? 'active' : ''}" onclick="selectAiTask(${idx})">
-            <span class="ai-task-main">
-              <span class="ai-task-name">${esc(row.type)}：${esc(row.name)}</span>
-              <span class="ai-task-meta">${esc(row.site)} · ${esc(row.brand)} · ${esc(row.sub)} · ${esc(row.date)}</span>
-            </span>
-            <span class="ai-task-sku">${esc(row.sku)}</span>
-          </button>
-        `).join('')}
-      </div>
-    </div>`;
-}
-
-function selectAiTask(idx) {
-  const tasks = getAiPendingTasks();
-  const row = tasks[idx];
-  if (!row) return;
-  aiChatState.activeTaskIndex = idx;
-  aiChatState.sku = row.sku || aiChatState.sku;
-  aiChatState.productName = row.name || aiChatState.productName;
-  renderAiLeftPanel();
-  renderAiMessages();
-  showToast(`已切换任务：${row.type} · ${row.name}`, 'success');
 }
 
 function aiSellingHtml(sell, ed) {
@@ -775,11 +777,6 @@ function renderAiHistoryList() {
             <span class="ai-history-time">${h.time}</span>
           </div>
           <div class="ai-history-preview">${h.preview}</div>
-          <div class="ai-history-meta">
-            <span class="ai-history-sku">${h.sku}</span>
-            ${h.skill ? `<span class="ai-history-skill">${h.skill}</span>` : ''}
-            <span class="ai-history-count">${h.count} 条消息</span>
-          </div>
         </div>
       `).join('')}
     </div>`;
@@ -1310,7 +1307,7 @@ function renderAiMessages() {
     <div class="aichat-msg ${m.role}" data-msg-id="${m.id}">
       <div class="aichat-avatar">${m.role === 'user' ? userInitial : botSvg}</div>
       <div class="aichat-bubble">
-        ${m.score ? renderAiScoreCard(m.score) : `<div style="white-space:pre-wrap;">${escapeAiHtml(m.text)}${m.streaming ? '<span class="ai-stream-cursor">▋</span>' : ''}</div>`}
+        ${m.score ? renderAiScoreCard(m.score) : (m.html ? `<div class="aichat-bubble-html">${m.html}</div>` : `<div style="white-space:pre-wrap;">${escapeAiHtml(m.text)}${m.streaming ? '<span class="ai-stream-cursor">▋</span>' : ''}</div>`)}
         <div class="msg-meta">${m.time || ''}</div>
         ${renderAiMsgActions(m)}
       </div>
@@ -1761,12 +1758,14 @@ function useAiExample(text) {
 
 function appendAiMessage(role, text, opts = {}) {
   const id = 'msg-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
-  const shouldStream = role === 'bot' && opts.stream !== false && !opts.score;
+  const isHtml = !!opts.html;
+  const shouldStream = !isHtml && role === 'bot' && opts.stream !== false && !opts.score;
   aiChatState.messages.push({
     id,
     role,
-    text: shouldStream ? '' : text,
+    text: isHtml ? '' : (shouldStream ? '' : text),
     fullText: shouldStream ? text : '',
+    html: isHtml ? text : null,
     streaming: shouldStream,
     time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }),
     actions: shouldStream ? null : (opts.actions || null),    // 气泡内：copy / regen；评测与提交在顶栏

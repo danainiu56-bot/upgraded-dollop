@@ -433,7 +433,7 @@ function renderReviewListTable() {
     const brandCls = row.brand === 'ZIKEE' ? 'brand-zikee' : (row.brand === 'AMOOS' ? 'brand-amoos' : '');
     const statusCls = row.review_status === '已通过' ? 'status-pass' : (row.review_status === '已驳回' ? 'status-reject' : 'status-review');
     const key = encodeURIComponent(row.review_key);
-    return `<tr onclick="openReviewAuditModal('${key}', 'detail')">
+    return `<tr onclick="openReviewAuditModal('${key}', 'detail', { showEdit: false })">
       <td><span class="req-type-pill ${typeCls}">${row.type}</span></td>
       <td>${row.site}</td>
       <td><span class="brand-tag ${brandCls}">${row.brand}</span></td>
@@ -458,9 +458,9 @@ function renderReviewRowActions(row) {
   const sku = row.sku;
   const key = encodeURIComponent(row.review_key);
   const div = `<span class="row-action-divider"></span>`;
-  const detail = `<button class="row-action-btn" onclick="event.stopPropagation();openReviewAuditModal('${key}', 'detail')">详情</button>`;
-  const audit = `<button class="row-action-btn warn" onclick="event.stopPropagation();openReviewAuditModal('${key}', 'audit')">审核</button>`;
-  const rejectLog = `<button class="row-action-btn danger" onclick="event.stopPropagation();openReviewRejectRecord('${key}')">驳回记录</button>`;
+  const detail = `<button class="row-action-btn" onclick="event.stopPropagation();openReviewAuditModal('${key}', 'detail', { showEdit: false })">详情</button>`;
+  const audit = `<button class="row-action-btn warn" onclick="event.stopPropagation();openReviewAuditModal('${key}', 'audit', { showEdit: false })">审核</button>`;
+  const rejectLog = `<button class="row-action-btn danger" onclick="event.stopPropagation();openReviewRejectRecord('${key}', { showEdit: false })">驳回记录</button>`;
   if (row.review_status === '待审核') return `<div class="row-actions">${audit}</div>`;
   if (row.review_status === '已驳回') return `<div class="row-actions">${rejectLog}</div>`;
   return `<div class="row-actions">${detail}</div>`;
@@ -724,7 +724,7 @@ function renderReviewStpModule(stp, esc) {
     </div>`);
 }
 
-function openReviewAuditModal(encodedKey, mode = 'audit') {
+function openReviewAuditModal(encodedKey, mode = 'audit', opts = {}) {
   const key = decodeReviewKey(encodedKey);
   const row = findReviewRowByKey(key);
   if (!row) {
@@ -753,7 +753,7 @@ function openReviewAuditModal(encodedKey, mode = 'audit') {
     : '';
   modal.classList.add('show');
   try {
-    body.innerHTML = (row.review_status === '已驳回' ? renderReviewRecordBlock(row) : '') + renderReviewDetail(row);
+    body.innerHTML = (row.review_status === '已驳回' ? renderReviewRecordBlock(row, opts) : '') + renderReviewDetail(row);
   } catch (e) {
     console.error('[review] render audit detail failed:', e);
     body.innerHTML = renderReviewFallbackDetail(row);
