@@ -49,13 +49,18 @@ function getReviewListData() {
     };
     const reviewKey = getReviewRowKey(normalized, idx);
     const decision = decisions[reviewKey];
+    const history = decision ? _normalizeDecisionHistory(decision) : [];
+    const latestEntry = history.length ? history[history.length - 1] : null;
+    const fallbackRecord = (!decision && Array.isArray(row.reject_history) && row.reject_history.length)
+      ? { status: row.review_status || row.status, history: row.reject_history }
+      : null;
     return {
       ...normalized,
       review_key: reviewKey,
       review_status: decision ? decision.status : (statusMap[row.status] || '待审核'),
-      review_time: decision ? decision.time : (row.review_time || '—'),
-      reject_reason: decision ? (decision.reason || '') : '',
-      decision_record: decision || null,
+      review_time: latestEntry ? latestEntry.time : (decision ? decision.time : (row.review_time || '—')),
+      reject_reason: latestEntry ? (latestEntry.reason || '') : (decision ? (decision.reason || '') : ''),
+      decision_record: decision || fallbackRecord,
     };
   });
 }
@@ -141,8 +146,6 @@ function reviewMgrTemplate() {
             <select class="combo-select-left" id="rv-person-type" onchange="onRvPersonTypeChange()">
               <option value="writer">文案人员</option>
               <option value="op">需求提交人</option>
-              <option value="bu">事业部</option>
-              <option value="bu_lead">BU长</option>
             </select>
             <select class="combo-select-right" id="rv-person-value" onchange="applyReviewFilters()"></select>
           </div>
@@ -572,6 +575,7 @@ function reviewModuleCard(id, title, body) {
 }
 
 function renderReviewBasicModule(basic, row, esc) {
+  const needLaunch = /新品.*(Listing|Title|TD|图片文案|卖点视频|操作视频)/.test(row.type);
   const merged = [
     ['需求类型', row.type],
     ['站点', row.site],
@@ -582,6 +586,7 @@ function renderReviewBasicModule(basic, row, esc) {
     ['需求提交人', row.op || '—'],
     ['文案人员', row.writer || '—'],
     ['期望交付时间', row.date || '—'],
+    ...(needLaunch ? [['产品开卖时间', row.launch_date || '—']] : []),
     ['提交审核时间', row.submit_time || '—'],
     ...basic.filter(item => !['文案需求类型', '站点', '子品类', 'SKU', '产品名称', '品牌', '文案人员'].includes(item.label)).map(item => [item.label, item.value]),
   ];
@@ -782,16 +787,45 @@ function renderReviewRecordBlock(row, opts = {}) {
   const record = row.decision_record || {};
   const encodedKey = encodeURIComponent(row.review_key || getReviewRowKey(row, 0));
   const showEdit = opts.showEdit !== false;
+
+  let history = _normalizeDecisionHistory(record);
+  if (history.length === 0) {
+    history = [{ reason: row.reject_reason || '', time: row.review_time || '—', reviewer: row.reviewer || 'Mason' }];
+  }
+  const reversed = history.slice().reverse();
+  const total = reversed.length;
+
   return `
     <div class="review-record-card">
       <div class="review-record-title">
-        <span>驳回记录</span>
+        <span>驳回记录 <span class="review-record-badge">${total}</span></span>
         ${showEdit ? `<button type="button" class="review-record-edit-btn" onclick="goToReviewRejectedEdit('${encodedKey}')">去修改</button>` : ''}
       </div>
-      <div class="review-record-row"><span>驳回人</span><strong>${esc(record.reviewer || row.reviewer || 'Mason')}</strong></div>
-      <div class="review-record-row"><span>驳回时间</span><strong>${esc(record.time || row.review_time || '—')}</strong></div>
-      <div class="review-record-reason">${esc(record.reason || row.reject_reason || '暂无驳回理由')}</div>
+      <div class="review-record-timeline">
+        ${reversed.map((item, i) => {
+          const seq = total - i;
+          const isLatest = i === 0;
+          return `<div class="review-record-item ${isLatest ? 'latest' : ''}">
+            <div class="review-record-dot"></div>
+            <div class="review-record-body">
+              <div class="review-record-head">
+                <span class="review-record-seq">第${seq}次驳回</span>
+                <span class="review-record-reviewer">${esc(item.reviewer || '—')}</span>
+                <span class="review-record-time">${esc(item.time || '—')}</span>
+              </div>
+              <div class="review-record-reason">${esc(item.reason || '暂无驳回理由')}</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
     </div>`;
+}
+
+function _normalizeDecisionHistory(decision) {
+  if (!decision) return [];
+  if (Array.isArray(decision.history)) return decision.history;
+  if (decision.time) return [{ reason: decision.reason || '', time: decision.time, reviewer: decision.reviewer || '' }];
+  return [];
 }
 
 function saveReviewDecision(encodedKey, status, reason = '') {
@@ -800,15 +834,16 @@ function saveReviewDecision(encodedKey, status, reason = '') {
   if (!row) return null;
   const decisions = readReviewDecisions();
   const now = new Date().toLocaleString('zh-CN');
+  const existing = decisions[key];
+  const history = _normalizeDecisionHistory(existing);
+  history.push({ reason, time: now, reviewer: 'Mason' });
   decisions[key] = {
     status,
-    reason,
-    time: now,
-    reviewer: 'Mason',
     sku: row.sku,
     type: row.type,
     name: row.name,
     submit_time: row.submit_time,
+    history,
   };
   writeReviewDecisions(decisions);
   syncReviewDecisionToMockData(row, status, now);

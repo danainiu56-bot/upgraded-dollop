@@ -130,8 +130,11 @@ function openCopyDraftPicker(encodedKey) {
     ratings: {},
     regenRound: 0,
   };
-  const best = copyDraftPickerState.drafts.reduce((a, b) => (b.score > a.score ? b : a), copyDraftPickerState.drafts[0]);
-  copyDraftPickerState.selectedId = best.id;
+  const isVideo = copyDraftPickerState.drafts.some(d => d.htmlContent);
+  if (!isVideo) {
+    const best = copyDraftPickerState.drafts.reduce((a, b) => (b.score > a.score ? b : a), copyDraftPickerState.drafts[0]);
+    copyDraftPickerState.selectedId = best.id;
+  }
   renderCopyDraftPicker();
   const modal = document.getElementById('copy-draft-picker');
   if (modal) modal.classList.add('show');
@@ -148,8 +151,13 @@ function regenerateCopyDrafts() {
   copyDraftPickerState.regenRound += 1;
   copyDraftPickerState.drafts = buildCopyDraftCandidates(row, copyDraftPickerState.regenRound);
   copyDraftPickerState.ratings = {};
-  const best = copyDraftPickerState.drafts.reduce((a, b) => (b.score > a.score ? b : a), copyDraftPickerState.drafts[0]);
-  copyDraftPickerState.selectedId = best.id;
+  const isVideoRegen = copyDraftPickerState.drafts.some(d => d.htmlContent);
+  if (!isVideoRegen) {
+    const best = copyDraftPickerState.drafts.reduce((a, b) => (b.score > a.score ? b : a), copyDraftPickerState.drafts[0]);
+    copyDraftPickerState.selectedId = best.id;
+  } else {
+    copyDraftPickerState.selectedId = '';
+  }
   renderCopyDraftPicker();
   showToast('已重新生成 3 个候选版本', 'success');
 }
@@ -158,15 +166,45 @@ function buildCopyDraftCandidates(row, round = 0) {
   const name = row.name || '产品';
   const brand = row.brand || 'AUVON';
   const site = row.site || 'US';
-  const keyword = row.type && row.type.includes('Title') ? 'Title' : (row.type && row.type.includes('TD') ? 'TD' : 'Listing');
   const scoreShift = round % 3;
+
+  if (row.type === '新品图片文案') {
+    return buildImageCopyDraftCandidates(name, brand, site, scoreShift);
+  }
+  if (row.type === '新品卖点视频') {
+    return buildVideoCopyDraftCandidates(name, brand, site, scoreShift);
+  }
+  if (row.type === '新品FAQ') {
+    return buildFaqCopyDraftCandidates(name, brand, site, scoreShift);
+  }
+
+  const keyword = row.type && row.type.includes('Title') ? 'Title' : (row.type && row.type.includes('TD') ? 'TD' : 'Listing');
+
+  function contentToHtml(text) {
+    const sections = text.split(/\n\n/).map(s => s.trim()).filter(Boolean);
+    const cards = sections.map(sec => {
+      const m = sec.match(/^【(.+?)】\n?([\s\S]*)$/);
+      if (!m) return `<div class="copy-draft-listing-point"><div class="listing-point-text">${sec}</div></div>`;
+      return `<div class="copy-draft-listing-point">
+        <span class="listing-point-tag">${m[1]}</span>
+        <div class="listing-point-text">${m[2].trim()}</div>
+      </div>`;
+    }).join('');
+    return `<div class="copy-draft-listing-points">${cards}</div>`;
+  }
+
+  const c1 = `【Title】\n${brand} ${name}, Practical ${keyword} Copy for Daily Use, Portable and Easy to Understand\n\n【TD-1】\n突出用户最关心的使用场景：日常使用、便携收纳和快速识别，让用户第一眼知道产品解决什么问题。\n\n【TD-2】\n将容量、安全和使用便利性放在前 3 个卖点，降低用户决策成本。\n\n【TD-3】\n结尾强化适用人群与购买信心，适合 ${site} 站点用户的浏览习惯。\n\n【TD-4】\n采用 BPA-Free 食品级 PP 材质，安全无毒，直接接触药片和保健品更安心。\n\n【TD-5】\n精美彩盒包装附赠说明卡与保修卡，自用送礼两相宜，完整开箱体验提升品牌好感度。`;
+  const c2 = `【Title】\n${brand} ${name}, Weekly Pill Organizer, 7 Day Pill Box, Portable Travel Medicine Case for Vitamins and Daily Use\n\n【TD-1】\n自然覆盖 weekly pill organizer、7 day pill box、travel medicine case 等核心搜索词。\n\n【TD-2】\n用标题前半段承接高意图关键词，Bullet 中补充容量、便携、安全等转化信息。\n\n【TD-3】\n整体结构适合作为第一版 Listing 初稿，再根据合规和品牌语气精修。\n\n【TD-4】\nFood-grade PP, BPA-free, FDA-compliant — safe for daily contact with vitamins, supplements and prescription pills.\n\n【TD-5】\nComplete kit with color-box packaging, instruction card and warranty card — makes a thoughtful gift for family and friends.`;
+  const c3 = `【Title】\n${brand} ${name}, Easy Daily Organizer for Home, Office and Travel, Simple Storage for Vitamins and Medicine\n\n【TD-1】\nUse clear, direct wording that matches ${site} shoppers' reading habits and avoids exaggerated medical claims.\n\n【TD-2】\nFocus on practical benefits: easy planning, portable storage, clear compartments and daily convenience.\n\n【TD-3】\nKeep claims verifiable and friendly, making the copy easier to adapt for FAQ, image text and Rufus style answers.\n\n【TD-4】\nHighlight material safety — BPA-free, food-grade PP, and FDA-compliant — to build trust with health-conscious shoppers.\n\n【TD-5】\nReinforce brand value with premium packaging, included warranty card, and responsive after-sales support via QR code.`;
+
   return [
     {
       id: 'conversion',
       title: '转化导向版',
       tag: '推荐购买理由',
       score: 88 + scoreShift,
-      content: `【Title】\n${brand} ${name}, Practical ${keyword} Copy for Daily Use, Portable and Easy to Understand\n\n【TD-1】\n突出用户最关心的使用场景：日常使用、便携收纳和快速识别，让用户第一眼知道产品解决什么问题。\n\n【TD-2】\n将容量、安全和使用便利性放在前 3 个卖点，降低用户决策成本。\n\n【TD-3】\n结尾强化适用人群与购买信心，适合 ${site} 站点用户的浏览习惯。`,
+      content: c1,
+      htmlContent: contentToHtml(c1),
       reasons: ['卖点顺序清晰，先回答购买理由', '适合进入对话后继续补强场景细节', '关键词覆盖中等，后续可再加强 SEO'],
     },
     {
@@ -174,7 +212,8 @@ function buildCopyDraftCandidates(row, round = 0) {
       title: 'SEO 覆盖版',
       tag: '推荐搜索承接',
       score: 91 - scoreShift,
-      content: `【Title】\n${brand} ${name}, Weekly Pill Organizer, 7 Day Pill Box, Portable Travel Medicine Case for Vitamins and Daily Use\n\n【TD-1】\n自然覆盖 weekly pill organizer、7 day pill box、travel medicine case 等核心搜索词。\n\n【TD-2】\n用标题前半段承接高意图关键词，Bullet 中补充容量、便携、安全等转化信息。\n\n【TD-3】\n整体结构适合作为第一版 Listing 初稿，再根据合规和品牌语气精修。`,
+      content: c2,
+      htmlContent: contentToHtml(c2),
       reasons: ['核心关键词前置，搜索承接更强', 'Title 和 TD 结构完整，适合快速进入审核', '语言略偏功能型，可在对话中调得更自然'],
     },
     {
@@ -182,8 +221,242 @@ function buildCopyDraftCandidates(row, round = 0) {
       title: '本地化表达版',
       tag: '推荐语言自然度',
       score: 86 + (scoreShift > 1 ? 1 : 0),
-      content: `【Title】\n${brand} ${name}, Easy Daily Organizer for Home, Office and Travel, Simple Storage for Vitamins and Medicine\n\n【TD-1】\nUse clear, direct wording that matches ${site} shoppers' reading habits and avoids exaggerated medical claims.\n\n【TD-2】\nFocus on practical benefits: easy planning, portable storage, clear compartments and daily convenience.\n\n【TD-3】\nKeep claims verifiable and friendly, making the copy easier to adapt for FAQ, image text and Rufus style answers.`,
+      content: c3,
+      htmlContent: contentToHtml(c3),
       reasons: ['表达更自然，适合美区用户阅读', '合规风险较低，避免医疗功效承诺', 'SEO 强度略低，后续可补关键词'],
+    },
+  ];
+}
+
+function buildImageCopyDraftCandidates(name, brand, site, scoreShift) {
+  const cnNum = ['一', '二', '三', '四', '五', '六', '七'];
+  const points = [
+    { label: '大容量分区', v1: `${brand} ${name} features a 17×4 all-black large-capacity compartment design, holding a full week of medications and supplements with clearly separated slots to prevent mix-ups.`, v2: `Spacious 7-day, 4-slot organizer — each compartment comfortably fits large fish oil capsules, vitamins, and daily supplements without crowding.`, v3: `Weekly 4-compartment organizer with spacious slots — fits large vitamins, fish oil, and daily supplements without cramming.` },
+    { label: '便携防洒', v1: `Snap-lock closure keeps pills securely inside during travel and commuting — no spills, no worries.`, v2: `Secure snap-lock lid keeps pills safely inside during travel — no spills in your bag, purse, or carry-on.`, v3: `Dual-latch anti-spill design, drop-test verified — a truly portable pill case you can trust on the go.` },
+    { label: '品牌专业感', v1: `${brand} logo printed on the lid with a matte-finish shell, conveying medical-grade professionalism and trust.`, v2: `Branded matte-finish case with embossed ${brand} logo — elevates the look beyond generic pill boxes.`, v3: `Made by ${brand}, a professional healthcare brand — instantly distinguishable from no-name alternatives.` },
+    { label: '老人友好', v1: `Large day-of-week labels with high-contrast color-coded sections help elderly users identify compartments easily, reducing medication errors.`, v2: `Clear day-of-week labels with high-contrast colors — senior-friendly design reduces medication errors.`, v3: `Rounded edges and one-hand open design — easy to operate even for seniors with limited dexterity.` },
+    { label: '场景化展示', v1: `Hero image showcases three key scenarios — home, office, and travel — letting shoppers instantly see how the product fits into daily life.`, v2: `Lifestyle imagery showing home, office, and travel use — helps shoppers visualize the product in their daily routine.`, v3: `Real-life scene photography elevates the listing from "product display" to "lifestyle storytelling," boosting click-through rates.` },
+    { label: '材质安全', v1: `Food-grade PP material, BPA-free, FDA-compliant — safe for direct contact with medications and supplements.`, v2: `Made from food-grade, BPA-free PP material — FDA-compliant and safe for direct contact with medications.`, v3: `Eco-friendly, non-toxic material that withstands high temperatures without warping — easy to clean and odor-free for long-term use.` },
+    { label: '包装与配件', v1: `Premium color-box packaging with instruction card and warranty card — a complete unboxing experience, perfect as a gift.`, v2: `Complete package includes pill organizer, instruction card, and warranty card — gift-ready presentation.`, v3: `Includes a branded after-sales card with QR code for instant customer support — reducing returns and boosting satisfaction.` },
+  ];
+
+  const buildContent = (key) => points.map((p, i) => `图片${cnNum[i]}：${p.label}\n${p[key]}`).join('\n\n');
+  const buildHtml = (key) => {
+    const cards = points.map((p, i) => `<div class="copy-draft-img-point">
+      <span class="img-point-idx">图片${cnNum[i]}</span>
+      <div class="img-point-body">
+        <div class="img-point-label">${p.label}</div>
+        <div class="img-point-text">${p[key]}</div>
+      </div>
+    </div>`).join('');
+    return `<div class="copy-draft-img-points">${cards}</div>`;
+  };
+
+  return [
+    {
+      id: 'img-conversion',
+      title: '转化导向版',
+      tag: '强调用户利益',
+      score: 90 + scoreShift,
+      content: buildContent('v1'),
+      htmlContent: buildHtml('v1'),
+      reasons: ['7 个卖点均直击用户痛点，转化效果预期较好', '卖点表达清晰，适合快速上线', '可结合 A+ 页面进一步丰富场景'],
+    },
+    {
+      id: 'img-localized',
+      title: '本地化表达版',
+      tag: '自然英文表达',
+      score: 87 - scoreShift,
+      content: buildContent('v2'),
+      htmlContent: buildHtml('v2'),
+      reasons: ['语言自然地道，符合 ' + site + ' 站点用户阅读习惯', '合规风险较低，审核通过率高', '中英混合时可在对话中调整语言比例'],
+    },
+    {
+      id: 'img-diff',
+      title: '差异化卖点版',
+      tag: '突出竞品对比',
+      score: 85 + (scoreShift > 1 ? 1 : 0),
+      content: buildContent('v3'),
+      htmlContent: buildHtml('v3'),
+      reasons: ['突出竞品差异点，有助于建立品牌认知', '适合与竞品对比图搭配使用', '部分表达较激进，需确认合规'],
+    },
+  ];
+}
+
+function buildVideoCopyDraftCandidates(name, brand, site, scoreShift) {
+  const scenes = [
+    { point: '一周用药清晰规划', visual: 'Overhead shot of opened pill box showing 7-day compartments with pills already placed; subtitle emphasizes weekly planning / 7-day routine.' },
+    { point: '大容量分格', visual: 'Hand placing vitamins, fish oil, and daily pills one by one; close-up comparison with a standard pill box to highlight capacity.' },
+    { point: '防洒便携', visual: 'Snap the latch shut, drop into a bag, give it a shake; cut to opening — pills still neatly arranged.' },
+    { point: '老人友好', visual: 'Senior or hand model effortlessly opens the lid; camera pans across clearly labeled, high-contrast compartments.' },
+    { point: 'BPA-Free 安全材质', visual: 'Material close-up with BPA-Free icon subtitle; conveys daily pill storage safety without medical efficacy claims.' },
+    { point: '旅行/办公场景适配', visual: 'Quick scene transitions: bedside table → office desk → travel bag; emphasizes home / office / travel versatility.' },
+    { point: '品牌可信与售后保障', visual: `${brand} logo, packaging, instruction card, and warranty card appear in sequence; final frame holds on full product shot.` },
+  ];
+
+  const versions = [
+    {
+      id: 'vid-conversion', title: '转化导向版', tag: '直击用户痛点', score: 91 + scoreShift,
+      cnCopies: [
+        '一周用药，提前规划，每一天都清清楚楚。',
+        '维生素、鱼油、日常药片，一格也能稳稳收纳。',
+        '放进包里也安心，出门携带不怕散乱。',
+        '清晰分区，轻松打开，家人使用更省心。',
+        'BPA-Free 材质，适合日常药片和补剂收纳。',
+        '居家、办公、旅行，一盒满足多场景用药管理。',
+        `${brand} 品牌品质，让日常收纳更有保障。`,
+      ],
+      enCopies: [
+        'Plan your week ahead — every day, clearly organized.',
+        'Vitamins, fish oil, daily meds — one spacious slot holds them all.',
+        'Toss it in your bag with confidence — snap-lock keeps pills in place.',
+        'Easy-open design with clear labels — perfect for seniors and caregivers.',
+        'BPA-Free material, safe for everyday pill and supplement storage.',
+        'Home, office, travel — one organizer for every scenario.',
+        `${brand} quality you can trust — reliable daily organization.`,
+      ],
+      reasons: ['文案节奏紧凑，痛点前置，转化驱动强', '画面与文案呼应度高，适合直接出片', '语气偏促销，可在对话中调柔和'],
+    },
+    {
+      id: 'vid-narrative', title: '品牌叙事版', tag: '情感化表达', score: 88 - scoreShift,
+      cnCopies: [
+        '每一格，都是对健康的小小承诺。',
+        '大小药粒都有安稳的位置，从此告别混乱。',
+        '无论走到哪里，你的用药习惯都不会被打断。',
+        '为最在意的人，选一份看得见的贴心。',
+        '安全材质，安心收纳，每天都值得被好好对待。',
+        '从晨间到旅途，让健康管理融入日常节奏。',
+        `选择 ${brand}，选择长久陪伴的品质。`,
+      ],
+      enCopies: [
+        'Each compartment — a small promise to your health.',
+        'Every pill finds its place; no more morning confusion.',
+        'Wherever you go, your routine stays unbroken.',
+        'A thoughtful choice for the ones you care about most.',
+        'Safe materials, peaceful mind — you deserve daily care done right.',
+        'From sunrise to suitcase — health management woven into your rhythm.',
+        `Choose ${brand} — choose lasting quality.`,
+      ],
+      reasons: ['叙事节奏舒缓，品牌调性高级', '适合品牌宣传片或社交媒体短视频', '转化力稍弱，建议搭配促销卡片'],
+    },
+    {
+      id: 'vid-functional', title: '功能简洁版', tag: '精炼直白', score: 85 + (scoreShift > 1 ? 1 : 0),
+      cnCopies: [
+        '7 天 4 格，一目了然。',
+        '大颗粒鱼油也能轻松放入。',
+        '卡扣锁紧，出行不洒。',
+        '大字标识，老人也能轻松辨认。',
+        'BPA-Free，食品级 PP 材质。',
+        '居家、出差、旅行通用。',
+        `${brand} 出品，12 个月保修。`,
+      ],
+      enCopies: [
+        '7 days, 4 slots — everything at a glance.',
+        'Fits large fish oil capsules with room to spare.',
+        'Snap-lock closure — no spills on the go.',
+        'Bold labels — seniors read them easily.',
+        'BPA-Free, food-grade PP material.',
+        'Works at home, in the office, or on the road.',
+        `By ${brand} — 12-month warranty included.`,
+      ],
+      reasons: ['语言精炼，适合字幕叠加型短视频', '信息密度高，快速传达卖点', '情感温度较低，可在对话中补充故事感'],
+    },
+  ];
+
+  function buildTable(ver) {
+    const rows = scenes.map((s, i) => `<tr>
+      <td>${String(i + 1).padStart(2, '0')}</td>
+      <td>${s.point}</td>
+      <td>${s.visual}</td>
+      <td>${ver.cnCopies[i]}</td>
+      <td>${ver.enCopies[i]}</td>
+    </tr>`).join('');
+    return `<table class="copy-draft-video-table">
+      <thead><tr><th>序号</th><th>卖点</th><th>画面展示</th><th>中文文案</th><th>英文文案</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  }
+
+  return versions.map(v => ({
+    id: v.id,
+    title: v.title,
+    tag: v.tag,
+    score: v.score,
+    content: '',
+    htmlContent: buildTable(v),
+    reasons: v.reasons,
+  }));
+}
+
+function buildFaqCopyDraftCandidates(name, brand, site, scoreShift) {
+  const qas = [
+    {
+      q: `What is the ${name} made of? Is it safe for daily use?`,
+      v1: `The ${name} is made from food-grade, BPA-free PP material that is FDA-compliant. It is safe for direct contact with vitamins, supplements, and prescription medications for everyday use.`,
+      v2: `Crafted from BPA-free, food-grade polypropylene — the same material trusted in baby bottles and food containers. Completely safe for storing your daily vitamins and supplements.`,
+      v3: `FDA-compliant, BPA-free PP material. Safe, non-toxic, odor-free — designed for long-term daily medication and supplement storage.`,
+    },
+    {
+      q: `How many compartments does the ${name} have? Can it fit large pills like fish oil?`,
+      v1: `The ${name} features a 7-day, 4-compartment-per-day design (28 slots total). Each compartment is spacious enough to hold large capsules like fish oil, multivitamins, and daily supplements without crowding.`,
+      v2: `7 daily sections with 4 roomy slots each — that's 28 compartments to organize your entire week. Even large fish oil capsules fit comfortably with space to spare.`,
+      v3: `28 compartments (7 days × 4 slots). Each slot accommodates large-size capsules including fish oil, calcium tablets, and multi-vitamins.`,
+    },
+    {
+      q: 'Will pills spill if I carry it in my bag or luggage?',
+      v1: `No. The ${name} uses a secure snap-lock closure that keeps every compartment tightly sealed. It has been designed to prevent spills during daily commutes and travel — just toss it in your bag with confidence.`,
+      v2: `Not at all. The dual-latch snap-lock keeps each section firmly closed. Whether it's in your handbag, backpack, or carry-on, your pills stay exactly where you put them.`,
+      v3: `Snap-lock closure on every compartment. Drop-test verified — no spills in bags, purses, or luggage. Built for portable, worry-free carry.`,
+    },
+    {
+      q: 'Is this pill organizer easy to use for elderly people?',
+      v1: `Absolutely. The ${name} features large, high-contrast day-of-week labels and color-coded sections so elderly users can quickly identify the right compartment. The lid opens smoothly with minimal effort.`,
+      v2: `Yes — it's designed with seniors in mind. Bold day labels, high-contrast colors, and a smooth one-hand open mechanism make it effortless for older adults or anyone with limited dexterity.`,
+      v3: `Senior-friendly design: large bold labels, high-contrast colors, rounded edges, easy one-hand open. Reduces medication errors for elderly users and caregivers.`,
+    },
+    {
+      q: `Does the ${name} come with a warranty? What if I receive a defective unit?`,
+      v1: `Yes. Every ${brand} ${name} comes with a 12-month warranty and a dedicated after-sales card inside the package. If you receive a defective unit, simply contact our support team via the QR code on the card for a prompt replacement or refund.`,
+      v2: `Absolutely. ${brand} offers a full 12-month warranty. Each box includes a warranty card with a QR code for instant access to our customer support — hassle-free replacements guaranteed.`,
+      v3: `12-month warranty included. Scan the QR code on the enclosed after-sales card for instant support. Defective units are replaced promptly — no questions asked.`,
+    },
+  ];
+
+  function buildHtml(key) {
+    const cards = qas.map((qa, i) => `<div class="copy-draft-faq-item">
+      <div class="faq-item-q"><span class="faq-item-idx">Q${i + 1}</span>${qa.q}</div>
+      <div class="faq-item-a"><span class="faq-item-idx ans">A${i + 1}</span>${qa[key]}</div>
+    </div>`).join('');
+    return `<div class="copy-draft-faq-list">${cards}</div>`;
+  }
+
+  return [
+    {
+      id: 'faq-conversion',
+      title: '转化导向版',
+      tag: '强调购买信心',
+      score: 90 + scoreShift,
+      content: '',
+      htmlContent: buildHtml('v1'),
+      reasons: ['回答详尽，直击用户购买顾虑', '信息完整，适合直接上架', '语气偏正式，可在对话中调整'],
+    },
+    {
+      id: 'faq-friendly',
+      title: '亲和表达版',
+      tag: '自然对话风格',
+      score: 87 - scoreShift,
+      content: '',
+      htmlContent: buildHtml('v2'),
+      reasons: ['语气亲切自然，贴近真实用户对话', '适合 Rufus 风格回答和社交媒体', '部分表达口语化，正式场景需微调'],
+    },
+    {
+      id: 'faq-concise',
+      title: '精炼简洁版',
+      tag: '高效信息密度',
+      score: 85 + (scoreShift > 1 ? 1 : 0),
+      content: '',
+      htmlContent: buildHtml('v3'),
+      reasons: ['句式精炼，信息密度高', '适合移动端快速浏览', '温度感较低，可搭配品牌故事补充'],
     },
   ];
 }
@@ -193,18 +466,71 @@ function renderCopyDraftPicker() {
   const row = copyDraftPickerState.row;
   if (!body || !row) return;
   const esc = typeof escapeAiHtml === 'function' ? escapeAiHtml : (x) => String(x || '');
-  body.innerHTML = `
+  const isVideo = copyDraftPickerState.drafts.some(d => d.htmlContent);
+  const contextHtml = `
     <div class="copy-draft-context">
       <span><b>SKU</b>${esc(row.sku)}</span>
       <span><b>产品</b>${esc(row.name)}</span>
       <span><b>需求类型</b>${esc(row.type)}</span>
       <span><b>站点</b>${esc(row.site)}</span>
       <span><b>优先级</b>${typeof getRowPriority === 'function' ? getRowPriority(row) : 'P1'}</span>
-    </div>
-    <div class="copy-draft-grid">
-      ${copyDraftPickerState.drafts.map(draft => renderCopyDraftCard(draft, esc)).join('')}
-    </div>
-  `;
+    </div>`;
+  if (isVideo) {
+    body.innerHTML = contextHtml + renderVideoDraftTabs(copyDraftPickerState.drafts, esc);
+  } else {
+    body.innerHTML = contextHtml + `
+      <div class="copy-draft-grid">
+        ${copyDraftPickerState.drafts.map(draft => renderCopyDraftCard(draft, esc)).join('')}
+      </div>`;
+  }
+}
+
+function renderVideoDraftTabs(drafts, esc) {
+  const activeId = copyDraftPickerState._videoTab || drafts[0].id;
+  const vLabels = ['V1', 'V2', 'V3'];
+  const tabBar = drafts.map((d, i) => {
+    const cls = d.id === activeId ? 'copy-draft-tab active' : 'copy-draft-tab';
+    const selCls = copyDraftPickerState.selectedId === d.id ? ' selected' : '';
+    return `<button type="button" class="${cls}${selCls}" data-idx="${i}" onclick="switchVideoDraftTab('${d.id}')">
+      <span class="tab-idx">${vLabels[i] || 'V' + (i + 1)}</span>
+      <span class="tab-title">${esc(d.title)}</span>
+      <span class="tab-tag">${esc(d.tag)}</span>
+      <span class="tab-score"><strong>${d.score}</strong>/100</span>
+      ${copyDraftPickerState.selectedId === d.id ? '<span class="tab-check">✓</span>' : ''}
+    </button>`;
+  }).join('');
+
+  const draft = drafts.find(d => d.id === activeId) || drafts[0];
+  const selected = copyDraftPickerState.selectedId === draft.id;
+  const rating = copyDraftPickerState.ratings[draft.id] || '';
+  const ratingBtns = ['好', '一般', '不可用'].map(item => `
+    <button type="button" class="${rating === item ? 'active' : ''}" onclick="rateCopyDraft('${draft.id}', '${item}')">${item}</button>
+  `).join('');
+
+  return `
+    <div class="copy-draft-tabs">
+      <div class="copy-draft-tab-bar">${tabBar}</div>
+      <div class="copy-draft-tab-panel">
+        <div class="copy-draft-preview has-html">${draft.htmlContent}</div>
+        <div class="copy-draft-tab-footer">
+          <div class="copy-draft-reasons">
+            <div class="copy-draft-label">AI 自评理由</div>
+            <ul>${draft.reasons.map(r => `<li>${esc(r)}</li>`).join('')}</ul>
+          </div>
+          <div class="copy-draft-tab-actions">
+            <div class="copy-draft-rating" onclick="event.stopPropagation()">
+              <span>人工评分</span>
+              <div>${ratingBtns}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function switchVideoDraftTab(id) {
+  copyDraftPickerState._videoTab = id;
+  renderCopyDraftPicker();
 }
 
 function renderCopyDraftCard(draft, esc) {
@@ -225,7 +551,7 @@ function renderCopyDraftCard(draft, esc) {
           <span>/100</span>
         </div>
       </div>
-      <div class="copy-draft-preview">${esc(draft.content)}</div>
+      <div class="copy-draft-preview${draft.htmlContent ? ' has-html' : ''}">${draft.htmlContent || esc(draft.content)}</div>
       <div class="copy-draft-reasons">
         <div class="copy-draft-label">AI 自评理由</div>
         <ul>${draft.reasons.map(reason => `<li>${esc(reason)}</li>`).join('')}</ul>
@@ -253,7 +579,10 @@ function rateCopyDraft(id, rating) {
 
 function enterAiChatWithSelectedDraft() {
   const row = copyDraftPickerState.row;
-  const draft = copyDraftPickerState.drafts.find(item => item.id === copyDraftPickerState.selectedId);
+  let draft = copyDraftPickerState.drafts.find(item => item.id === copyDraftPickerState.selectedId);
+  if (!draft && copyDraftPickerState._videoTab) {
+    draft = copyDraftPickerState.drafts.find(item => item.id === copyDraftPickerState._videoTab);
+  }
   if (!row || !draft) {
     showToast('请先选择一个候选版本', 'warning');
     return;
@@ -1653,9 +1982,9 @@ function renderRowActions(r, rowIdx) {
       extra = `${div}<button class="row-action-btn" onclick="rowAction('reject_log_readonly','${sku}')">驳回记录</button>`;
       break;
     case '待处理':
-      return `<div class="row-actions"><button class="row-action-btn warn" onclick="event.stopPropagation();openAiChat('${sku}', '')">文案生成</button></div>`;
+      return `<div class="row-actions"><button class="row-action-btn warn" onclick="event.stopPropagation();openAiChat('${sku}', '')">文案生成</button>${div}<button class="row-action-btn warn" onclick="rowAction('change','${sku}',${idx})">变更</button></div>`;
     case '处理中':
-      extra = '';
+      extra = `${div}<button class="row-action-btn warn" onclick="rowAction('change','${sku}',${idx})">变更</button>`;
       break;
     case '已完成':
       return `<div class="row-actions"><button class="row-action-btn success" onclick="rowAction('view_copy','${sku}')">查看文案</button></div>`;
@@ -1672,8 +2001,14 @@ function rowAction(act, sku, rowIdx) {
     openReviewRejectRecordBySku(sku, { showEdit: false });
     return;
   }
+  if (act === 'detail') {
+    openChangeModal(sku, -1, 'detail');
+    return;
+  }
   if (act === 'change') {
-    openChangeModal(sku, rowIdx);
+    const row = (rowIdx >= 0 && LIST_DATA[rowIdx]) ? LIST_DATA[rowIdx] : LIST_DATA.find(r => r.sku === sku);
+    const mode = (row && (row.status === '处理中' || row.status === '待处理')) ? 'limited' : 'full';
+    openChangeModal(sku, rowIdx, mode);
     return;
   }
   const messages = {
@@ -1709,42 +2044,72 @@ const TYPE_TO_RESULT_KEY = {
 };
 
 let _changeRowRef = null;
+let _changeMode = 'full';
 
-function openChangeModal(sku, rowIdx) {
+function openChangeModal(sku, rowIdx, mode) {
+  _changeMode = mode || 'full';
   const row = (rowIdx >= 0 && LIST_DATA[rowIdx])
            ? LIST_DATA[rowIdx]
            : LIST_DATA.find(r => r.sku === sku && r.status === '待审核') || LIST_DATA.find(r => r.sku === sku);
   if (!row) { showToast('未找到需求数据', 'warning'); return; }
   _changeRowRef = row;
 
+  const modalEl = document.getElementById('change-modal');
+  const modalTitle = document.getElementById('change-modal-title');
+  const formSection = modalEl.querySelector('.change-form').closest('.cm-section');
+  const modalFooter = modalEl.querySelector('.modal-footer');
+
   document.getElementById('change-modal-subtitle').textContent = `${row.type} · ${sku}`;
-  document.getElementById('cm-type-label').textContent = row.type;
-  document.getElementById('cm-sku-label').textContent = sku;
 
-  const siteSelect = document.getElementById('cm-site');
-  siteSelect.value = (row.site || '').toLowerCase();
+  if (_changeMode === 'detail') {
+    modalTitle.textContent = '需求详情';
+    formSection.style.display = 'none';
+    modalFooter.style.display = 'none';
+  } else {
+    modalTitle.textContent = '变更需求';
+    formSection.style.display = '';
+    modalFooter.style.display = '';
 
-  const subSel = document.getElementById('cm-subcategory');
-  const cats = typeof subCategoriesData !== 'undefined' ? subCategoriesData : [];
-  subSel.innerHTML = cats.map(s => `<option value="${s.value}">${s.label}</option>`).join('');
-  const matchedSub = cats.find(s => s.label === row.sub);
-  if (matchedSub) subSel.value = matchedSub.value;
+    document.getElementById('cm-type-label').textContent = row.type;
+    document.getElementById('cm-sku-label').textContent = sku;
 
-  document.getElementById('cm-date').value = (row.date || '').replace(/\//g, '-');
+    const isLimited = _changeMode === 'limited';
 
-  const needLaunch = /新品.*(Listing|图片文案|卖点视频|操作视频)/.test(row.type) || row.type === '新品Listing';
-  const launchRow = document.getElementById('cm-launch-row');
-  launchRow.style.display = needLaunch ? '' : 'none';
-  if (needLaunch) {
-    document.getElementById('cm-launch-date').value = (row.launch_date || '').replace(/\//g, '-');
+    const siteSelect = document.getElementById('cm-site');
+    siteSelect.value = (row.site || '').toLowerCase();
+    siteSelect.disabled = isLimited;
+
+    const subSel = document.getElementById('cm-subcategory');
+    const cats = typeof subCategoriesData !== 'undefined' ? subCategoriesData : [];
+    subSel.innerHTML = cats.map(s => `<option value="${s.value}">${s.label}</option>`).join('');
+    const matchedSub = cats.find(s => s.label === row.sub);
+    if (matchedSub) subSel.value = matchedSub.value;
+    subSel.disabled = isLimited;
+
+    document.getElementById('cm-date').value = (row.date || '').replace(/\//g, '-');
+
+    const needLaunch = /新品.*(Listing|图片文案|卖点视频|操作视频)/.test(row.type) || row.type === '新品Listing';
+    const launchRow = document.getElementById('cm-launch-row');
+    launchRow.style.display = needLaunch ? '' : 'none';
+    if (needLaunch) {
+      const launchInput = document.getElementById('cm-launch-date');
+      launchInput.value = (row.launch_date || '').replace(/\//g, '-');
+      launchInput.disabled = isLimited;
+    }
+
+    const reasonRow = document.getElementById('cm-reason').closest('.change-form-row') || document.getElementById('cm-reason').parentElement;
+    if (isLimited) {
+      reasonRow.style.display = 'none';
+      document.getElementById('cm-reason').value = '';
+    } else {
+      reasonRow.style.display = '';
+      document.getElementById('cm-reason').value = '';
+    }
   }
-
-  document.getElementById('cm-reason').value = '';
 
   _renderChangeModules(row.type);
 
-  const modal = document.getElementById('change-modal');
-  modal.style.display = 'flex';
+  modalEl.style.display = 'flex';
 }
 
 function _renderChangeModules(type) {
@@ -1768,29 +2133,60 @@ function _renderChangeModules(type) {
   }
 
   if (reqTypeEl) reqTypeEl.value = savedVal;
+
+  if (_changeMode === 'limited' || _changeMode === 'detail') {
+    container.querySelectorAll('[contenteditable="true"]').forEach(el => {
+      el.contentEditable = 'false';
+      el.classList.remove('editing');
+    });
+    container.querySelectorAll('.prod-img-overlay, .prod-img-upload-zone').forEach(el => {
+      el.style.display = 'none';
+    });
+    container.querySelectorAll('input, select, textarea').forEach(el => {
+      el.disabled = true;
+    });
+  }
 }
 
 function closeChangeModal() {
-  document.getElementById('change-modal').style.display = 'none';
+  const modalEl = document.getElementById('change-modal');
+  modalEl.style.display = 'none';
   _changeRowRef = null;
+  _changeMode = 'full';
+
+  document.getElementById('change-modal-title').textContent = '变更需求';
+  const formSection = modalEl.querySelector('.change-form').closest('.cm-section');
+  if (formSection) formSection.style.display = '';
+  const modalFooter = modalEl.querySelector('.modal-footer');
+  if (modalFooter) modalFooter.style.display = '';
+
+  document.getElementById('cm-site').disabled = false;
+  document.getElementById('cm-subcategory').disabled = false;
+  const launchInput = document.getElementById('cm-launch-date');
+  if (launchInput) launchInput.disabled = false;
+  const reasonRow = document.getElementById('cm-reason').closest('.change-form-row') || document.getElementById('cm-reason').parentElement;
+  reasonRow.style.display = '';
 }
 
 function submitChangeModal() {
   if (!_changeRowRef) return;
   const row = _changeRowRef;
 
-  const siteVal = document.getElementById('cm-site').value;
-  const subSel = document.getElementById('cm-subcategory');
-  const subLabel = subSel.options[subSel.selectedIndex] ? subSel.options[subSel.selectedIndex].text : row.sub;
   const dateVal = document.getElementById('cm-date').value.replace(/-/g, '/');
-  const launchRow = document.getElementById('cm-launch-row');
-  const showLaunch = launchRow.style.display !== 'none';
-  const launchVal = showLaunch ? document.getElementById('cm-launch-date').value.replace(/-/g, '/') : undefined;
-
-  row.site = siteVal.toUpperCase();
-  row.sub = subLabel;
   row.date = dateVal;
-  if (showLaunch && launchVal) row.launch_date = launchVal;
+
+  if (_changeMode === 'full') {
+    const siteVal = document.getElementById('cm-site').value;
+    const subSel = document.getElementById('cm-subcategory');
+    const subLabel = subSel.options[subSel.selectedIndex] ? subSel.options[subSel.selectedIndex].text : row.sub;
+    const launchRow = document.getElementById('cm-launch-row');
+    const showLaunch = launchRow.style.display !== 'none';
+    const launchVal = showLaunch ? document.getElementById('cm-launch-date').value.replace(/-/g, '/') : undefined;
+
+    row.site = siteVal.toUpperCase();
+    row.sub = subLabel;
+    if (showLaunch && launchVal) row.launch_date = launchVal;
+  }
 
   if (typeof renderListTable === 'function') renderListTable();
   closeChangeModal();
