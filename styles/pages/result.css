@@ -1681,11 +1681,6 @@
     font-size: 13px;
     line-height: 1.7;
   }
-  .sell-summary-section {
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px dashed var(--border);
-  }
   .video-ref-grid {
     display: grid;
     grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);

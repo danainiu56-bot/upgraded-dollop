@@ -378,7 +378,7 @@ function renderProduct() {
       </div>
     </div>
     <div class="prod-section">
-      <div class="prod-section-label">K 好信息字段 <span class="prod-section-hint">(${p.kInfo.length} 项)</span></div>
+      <div class="prod-section-label">K 号信息 <span class="prod-section-hint">(${p.kInfo.length} 项)</span></div>
       <div class="info-grid-2">
         ${p.kInfo.map((k, i) => `
           <div class="info-grid-item">
@@ -626,12 +626,7 @@ function renderSelling() {
       </div>
     `).join('')}
   </div>
-  ${(isSellingPointImageDemand() || isFaqDemand()) ? `
-    <div class="prod-section sell-summary-section">
-      <div class="prod-section-label">卖点总概</div>
-      <div class="text-block editable">${editableField('selling.summary', s.summary, { cls: 'edit-block', multiline: true })}</div>
-    </div>
-  ` : ''}`;
+  `;
 }
 
 function renderVideoSelling() {
@@ -1069,7 +1064,7 @@ function openDetailModal(id) {
           <tbody>${p.credentials.map(c => `<tr><td style="width:40%;color:var(--text-muted);">${c.label}</td><td>${c.value}</td></tr>`).join('')}</tbody>
         </table>
         <p style="margin-top:12px;"><strong>适用病症：</strong>${p.indications.join('、')}</p>
-        <p style="margin-top:12px;"><strong>K 好信息字段：</strong></p>
+        <p style="margin-top:12px;"><strong>K 号信息：</strong></p>
         <table class="compact-table">
           <tbody>${p.kInfo.map(k => `<tr><td style="width:40%;color:var(--text-muted);">${k.label}</td><td>${k.value}</td></tr>`).join('')}</tbody>
         </table>`;
@@ -1243,5 +1238,84 @@ function goBack() {
 // ============================================
 // ===== 列表页相关 =====
 // ============================================
+
+// ===== Excel 导出 =====
+function exportResultExcel() {
+  if (typeof XLSX === 'undefined') {
+    showToast('Excel 库加载失败，请刷新页面重试', 'error');
+    return;
+  }
+  const wb = XLSX.utils.book_new();
+
+  // --- Sheet 1: 基础信息 ---
+  const basicRows = getResultBasicRows();
+  const s1Data = [['字段名', '值']];
+  basicRows.forEach(r => s1Data.push([r.label, r.value]));
+  const ws1 = XLSX.utils.aoa_to_sheet(s1Data);
+  ws1['!cols'] = [{ wch: 18 }, { wch: 40 }];
+  XLSX.utils.book_append_sheet(wb, ws1, '基础信息');
+
+  // --- Sheet 2: 产品信息 ---
+  const prod = MOCK_DATA.product || {};
+  const imgProd = MOCK_DATA.imageProduct || {};
+  const s2Data = [];
+  s2Data.push(['【产品定位】']);
+  s2Data.push([prod.positioning || '']);
+  s2Data.push([]);
+  s2Data.push(['【竞争对手对比 - 优势差异点】']);
+  s2Data.push(['维度', '差异描述', '来源品牌', '来源链接']);
+  (imgProd.competitorAdvantages || []).forEach((a, i) => {
+    const src = (imgProd.competitorSources || [])[i] || {};
+    s2Data.push([a.label, a.value, src.brand || '', src.link || '']);
+  });
+  s2Data.push([]);
+  s2Data.push(['【竞对主要客诉点】']);
+  s2Data.push(['序号', '客诉内容']);
+  (imgProd.complaints || []).forEach((c, i) => s2Data.push([i + 1, c]));
+  s2Data.push([]);
+  s2Data.push(['【出货清单】']);
+  s2Data.push(['序号', '清单项']);
+  (imgProd.packingList || []).forEach((p, i) => s2Data.push([i + 1, p]));
+  const ws2 = XLSX.utils.aoa_to_sheet(s2Data);
+  ws2['!cols'] = [{ wch: 14 }, { wch: 50 }, { wch: 16 }, { wch: 44 }];
+  XLSX.utils.book_append_sheet(wb, ws2, '产品信息');
+
+  // --- Sheet 3: 卖点信息 ---
+  const sell = MOCK_DATA.selling || {};
+  const s3Data = [['分组', '序号', '卖点标题', '卖点描述']];
+  ['usp', 'ksp', 'osp'].forEach(group => {
+    const label = group.toUpperCase();
+    (sell[group] || []).forEach((item, i) => {
+      s3Data.push([label, i + 1, item.title, item.desc]);
+    });
+  });
+  const ws3 = XLSX.utils.aoa_to_sheet(s3Data);
+  ws3['!cols'] = [{ wch: 8 }, { wch: 6 }, { wch: 24 }, { wch: 60 }];
+  XLSX.utils.book_append_sheet(wb, ws3, '卖点信息');
+
+  // --- Sheet 4: 卖点创意信息 ---
+  const creative = MOCK_DATA.imageCreative || {};
+  const s4Data = [];
+  s4Data.push(['【图片创意】']);
+  s4Data.push(['图序号', '本图核心表达', '对标竞品', '竞对核心卖点', '差异化优势']);
+  (creative.gallery || []).forEach(g => {
+    s4Data.push([g.image, g.productPoint, g.benchmark, g.competitorPoint, g.advantage]);
+  });
+  s4Data.push([]);
+  s4Data.push(['【富文本创意】']);
+  s4Data.push(['标题', '内容']);
+  (creative.richText || []).forEach(r => s4Data.push([r.title, r.content]));
+  s4Data.push([]);
+  s4Data.push(['【富文本关联图建议】']);
+  s4Data.push(['富文本内容', '关联图片建议']);
+  (creative.richTextImages || []).forEach(r => s4Data.push([r.content, r.image]));
+  const ws4 = XLSX.utils.aoa_to_sheet(s4Data);
+  ws4['!cols'] = [{ wch: 10 }, { wch: 40 }, { wch: 36 }, { wch: 40 }, { wch: 40 }];
+  XLSX.utils.book_append_sheet(wb, ws4, '卖点创意信息');
+
+  const skuCode = (getResultBasicRows().find(r => r.label === 'SKU') || {}).value || 'export';
+  XLSX.writeFile(wb, `图片文案模板_${skuCode}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  showToast('Excel 模板已导出', 'success');
+}
 
 // 现代线性图标库（Lucide 风格，stroke 1.6）

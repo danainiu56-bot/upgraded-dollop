@@ -738,9 +738,66 @@ function removeFile() {
   document.getElementById('uploaded-file-display').style.display = 'none';
   document.getElementById('file-input').value = '';
 }
+const STATIC_TEMPLATES = {
+  B: 'assets/templates/listing_template.xlsx',
+};
+
 function downloadTemplate() {
-  showToast('需求模板下载中...', 'success');
-  setTimeout(() => showToast('模板已下载，请按格式填写后上传', 'success'), 1000);
+  const reqKey = buildReqTypeKey();
+  if (!reqKey) {
+    showToast('请先在第一步选择需求类型', 'warning');
+    return;
+  }
+
+  const label = (typeof buildReqTypeLabel === 'function' && buildReqTypeLabel()) || reqKey;
+  const safeLabel = String(label).replace(/[\\/:*?"<>|·\s]+/g, '_');
+  const tplKey = (typeof getInputTemplateKey === 'function') ? getInputTemplateKey(reqKey) : 'E';
+  const staticPath = STATIC_TEMPLATES[tplKey];
+
+  if (staticPath) {
+    fetch(staticPath)
+      .then(r => {
+        if (!r.ok) throw new Error('network');
+        return r.blob();
+      })
+      .then(blob => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${safeLabel}_需求模板.xlsx`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showToast('模板已下载，请按格式填写后上传', 'success');
+      })
+      .catch(() => showToast('模板文件加载失败，请重试', 'error'));
+    return;
+  }
+
+  if (typeof XLSX === 'undefined') {
+    showToast('Excel 库未加载，请刷新页面重试', 'error');
+    return;
+  }
+  const sheets = (typeof INPUT_TEMPLATES !== 'undefined' && INPUT_TEMPLATES[tplKey]) || [];
+  if (!sheets.length) {
+    showToast('未找到对应模板', 'error');
+    return;
+  }
+  const wb = XLSX.utils.book_new();
+  sheets.forEach(sh => {
+    const aoa = [INPUT_TEMPLATE_HEADERS];
+    sh.rows.forEach(r => {
+      aoa.push([
+        r.label || '',
+        r.example || '',
+        r.desc || '',
+        r.required ? '是' : '否',
+      ]);
+    });
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = [{ wch: 24 }, { wch: 50 }, { wch: 40 }, { wch: 10 }];
+    XLSX.utils.book_append_sheet(wb, ws, sh.name);
+  });
+  XLSX.writeFile(wb, `${safeLabel}_需求模板.xlsx`);
+  showToast('模板已下载，请按格式填写后上传', 'success');
 }
 
 // ===== 解析流程 =====

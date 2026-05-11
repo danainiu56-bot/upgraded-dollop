@@ -20,7 +20,7 @@
 <link rel="stylesheet" href="styles/pages/topbar.css?v=20260509-1710">
 <link rel="stylesheet" href="styles/pages/layout.css?v=20260509-1710">
 <link rel="stylesheet" href="styles/pages/wizard.css?v=20260509-1710">
-<link rel="stylesheet" href="styles/pages/result.css?v=20260509-1710">
+<link rel="stylesheet" href="styles/pages/result.css?v=20260509-1810">
 <link rel="stylesheet" href="styles/pages/demand-list.css?v=20260509-1710">
 <link rel="stylesheet" href="styles/pages/copy-list.css?v=20260509-1710">
 <link rel="stylesheet" href="styles/pages/workbench.css?v=20260509-1710">
@@ -38,6 +38,7 @@
 <script src="scripts/data/ai-history.js?v=20260509-1710"></script>
 <script src="scripts/data/bg-knowledge.js?v=20260509-1710"></script>
 <script src="scripts/data/score-rules.js?v=20260509-1710"></script>
+<script src="scripts/data/input-templates.js?v=20260511-1430"></script>
 
 <!-- ===== Core 基础设施（在数据之后、主 inline 脚本之前加载）===== -->
 <script src="scripts/core/icons.js?v=20260509-1710"></script>
@@ -45,10 +46,13 @@
 <script src="scripts/core/toast.js?v=20260509-1710"></script>
 <script src="scripts/core/router.js?v=20260509-1710"></script>
 
+<!-- ===== SheetJS（Excel 生成库，在页面脚本之前加载） ===== -->
+<script src="scripts/vendor/xlsx.full.min.js"></script>
+
 <!-- ===== 页面级 JS（按业务模块） ===== -->
 <script src="scripts/pages/topbar.js?v=20260509-1710"></script>
-<script src="scripts/pages/wizard.js?v=20260509-1710"></script>
-<script src="scripts/pages/result.js?v=20260509-1710"></script>
+<script src="scripts/pages/wizard.js?v=20260511-1430"></script>
+<script src="scripts/pages/result.js?v=20260511-1215"></script>
 <script src="scripts/pages/demand-list.js?v=20260509-1710"></script>
 <script src="scripts/pages/copy-list.js?v=20260509-1710"></script>
 <script src="scripts/pages/review-list.js?v=20260509-1710"></script>
