@@ -357,6 +357,121 @@
     display: none;
   }
 
+  /* 查看已定稿文案 */
+  .view-copy-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 92;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(15, 23, 42, 0.42);
+    backdrop-filter: blur(6px);
+  }
+  .view-copy-overlay.show { display: flex; }
+  .view-copy-modal {
+    width: min(1040px, 100%);
+    max-height: min(86vh, 820px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 22px;
+    background: #fff;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: 0 28px 80px rgba(15, 23, 42, 0.24);
+  }
+  .view-copy-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #f8fafc;
+  }
+  .view-copy-kicker {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  #view-copy-type-tag,
+  #view-copy-version-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  #view-copy-type-tag {
+    color: var(--primary);
+    background: var(--primary-light);
+  }
+  #view-copy-version-tag {
+    color: #065f46;
+    background: #d1fae5;
+  }
+  .view-copy-head h3 {
+    margin: 0;
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 800;
+  }
+  .view-copy-head p {
+    margin: 6px 0 0;
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .view-copy-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+  }
+  .view-copy-close:hover {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+  .view-copy-body {
+    padding: 18px 24px 20px;
+    overflow: auto;
+    background: #f8fafc;
+  }
+  .view-copy-body .copy-draft-listing-points,
+  .view-copy-body .copy-draft-img-points,
+  .view-copy-body .copy-draft-faq-list {
+    padding: 0;
+  }
+  .view-copy-plain {
+    margin: 0;
+    white-space: pre-wrap;
+    line-height: 1.7;
+    color: var(--text);
+  }
+  .view-copy-foot {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px;
+    border-top: 1px solid var(--border);
+    background: white;
+  }
+  .view-copy-foot-hint {
+    margin-right: auto;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
   .aichat-layout {
     flex: 1;
     min-height: 0;

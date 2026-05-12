@@ -1966,6 +1966,65 @@ function stopAiResize() {
 }
 
 // 行内操作（按状态决定按钮）
+let viewCopyModalState = { text: '' };
+
+function getFinalCopyForRow(row) {
+  if (!row) return null;
+  if (row.finalCopy) return row.finalCopy;
+  if (typeof buildCopyDraftCandidates === 'function') {
+    const drafts = buildCopyDraftCandidates(row, 0);
+    if (drafts && drafts.length) {
+      return drafts.reduce((best, draft) => (draft.score > best.score ? draft : best), drafts[0]);
+    }
+  }
+  return null;
+}
+
+function openViewCopyModal(row) {
+  const copy = getFinalCopyForRow(row);
+  if (!row || !copy) {
+    showToast('暂无已生成的文案', 'warning');
+    return;
+  }
+  viewCopyModalState.text = copy.content || copy.plainText || '';
+
+  const modal = document.getElementById('view-copy-modal');
+  const typeTag = document.getElementById('view-copy-type-tag');
+  const versionTag = document.getElementById('view-copy-version-tag');
+  const title = document.getElementById('view-copy-title');
+  const subtitle = document.getElementById('view-copy-subtitle');
+  const body = document.getElementById('view-copy-body');
+  const footHint = document.getElementById('view-copy-foot-hint');
+  if (!modal || !body) return;
+
+  if (typeTag) typeTag.textContent = row.type || '文案';
+  if (versionTag) versionTag.textContent = `${copy.title || '定稿'} · ${copy.tag || '审核通过'}`;
+  if (title) title.textContent = `${row.name || row.sku || '产品'} · 查看文案`;
+  if (subtitle) subtitle.textContent = `${row.sku || ''} / ${row.site || ''} / ${row.brand || ''}`;
+  if (footHint) footHint.textContent = `评分 ${copy.score || '-'} · 审核通过定稿，只读展示`;
+  body.innerHTML = copy.htmlContent || `<pre class="view-copy-plain">${viewCopyModalState.text}</pre>`;
+  modal.classList.add('show');
+}
+
+function closeViewCopyModal() {
+  const modal = document.getElementById('view-copy-modal');
+  if (modal) modal.classList.remove('show');
+}
+
+function copyViewCopyText() {
+  const text = viewCopyModalState.text || '';
+  if (!text) {
+    showToast('暂无可复制的文案内容', 'warning');
+    return;
+  }
+  try {
+    navigator.clipboard.writeText(text);
+    showToast('文案已复制到剪贴板', 'success');
+  } catch (e) {
+    showToast('复制失败，请手动选择内容复制', 'warning');
+  }
+}
+
 function renderRowActions(r, rowIdx) {
   const sku = r.sku;
   const idx = rowIdx != null ? rowIdx : -1;
@@ -1986,12 +2045,17 @@ function renderRowActions(r, rowIdx) {
       extra = `${div}<button class="row-action-btn warn" onclick="rowAction('change','${sku}',${idx})">变更</button>`;
       break;
     case '已完成':
-      return `<div class="row-actions"><button class="row-action-btn success" onclick="rowAction('view_copy','${sku}')">查看文案</button></div>`;
+      return `<div class="row-actions"><button class="row-action-btn success" onclick="rowAction('view_copy','${sku}',${idx})">查看文案</button></div>`;
   }
   return `<div class="row-actions">${detailBtn}${extra}</div>`;
 }
 
 function rowAction(act, sku, rowIdx) {
+  if (act === 'view_copy') {
+    const row = (rowIdx >= 0 && LIST_DATA[rowIdx]) ? LIST_DATA[rowIdx] : LIST_DATA.find(r => r.sku === sku && r.status === '已完成');
+    openViewCopyModal(row);
+    return;
+  }
   if (act === 'reject_log' && typeof openReviewRejectRecordBySku === 'function') {
     openReviewRejectRecordBySku(sku);
     return;

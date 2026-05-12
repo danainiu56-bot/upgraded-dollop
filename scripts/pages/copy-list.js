@@ -211,6 +211,7 @@ function clearCopyFilter(key) {
 function renderCopyRowActions(r) {
   const sku = r.sku;
   const draftKey = encodeURIComponent([r.sku, r.type, r.submit_time].join('|'));
+  const copyRowIdx = (typeof COPY_LIST_DATA !== 'undefined') ? COPY_LIST_DATA.indexOf(r) : -1;
   const div = `<span class="row-action-divider"></span>`;
   // 颜色规则：
   //   详情      → 默认（紫，主色）
@@ -220,7 +221,7 @@ function renderCopyRowActions(r) {
   const detail   = `<button class="row-action-btn" onclick="event.stopPropagation();showToast('查看详情：${sku}','success')">详情</button>`;
   const reject   = `<button class="row-action-btn danger" onclick="event.stopPropagation();openCopyAuditRecordBySku('${sku}','${r.status}')">驳回记录</button>`;
   const generate = `<button class="row-action-btn warn" onclick="event.stopPropagation();openCopyDraftPicker('${draftKey}')">文案生成</button>`;
-  const view     = `<button class="row-action-btn success" onclick="event.stopPropagation();showToast('查看文案：${sku}','success')">查看文案</button>`;
+  const view     = `<button class="row-action-btn success" onclick="event.stopPropagation();openViewCopyModalFromCopyList(${copyRowIdx})">查看文案</button>`;
   let extra = '';
   switch (r.status) {
     case '待处理': extra = generate; break;
@@ -230,6 +231,15 @@ function renderCopyRowActions(r) {
     default:       extra = detail;
   }
   return `<div class="row-actions">${extra}</div>`;
+}
+
+function openViewCopyModalFromCopyList(idx) {
+  const row = (typeof COPY_LIST_DATA !== 'undefined' && idx >= 0) ? COPY_LIST_DATA[idx] : null;
+  if (row && typeof openViewCopyModal === 'function') {
+    openViewCopyModal(row);
+  } else {
+    showToast('暂无已生成的文案', 'warning');
+  }
 }
 
 function renderCopyListTable() {

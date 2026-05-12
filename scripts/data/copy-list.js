@@ -26,3 +26,9 @@ const CF_STATUS_CLS = {
   '已通过': 'status-pass',
 };
 
+COPY_LIST_DATA.forEach(row => {
+  if (row.status === '已通过' && !row.finalCopy && typeof buildFinalCopyDraft === 'function') {
+    row.finalCopy = buildFinalCopyDraft(row);
+  }
+});
+

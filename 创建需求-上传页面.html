@@ -24,15 +24,15 @@
 <link rel="stylesheet" href="styles/pages/demand-list.css?v=20260509-1710">
 <link rel="stylesheet" href="styles/pages/copy-list.css?v=20260509-1710">
 <link rel="stylesheet" href="styles/pages/workbench.css?v=20260509-1710">
-<link rel="stylesheet" href="styles/pages/ai-chat.css?v=20260509-1710">
+<link rel="stylesheet" href="styles/pages/ai-chat.css?v=20260512-1618">
 
 <!-- ===== Mock 数据层（必须在主 script 之前加载，因为有顶层立即引用）===== -->
 <!-- 接 API 时只改这些文件 -->
 <script src="scripts/data/req-types.js?v=20260509-1710"></script>
 <script src="scripts/data/persons.js?v=20260509-1710"></script>
 <script src="scripts/data/skus.js?v=20260509-1710"></script>
-<script src="scripts/data/demand-list.js?v=20260509-1710"></script>
-<script src="scripts/data/copy-list.js?v=20260509-1710"></script>
+<script src="scripts/data/demand-list.js?v=20260512-1618"></script>
+<script src="scripts/data/copy-list.js?v=20260512-1655"></script>
 <script src="scripts/data/result-mock.js?v=20260509-1710"></script>
 <script src="scripts/data/ai-skills.js?v=20260509-1710"></script>
 <script src="scripts/data/ai-history.js?v=20260509-1710"></script>
@@ -54,10 +54,10 @@
 <script src="scripts/pages/wizard.js?v=20260511-1430"></script>
 <script src="scripts/pages/result.js?v=20260511-1215"></script>
 <script src="scripts/pages/demand-list.js?v=20260509-1710"></script>
-<script src="scripts/pages/copy-list.js?v=20260509-1710"></script>
+<script src="scripts/pages/copy-list.js?v=20260512-1655"></script>
 <script src="scripts/pages/review-list.js?v=20260509-1710"></script>
 <script src="scripts/pages/copy-review-list.js?v=20260509-1710"></script>
-<script src="scripts/pages/ai-chat.js?v=20260509-1710"></script>
+<script src="scripts/pages/ai-chat.js?v=20260512-1618"></script>
 
 <!-- ===== 入口（DOMContentLoaded 初始化）===== -->
 <script src="scripts/main.js?v=20260509-1710"></script>
@@ -1590,6 +1590,36 @@
       <button type="button" class="btn btn-secondary" onclick="closeCopyDraftPicker()">取消</button>
       <button type="button" class="btn btn-secondary" onclick="regenerateCopyDrafts()">重新生成</button>
       <button type="button" class="btn btn-primary" onclick="enterAiChatWithSelectedDraft()">选择此版本并进入调优</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 查看已定稿文案弹窗 ===== -->
+<div
+  class="view-copy-overlay"
+  id="view-copy-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="view-copy-title"
+  onclick="if(event.target===this)closeViewCopyModal()"
+>
+  <div class="view-copy-modal" onclick="event.stopPropagation()">
+    <div class="view-copy-head">
+      <div>
+        <div class="view-copy-kicker">
+          <span id="view-copy-type-tag"></span>
+          <span id="view-copy-version-tag"></span>
+        </div>
+        <h3 id="view-copy-title">查看文案</h3>
+        <p id="view-copy-subtitle"></p>
+      </div>
+      <button type="button" class="view-copy-close" onclick="closeViewCopyModal()" title="关闭">×</button>
+    </div>
+    <div class="view-copy-body" id="view-copy-body"></div>
+    <div class="view-copy-foot">
+      <span class="view-copy-foot-hint" id="view-copy-foot-hint">审核通过定稿，只读展示</span>
+      <button type="button" class="btn btn-secondary" onclick="copyViewCopyText()">一键复制</button>
+      <button type="button" class="btn btn-primary" onclick="closeViewCopyModal()">关闭</button>
     </div>
   </div>
 </div>
