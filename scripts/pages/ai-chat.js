@@ -1318,26 +1318,47 @@ function renderAiMessages() {
   updateAiChatGlobalActions();
 }
 
-function renderAiMsgActions(m) {
-  if (m.streaming) return '';
-  if (!m.actions || !m.actions.length) return '';
-  const map = {
-    copy:   `<button class="msg-action-btn" onclick="copyAiMessage('${m.id}')">${I('copy',12)}<span>复制</span></button>`,
-    regen:  `<button class="msg-action-btn" onclick="regenerateAi('${m.id}')">${I('refresh',12)}<span>重新生成</span></button>`,
-  };
-  return `<div class="msg-actions">${m.actions.map(a => map[a] || '').join('')}</div>`;
+function isQualifiedBotMsg(m) {
+  if (m.role !== 'bot' || m.score || m.streaming) return false;
+  const t = (m.text || '').trim();
+  if (t.length < 12) return false;
+  if (t === '已完成 AI 评测') return false;
+  if (/^✅ 已提交审核/.test(t)) return false;
+  return true;
 }
 
-/** 顶部公共操作：评测 / 提交针对「最近一条可操作的 AI 正文」 */
+function renderAiMsgActions(m) {
+  if (m.streaming) return '';
+  const statusTags = [];
+  if (m.scored)    statusTags.push(`<span class="msg-status-tag scored">已评测 · ${m.scoredTotal || '--'}分</span>`);
+  if (m.submitted) statusTags.push(`<span class="msg-status-tag submitted">已提交审核</span>`);
+  const statusHtml = statusTags.length ? `<div class="msg-status-tags">${statusTags.join('')}</div>` : '';
+
+  const qualified = isQualifiedBotMsg(m);
+  const btns = [];
+  if (m.actions && m.actions.length) {
+    const map = {
+      copy:  `<button class="msg-action-btn" onclick="copyAiMessage('${m.id}')">${I('copy',12)}<span>复制</span></button>`,
+      regen: `<button class="msg-action-btn" onclick="regenerateAi('${m.id}')">${I('refresh',12)}<span>重新生成</span></button>`,
+    };
+    m.actions.forEach(a => { if (map[a]) btns.push(map[a]); });
+  }
+  if (qualified && !m.scored) {
+    btns.push(`<button class="msg-action-btn primary" onclick="scoreAiMessageById('${m.id}')">${I('checkc',12)}<span>AI 评测</span></button>`);
+  }
+  if (qualified && !m.submitted) {
+    btns.push(`<button class="msg-action-btn success" onclick="submitAiMessageById('${m.id}')">${I('check',12)}<span>提交审核</span></button>`);
+  }
+  if (!btns.length && !statusHtml) return '';
+  const actionsHtml = btns.length ? `<div class="msg-actions">${btns.join('')}</div>` : '';
+  return statusHtml + actionsHtml;
+}
+
+/** 顶部公共操作：已移至消息级悬浮操作栏，顶栏不再显示按钮 */
 function renderAiHeaderActions() {
   const wrap = document.getElementById('aichat-header-actions');
   if (!wrap) return;
-  wrap.innerHTML = `
-    <span class="aichat-action-hint" id="aichat-action-hint"></span>
-    <button type="button" class="aichat-header-action-btn primary" id="aichat-btn-score" onclick="scoreCurrentAiOutput()">${I('checkc', 12)}<span>AI 评测打分</span></button>
-    <button type="button" class="aichat-header-action-btn success" id="aichat-btn-submit" onclick="submitCurrentAiOutput()">${I('check', 12)}<span>提交审核</span></button>
-  `;
-  updateAiChatGlobalActions();
+  wrap.innerHTML = '';
 }
 
 function getAiActionTargetMessage() {
@@ -1382,7 +1403,7 @@ function scoreCurrentAiOutput() {
     showToast('暂无可评测的 AI 产出，请先生成文案', 'warning');
     return;
   }
-  scoreAiMessage(m.id);
+  scoreAiMessageById(m.id);
 }
 
 function submitCurrentAiOutput() {
@@ -1391,7 +1412,29 @@ function submitCurrentAiOutput() {
     showToast('暂无可提交的 AI 产出，请先生成文案', 'warning');
     return;
   }
-  openAiSubmitModal(m.id);
+  submitAiMessageById(m.id);
+}
+
+function highlightAiMsg(msgId) {
+  document.querySelectorAll('.aichat-msg.aichat-msg-selected').forEach(el => el.classList.remove('aichat-msg-selected'));
+  if (msgId) {
+    const el = document.querySelector(`.aichat-msg[data-msg-id="${msgId}"]`);
+    if (el) el.classList.add('aichat-msg-selected');
+  }
+}
+
+function clearAiMsgHighlight() {
+  document.querySelectorAll('.aichat-msg.aichat-msg-selected').forEach(el => el.classList.remove('aichat-msg-selected'));
+}
+
+function scoreAiMessageById(msgId) {
+  highlightAiMsg(msgId);
+  scoreAiMessage(msgId);
+}
+
+function submitAiMessageById(msgId) {
+  highlightAiMsg(msgId);
+  openAiSubmitModal(msgId);
 }
 
 // ===== AI 评测打分（弹框展示） =====
@@ -1446,6 +1489,13 @@ function computeAiScorePayload(messageId) {
 function scoreAiMessage(messageId) {
   const payload = computeAiScorePayload(messageId);
   if (!payload) return;
+  const m = aiChatState.messages.find(x => x.id === messageId);
+  if (m) {
+    m.scored = true;
+    m.scoredTotal = payload.total;
+    renderAiMessages();
+    highlightAiMsg(messageId);
+  }
   openAiScoreModal(payload);
 }
 
@@ -1466,6 +1516,7 @@ function closeAiScoreModal() {
   document.removeEventListener('keydown', onAiScoreModalKeydown);
   const root = document.getElementById('aichat-score-modal');
   if (root) root.classList.remove('show');
+  clearAiMsgHighlight();
   aiScoreModalState = { sourceMessageId: null, suggestions: [] };
 }
 
@@ -1616,6 +1667,7 @@ function openAiSubmitModal(messageId) {
 function closeAiSubmitModal() {
   const root = document.getElementById('aichat-submit-modal');
   if (root) root.classList.remove('show');
+  clearAiMsgHighlight();
   aiSubmitModalState = { sourceMessageId: null };
 }
 
@@ -1646,6 +1698,7 @@ function confirmAiSubmitReview() {
 function submitAiMessage(messageId, payload = null) {
   const m = aiChatState.messages.find(x => x.id === messageId);
   if (!m) return;
+  m.submitted = true;
   showToast('已提交审核，审核结果会以站内通知反馈', 'success');
   const text = payload
     ? `✅ 已提交审核\n\nSKU：${aiChatState.sku}\n提交人：${getCurrentUserInitial()}（Mason）\n时间：${new Date().toLocaleString('zh-CN')}\n\n【Title】\n${payload.title}\n\n${payload.tds.map((td, i) => `【TD-${i + 1}】\n${td}`).join('\n\n')}\n\n你可以继续在此对话中迭代新版本，或返回「文案管理」列表查看审核进度。`

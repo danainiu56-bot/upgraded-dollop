@@ -712,7 +712,14 @@
   .aichat-msg.bot  .aichat-avatar { background: linear-gradient(135deg, #06b6d4, #10b981); }
   .aichat-msg.bot  .aichat-avatar svg { display: block; filter: drop-shadow(0 1px 2px rgba(0,0,0,.2)); }
 
-  /* 消息底部操作按钮 */
+  /* 消息选中态高亮 */
+  .aichat-msg.aichat-msg-selected > .aichat-bubble {
+    border-color: #818cf8;
+    background: #f5f3ff;
+    box-shadow: 0 0 0 2px rgba(129,140,248,.25), 0 2px 8px rgba(99,102,241,.1);
+  }
+
+  /* 消息底部操作按钮 -- hover 浮出 */
   .msg-actions {
     margin-top: 10px;
     padding-top: 10px;
@@ -720,7 +727,13 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
+    opacity: 0;
+    transition: opacity .2s ease;
   }
+  .aichat-msg.bot:hover .msg-actions,
+  .aichat-msg.aichat-msg-selected .msg-actions { opacity: 1; }
+  .aichat-msg.user .msg-actions { opacity: 1; }
+
   .msg-action-btn {
     display: inline-flex;
     align-items: center;
@@ -756,6 +769,34 @@
     transform: translateY(-1px);
     box-shadow: 0 4px 10px rgba(16,185,129,.3);
     color: white;
+  }
+
+  /* 已操作状态标签 */
+  .msg-status-tags {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .msg-status-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.6;
+  }
+  .msg-status-tag.scored {
+    background: #eff6ff;
+    color: #3b82f6;
+    border: 1px solid #bfdbfe;
+  }
+  .msg-status-tag.submitted {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
   }
 
   /* 评分卡 */
