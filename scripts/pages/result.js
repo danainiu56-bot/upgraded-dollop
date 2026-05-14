@@ -98,7 +98,7 @@ function getActiveResultModules() {
     title: listingModules,
     td: listingModules,
     titletd: listingModules,
-    listing7: ['mod-basic', 'mod-product', 'mod-selling', 'mod-image-creative'],
+    listing7: ['mod-basic', 'mod-product', 'mod-prod-comp', 'mod-selling', 'mod-image-creative'],
     video: ['mod-basic', 'mod-product', 'mod-selling', 'mod-audience', 'mod-pain'],
     package: ['mod-basic', 'mod-product', 'mod-selling', 'mod-audience', 'mod-pain'],
     manual: ['mod-basic', 'mod-product', 'mod-selling', 'mod-audience', 'mod-pain'],
@@ -152,6 +152,7 @@ function renderModuleCard(m) {
     case 'mod-basic':      bodyHtml = renderBasic(); break;
     case 'mod-optimization': bodyHtml = renderOptimization(); break;
     case 'mod-product':    bodyHtml = renderProduct(); break;
+    case 'mod-prod-comp':  bodyHtml = renderProdComp(); break;
     case 'mod-seo':        bodyHtml = renderSEO(); break;
     case 'mod-competitor': bodyHtml = renderCompetitor(); break;
     case 'mod-selling':    bodyHtml = renderSelling(); break;
@@ -191,6 +192,10 @@ function getModuleMeta(id) {
       if (isFaqDemand()) return [{ text: '2 类资料', cls: 'ok' }];
       if (isSellingPointImageDemand()) return [{ text: '5 类资料', cls: 'ok' }, { text: `${MOCK_DATA.imageProduct.competitorAdvantages.length} 个优势差异`, cls: '' }];
       return [{ text: `${MOCK_DATA.product.credentials.length} 项资质`, cls: 'ok' }, { text: `${MOCK_DATA.product.indications.length} 个适用病症`, cls: '' }];
+    case 'mod-prod-comp': {
+      const n = (MOCK_DATA.product.productCompetitors || []).length;
+      return [{ text: `${n} 个竞品`, cls: 'ok' }];
+    }
     case 'mod-seo': {
       const total = MOCK_DATA.seo.rows.length;
       const strong = MOCK_DATA.seo.rows.filter(r => r.relevance === '强').length;
@@ -221,7 +226,7 @@ function getModuleMeta(id) {
     case 'mod-stp':        return [{ text: `${MOCK_DATA.stp.columns.length - 1} 个竞品`, cls: 'ok' }, { text: `${MOCK_DATA.stp.rows.length} 项拼比`, cls: '' }];
     case 'mod-image-creative': return [{ text: `${MOCK_DATA.imageCreative.gallery.length} 张图`, cls: 'ok' }, { text: `${MOCK_DATA.imageCreative.richText.length} 段富文本`, cls: '' }];
     case 'mod-video-display': return [{ text: `${MOCK_DATA.sellingVideo.displays.length} 个展示镜头`, cls: 'ok' }];
-    case 'mod-faq-extra':  return [{ text: 'GEO 助手', cls: 'ok' }, { text: 'Rufus 补充', cls: '' }];
+    case 'mod-faq-extra':  return [{ text: `${(MOCK_DATA.faqSupplement.screenshots || []).length} 张截图`, cls: 'ok' }];
     default: return [];
   }
 }
@@ -390,6 +395,36 @@ function renderProduct() {
     </div>`;
 }
 
+function renderProdComp() {
+  const pc = (MOCK_DATA.product && MOCK_DATA.product.productCompetitors) || [];
+  if (!pc.length) return '<div style="color:var(--text-muted);">暂无竞品信息</div>';
+  return `
+    <div class="prod-comp-grid">
+      ${pc.map((c, i) => `
+        <div class="prod-comp-card">
+          ${renderProductImageUpload(c.image, c.name, 'product.productCompetitors.' + i + '.image', 'prod-comp-img')}
+          <div class="prod-comp-info">
+            <div class="prod-comp-name">
+              <span class="prod-comp-index">竞对${['一','二','三','四','五'][i] || i + 1}</span>
+              <strong>${editableField('product.productCompetitors.' + i + '.name', c.name, { cls: 'edit-inline-value' })}</strong>
+            </div>
+            <div class="prod-comp-field">
+              <span class="prod-comp-label">ASIN</span>
+              <code>${editableField('product.productCompetitors.' + i + '.asin', c.asin, { cls: 'edit-inline-value' })}</code>
+            </div>
+            <div class="prod-comp-field">
+              <span class="prod-comp-label">链接</span>
+              <a href="${c.link}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="prod-comp-link">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Amazon
+              </a>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>`;
+}
+
 function renderFaqProduct() {
   const p = MOCK_DATA.product;
   return `
@@ -400,6 +435,21 @@ function renderFaqProduct() {
         <div class="image-product-position">
           <div class="prod-section-label">产品定位</div>
           <div class="text-block editable">${editableField('product.positioning', p.positioning, { cls: 'edit-block', multiline: true })}</div>
+        </div>
+        <div class="image-product-position">
+          <div class="prod-section-label">Title</div>
+          <div class="text-block editable">${editableField('product.title', p.title, { cls: 'edit-block', multiline: true })}</div>
+        </div>
+        <div class="image-product-position">
+          <div class="prod-section-label">TD <span class="prod-section-hint">(${p.td.length} 项)</span></div>
+          <div class="td-list">
+            ${p.td.map((t, i) => `
+              <div class="td-item">
+                <span class="td-index">TD ${i + 1}</span>
+                <div class="td-text">${editableField(`product.td.${i}`, t, { cls: 'edit-block', multiline: true })}</div>
+              </div>
+            `).join('')}
+          </div>
         </div>
       </div>
     </div>`;
@@ -693,6 +743,83 @@ function renderVideoDisplay() {
   </div>`;
 }
 
+function renderCreativeRefImages(galleryIdx) {
+  const imgs = (MOCK_DATA.imageCreative.gallery[galleryIdx] || {}).referenceImages || [];
+  const maxRefImgs = 3;
+  return imgs.map((img, j) => `
+    <figure class="creative-ref-item">
+      <img class="creative-ref-img" src="${img.url}" alt="${img.caption || ''}" loading="lazy"
+           onclick="window.open('${img.url}','_blank')">
+      <div class="creative-ref-overlay">
+        <label class="creative-ref-ol-btn" onclick="event.stopPropagation()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          替换
+          <input type="file" accept="image/*" style="display:none" onchange="onRefImgReplace(event,${galleryIdx},${j})">
+        </label>
+        <button class="creative-ref-ol-btn" onclick="event.stopPropagation();onRefImgDelete(${galleryIdx},${j})">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          删除
+        </button>
+      </div>
+      ${img.caption ? `<figcaption class="creative-ref-caption">${img.caption}</figcaption>` : ''}
+    </figure>
+  `).join('') + (imgs.length < maxRefImgs ? `
+    <div class="creative-ref-add" onclick="event.stopPropagation();this.querySelector('input').click()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span>添加</span>
+      <input type="file" accept="image/*" style="display:none" onchange="onRefImgAdd(event,${galleryIdx})">
+    </div>
+  ` : '');
+}
+
+function onRefImgReplace(event, galleryIdx, imgIdx) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const arr = MOCK_DATA.imageCreative.gallery[galleryIdx].referenceImages;
+    if (arr && arr[imgIdx]) {
+      arr[imgIdx].url = e.target.result;
+      arr[imgIdx].caption = file.name.replace(/\.[^.]+$/, '');
+    }
+    refreshCreativeRefImages(galleryIdx);
+  };
+  reader.readAsDataURL(file);
+}
+
+function onRefImgDelete(galleryIdx, imgIdx) {
+  const arr = MOCK_DATA.imageCreative.gallery[galleryIdx].referenceImages;
+  if (arr) arr.splice(imgIdx, 1);
+  refreshCreativeRefImages(galleryIdx);
+}
+
+function onRefImgAdd(event, galleryIdx) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const gallery = MOCK_DATA.imageCreative.gallery[galleryIdx];
+  if (!gallery.referenceImages) gallery.referenceImages = [];
+  if (gallery.referenceImages.length >= 3) {
+    showToast('每张创意卡片最多 3 张参考图', 'warning');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    gallery.referenceImages.push({
+      url: e.target.result,
+      caption: file.name.replace(/\.[^.]+$/, ''),
+    });
+    refreshCreativeRefImages(galleryIdx);
+  };
+  reader.readAsDataURL(file);
+}
+
+function refreshCreativeRefImages(galleryIdx) {
+  const containers = document.querySelectorAll('.creative-ref-images');
+  if (containers[galleryIdx]) {
+    containers[galleryIdx].innerHTML = renderCreativeRefImages(galleryIdx);
+  }
+}
+
 function renderImageCreative() {
   const data = MOCK_DATA.imageCreative;
   return `
@@ -713,8 +840,10 @@ function renderImageCreative() {
             </div>
             <div class="creative-reference">
               <div>
-                <label>对标竞品</label>
-                <div class="creative-card-text">${editableField(`imageCreative.gallery.${i}.benchmark`, it.benchmark, { cls: 'edit-inline-value', multiline: true })}</div>
+                <label>参考图</label>
+                <div class="creative-ref-images">
+                  ${renderCreativeRefImages(i)}
+                </div>
               </div>
               <div>
                 <label>竞对核心卖点</label>
@@ -757,74 +886,79 @@ function renderImageCreative() {
 }
 
 function renderFaqExtra() {
-  const data = MOCK_DATA.faqSupplement;
   return `
-    <div class="faq-screenshot-board">
-      <div class="faq-shot-card geo-shot">
-        <div class="faq-shot-title">GEO助手查截屏</div>
-        <div class="geo-screen">
-          <div class="geo-screen-head">
-            <strong>Amazon Q&A / Rufus 问题查询</strong>
-            <span>Chrome 插件</span>
-          </div>
-          <div class="geo-screen-body">
-            <aside class="geo-filter">
-              <b>筛选条件</b>
-              <span>站点：US</span>
-              <span>主题类目：Pill Organizers</span>
-              <span>来源：Rufus / Q&A</span>
-            </aside>
-            <div class="geo-question-table">
-              ${[
-                ['Replacement tops for best results', '28', '强相关', '容量'],
-                ['Does it work on back pain', '19', '中相关', '适用'],
-                ['Compare Bexeen vs reminder effectiveness', '19', '强相关', '竞品'],
-                ['Can it be applied to knee', '18', '中相关', '场景'],
-                ['How much should I use Patches?', '17', '强相关', '用法'],
-                ['Is it scented?', '17', '弱相关', '材质'],
-                ['Tips for sensitive skin users?', '16', '中相关', '风险'],
-              ].map((row, i) => `
-                <div class="geo-question-row">
-                  <span>${editableField(`faqSupplement.geoQuery.${i}.question`, row[0], { cls: 'edit-inline-value' })}</span>
-                  <b>${row[1]}</b>
-                  <em>${row[2]}</em>
-                  <i>${row[3]}</i>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-          <div class="geo-screen-foot">
-            ${data.geo.map((it, i) => `<span>${editableField(`faqSupplement.geo.${i}.title`, it.title, { cls: 'edit-inline-value' })}</span>`).join('')}
-          </div>
-        </div>
-      </div>
-
-      <div class="faq-shot-card rufus-shot">
-        <div class="faq-shot-title">Rufus交互截屏补充</div>
-        <div class="rufus-screen">
-          <div class="rufus-search-panel">
-            <strong>Looking for specific info?</strong>
-            <div class="rufus-search-box">Ask Rufus or search reviews and Q&A</div>
-            <div class="rufus-chip-row">
-              <span>Can this pill case hold large pills?</span>
-              <span>Is it easy to carry?</span>
-              <span>How secure is the lid?</span>
-            </div>
-          </div>
-          <div class="rufus-phone">
-            <div class="rufus-phone-head">Rufus</div>
-            <div class="rufus-answer-card">
-              ${data.rufus.map((it, i) => `
-                <div class="rufus-answer-item">
-                  <b>${editableField(`faqSupplement.rufus.${i}.question`, it.question, { cls: 'edit-inline-value' })}</b>
-                  <p>${editableField(`faqSupplement.rufus.${i}.answer`, it.answer, { cls: 'edit-inline-value', multiline: true })}</p>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        </div>
+    <div class="faq-shot-board-v2">
+      <div class="faq-shot-grid" id="faq-shot-grid">
+        ${renderFaqShots()}
       </div>
     </div>`;
+}
+
+function renderFaqShots() {
+  const arr = (MOCK_DATA.faqSupplement && MOCK_DATA.faqSupplement.screenshots) || [];
+  const max = 12;
+  return arr.map((img, j) => `
+    <figure class="faq-shot-item">
+      <img class="faq-shot-img" src="${img.url}" alt="${img.caption || ''}" loading="lazy"
+           onclick="window.open('${img.url}','_blank')">
+      <div class="faq-shot-overlay">
+        <label class="faq-shot-ol-btn" onclick="event.stopPropagation()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          替换
+          <input type="file" accept="image/*" style="display:none" onchange="onFaqShotReplace(event,${j})">
+        </label>
+        <button class="faq-shot-ol-btn" onclick="event.stopPropagation();onFaqShotDelete(${j})">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          删除
+        </button>
+      </div>
+      <figcaption class="faq-shot-caption">${editableField(`faqSupplement.screenshots.${j}.caption`, img.caption || '', { cls: 'edit-inline-value' })}</figcaption>
+    </figure>
+  `).join('') + (arr.length < max ? `
+    <div class="faq-shot-add" onclick="event.stopPropagation();this.querySelector('input').click()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span>添加截图</span>
+      <input type="file" accept="image/*" style="display:none" onchange="onFaqShotAdd(event)">
+    </div>` : '');
+}
+
+function onFaqShotReplace(event, idx) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const arr = MOCK_DATA.faqSupplement.screenshots;
+    if (arr && arr[idx]) {
+      arr[idx].url = e.target.result;
+      arr[idx].caption = arr[idx].caption || file.name.replace(/\.[^.]+$/, '');
+    }
+    refreshFaqShots();
+  };
+  reader.readAsDataURL(file);
+}
+
+function onFaqShotDelete(idx) {
+  const arr = MOCK_DATA.faqSupplement.screenshots;
+  if (arr) arr.splice(idx, 1);
+  refreshFaqShots();
+}
+
+function onFaqShotAdd(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const arr = MOCK_DATA.faqSupplement.screenshots = MOCK_DATA.faqSupplement.screenshots || [];
+  if (arr.length >= 12) { showToast('最多上传 12 张截图', 'warning'); return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    arr.push({ url: e.target.result, caption: file.name.replace(/\.[^.]+$/, '') });
+    refreshFaqShots();
+  };
+  reader.readAsDataURL(file);
+}
+
+function refreshFaqShots() {
+  const grid = document.getElementById('faq-shot-grid');
+  if (grid) grid.innerHTML = renderFaqShots();
 }
 
 // ===== 6. 目标人群 =====

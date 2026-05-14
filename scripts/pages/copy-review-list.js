@@ -10,12 +10,12 @@ let copyAuditIssueMarks = [];
 const COPY_REVIEW_DECISIONS_KEY = '__cursor_copy_review_decisions';
 
 const COPY_REVIEW_LIST_DATA = [
-  { type: '老品Title',    site: 'US', brand: 'AUVON', sub: '药盒', name: '7格大容量粉色',       sku: 'PO17X4011', review_status: '待审核', bu: '物理治疗', bu_lead: 'Suki', op: 'Jessi', writer: 'Yumi',  date: '2026/02/12', submit_time: '2026/02/08 10:15:42', review_time: '—' },
-  { type: '新品Listing', site: 'US', brand: 'AUVON', sub: '电疗', name: '伤口贴 10pack',       sku: 'PO17X4011', review_status: '待审核', bu: '物理治疗', bu_lead: 'Suki', op: 'Jessi', writer: 'Yumi',  launch_date: '2026/02/22', date: '2026/02/12', submit_time: '2026/02/07 14:20:33', review_time: '—' },
-  { type: '新品Listing', site: 'US', brand: 'AUVON', sub: '贴片', name: '针形贴片 20pack',     sku: 'PO17X4011', review_status: '待审核', bu: '物理治疗', bu_lead: 'Suki', op: 'Jessi', writer: 'Yumi',  launch_date: '2026/02/21', date: '2026/02/12', submit_time: '2026/02/09 08:55:21', review_time: '—' },
-  { type: '新品Listing', site: 'US', brand: 'ZIKEE', sub: '贴片', name: '医疗款 TENS',         sku: 'PO17X4011', review_status: '待审核', bu: '北美市场', bu_lead: 'Suki', op: 'Liz',   writer: 'Brian', launch_date: '2026/02/24', date: '2026/02/12', submit_time: '2026/02/09 16:08:52', review_time: '—' },
-  { type: '新品Listing', site: 'US', brand: 'ZIKEE', sub: '贴片', name: '背光小夜灯',          sku: 'PO17X4011', review_status: '待审核', bu: '北美市场', bu_lead: 'Suki', op: 'Liz',   writer: 'Brian', launch_date: '2026/02/25', date: '2026/02/12', submit_time: '2026/02/10 09:18:37', review_time: '—' },
-  { type: '老品Title TD', site: 'UK', brand: 'AUVON', sub: '药盒', name: '7格旅行药盒（粉色）', sku: 'PO19A2210', review_status: '待审核', bu: '物理治疗', bu_lead: 'Suki', op: 'Tina',  writer: 'Lucy',  date: '2026/02/14', submit_time: '2026/02/11 08:42:55', review_time: '—' },
+  { type: '新品Listing', site: 'US', brand: 'AUVON', sub: '药盒', name: '7格大容量粉色',       sku: 'PO17X4011', review_status: '待审核', bu: '物理治疗', bu_lead: 'Suki', op: 'Jessi', writer: 'Yumi',  launch_date: '2026/02/20', date: '2026/02/12', submit_time: '2026/02/08 10:15:42', review_time: '—' },
+  { type: '新品图片文案', site: 'US', brand: 'AUVON', sub: '电疗', name: '伤口贴 10pack',       sku: 'PO17X4011', review_status: '待审核', bu: '物理治疗', bu_lead: 'Suki', op: 'Jessi', writer: 'Yumi',  launch_date: '2026/02/22', date: '2026/02/12', submit_time: '2026/02/07 14:20:33', review_time: '—' },
+  { type: '新品图片文案', site: 'US', brand: 'AUVON', sub: '贴片', name: '针形贴片 20pack',     sku: 'PO17X4011', review_status: '待审核', bu: '物理治疗', bu_lead: 'Suki', op: 'Jessi', writer: 'Yumi',  launch_date: '2026/02/21', date: '2026/02/12', submit_time: '2026/02/09 08:55:21', review_time: '—' },
+  { type: '新品FAQ',     site: 'US', brand: 'ZIKEE', sub: '贴片', name: '医疗款 TENS',         sku: 'PO17X4011', review_status: '待审核', bu: '北美市场', bu_lead: 'Suki', op: 'Liz',   writer: 'Brian', launch_date: '2026/02/24', date: '2026/02/12', submit_time: '2026/02/09 16:08:52', review_time: '—' },
+  { type: '新品FAQ',     site: 'US', brand: 'ZIKEE', sub: '贴片', name: '背光小夜灯',          sku: 'PO17X4011', review_status: '待审核', bu: '北美市场', bu_lead: 'Suki', op: 'Liz',   writer: 'Brian', launch_date: '2026/02/25', date: '2026/02/12', submit_time: '2026/02/10 09:18:37', review_time: '—' },
+  { type: '新品Listing', site: 'UK', brand: 'AUVON', sub: '药盒', name: '7格旅行药盒（粉色）', sku: 'PO19A2210', review_status: '待审核', bu: '物理治疗', bu_lead: 'Suki', op: 'Tina',  writer: 'Lucy',  launch_date: '2026/02/26', date: '2026/02/14', submit_time: '2026/02/11 08:42:55', review_time: '—' },
   { type: '新品Listing', site: 'US', brand: 'ZIKEE', sub: '贴片', name: '银色 TENS 套装',      sku: 'PO17X4011', review_status: '已驳回', bu: '北美市场', bu_lead: 'Suki', op: 'Jessi', writer: 'Yumi',  launch_date: '2026/02/23', date: '2026/02/12', submit_time: '2026/02/09 13:42:08', review_time: '2026/02/10 10:08:55', reject_history: [{ reason: 'Title 核心关键词 weekly pill organizer 位置靠后，建议前置到前 80 字符以内。', time: '2026/02/10 10:08:55', reviewer: 'Suki' }, { reason: '卖点排序偏功能罗列，Bullet 1 应优先回答容量与防洒便携等购买决策点。', time: '2026/02/12 15:22:10', reviewer: 'Susie' }, { reason: 'TD 描述缺少场景化表达，建议补充 travel / daily routine 使用场景。', time: '2026/02/15 09:41:33', reviewer: 'Susie' }] },
   { type: '老品TD',      site: 'UK', brand: 'ZIKEE', sub: '电疗', name: '理疗仪豪华版',        sku: 'PO19B5621', review_status: '已驳回', bu: '北美市场', bu_lead: 'Suki', op: 'Tina',  writer: 'Lucy',  date: '2026/02/14', submit_time: '2026/02/11 15:33:04', review_time: '2026/02/12 09:48:21', reject_history: [{ reason: '产品参数描述不准确，需核实 TENS 频率范围与 FDA 认证编号。', time: '2026/02/12 09:48:21', reviewer: 'Tammy' }, { reason: '竞品差异化卖点表述不足，建议增加与 iReliev 和 HealthmateForever 的对比说明。', time: '2026/02/14 11:15:08', reviewer: 'Suki' }] },
   { type: '新品Listing', site: 'US', brand: 'AUVON', sub: '药盒', name: '7格弹跳药盒',         sku: 'PO17X4011', review_status: '已通过', bu: '物理治疗', bu_lead: 'Suki', op: 'Jessi', writer: 'Yumi',  launch_date: '2026/02/20', date: '2026/02/12', submit_time: '2026/02/08 09:32:14', review_time: '2026/04/27 18:27:30' },
@@ -548,6 +548,7 @@ function openCopyAuditModal(encodedKey, mode = 'audit', opts = {}) {
            <button type="button" onclick="selectCopyQuickReview('因果链不完整')">因果链不完整</button>
            <button type="button" onclick="selectCopyQuickReview('卖点没有表达出来')">卖点没有表达出来</button>
            <button type="button" onclick="selectCopyQuickReview('信息错误')">信息错误</button>
+           <button type="button" onclick="selectCopyQuickReview('其他')">其他</button>
          </div>
          <div class="copy-reject-reason-wrap" id="copy-reject-reason-wrap">
            <label for="copy-audit-reject-reason">驳回理由（点击驳回时必填）</label>
@@ -622,7 +623,15 @@ function getCopyAuditPayload(row) {
         id: 'copy-cat',
         title: '品类信息',
         icon: 'database',
-        body: [['品类', row.sub], ['站点', row.site], ['需求类型', row.type], ['文案人员', row.writer], ['需求提交人', row.op], ['期望交付时间', row.date]],
+        body: [
+          ['文案需求类型', row.type],
+          ['站点',         row.site],
+          ['品牌',         row.brand],
+          ['子品类',       row.sub],
+          ['SKU',          row.sku],
+          ['优先级',       row.priority || '—'],
+          ['文案人员',     row.writer],
+        ],
       },
       {
         id: 'copy-bsr',
@@ -675,6 +684,8 @@ function renderCopyAuditHeaderSummary(row, payload) {
   const esc = copyReviewEscape;
   const risk = getCopyAuditRiskMeta(payload);
   const priority = typeof getRowPriority === 'function' ? getRowPriority({ type: row.type }) : 'P1';
+  const isImageCopy = /图片文案/.test(row.type || '');
+  const isFaq = !isImageCopy && /FAQ/.test(row.type || '');
   return `
     <span class="copy-audit-head-summary">
       <span>${esc(row.type)} · ${esc(row.sku)} · ${esc(row.name)}</span>
@@ -684,6 +695,8 @@ function renderCopyAuditHeaderSummary(row, payload) {
       <span>交付 ${esc(row.date || '—')}</span>
       <span>AI ${esc(payload.score.total)} 分</span>
       <span class="risk-${risk.cls}">${risk.text}</span>
+      ${isImageCopy ? '<span id="image-copy-progress" class="image-copy-progress">已标 0/7 张图 · 共 0 项问题</span>' : ''}
+      ${isFaq ? '<span id="faq-copy-progress" class="image-copy-progress">已审 0/5 · 已标 0 项</span>' : ''}
     </span>
   `;
 }
@@ -691,21 +704,43 @@ function renderCopyAuditHeaderSummary(row, payload) {
 function renderCopyAuditDetail(row, opts = {}) {
   const esc = copyReviewEscape;
   const payload = opts.payload || getCopyAuditPayload(row);
+  const isImageCopy = /图片文案/.test(row.type || '');
+  const isFaq = !isImageCopy && /FAQ/.test(row.type || '');
   const categoryModule = payload.modules.find(m => m.id === 'copy-cat');
   const backgroundModules = payload.modules.filter(m => m.id !== 'copy-cat');
+  const resizerHTML = opts.hideInfo ? '' : '<div class="copy-audit-resizer" title="拖动调整左右宽度" onmousedown="startCopyAuditResize(event)" ondblclick="resetCopyAuditSplit()"></div>';
+  if (isImageCopy) {
+    return `
+      <div class="copy-audit-layout ${opts.hideInfo ? 'copy-audit-layout-single' : ''}">
+        ${renderImageCopyAuditLeft(row, payload, opts)}
+        ${resizerHTML}
+        ${renderImageCopyAuditRight(row, payload)}
+      </div>`;
+  }
+  if (isFaq) {
+    return `
+      <div class="copy-audit-layout ${opts.hideInfo ? 'copy-audit-layout-single' : ''}">
+        ${renderFaqCopyAuditLeft(row, payload)}
+        ${resizerHTML}
+        ${renderFaqCopyAuditRight(row, payload)}
+      </div>`;
+  }
   return `
     <div class="copy-audit-layout ${opts.hideInfo ? 'copy-audit-layout-single' : ''}">
       <section class="copy-audit-left">
         ${categoryModule ? `<div class="copy-audit-card">
-          <div class="copy-audit-card-title">1. 品类信息</div>
+          <div class="copy-audit-card-title">1. 基础信息</div>
           <div class="review-info-grid copy-info-grid">
             ${categoryModule.body.map(([label, value]) => `<div class="review-info-cell"><span>${esc(label)}</span><strong>${esc(value || '—')}</strong></div>`).join('')}
           </div>
         </div>` : ''}
-        
+        <div class="copy-audit-card">
+          <div class="copy-audit-card-title">2. AI 评测打分</div>
+          <div class="copy-audit-ai-score">${renderAiScoreCardLite(buildListingDemoScore())}</div>
+        </div>
         ${opts.hideInfo ? '' : renderCopyAuditModuleBrowser(backgroundModules, esc)}
       </section>
-      ${opts.hideInfo ? '' : '<div class="copy-audit-resizer" title="拖动调整左右宽度" onmousedown="startCopyAuditResize(event)" ondblclick="resetCopyAuditSplit()"></div>'}
+      ${resizerHTML}
       <section class="copy-audit-right copy-audit-submission">
         <div class="copy-audit-card copy-submission-card">
           <div class="copy-audit-card-title">2. 提交内容：Title</div>
@@ -726,6 +761,409 @@ function renderCopyAuditDetail(row, opts = {}) {
         </div>
       </section>
     </div>`;
+}
+
+function renderImageCopyAuditLeft(row, payload, opts) {
+  const esc = copyReviewEscape;
+  const md = (typeof MOCK_DATA !== 'undefined') ? MOCK_DATA : {};
+  const categoryModule = payload.modules.find(m => m.id === 'copy-cat');
+  const selling = md.selling || { usp: [], ksp: [], osp: [] };
+  const gallery = (md.imageCreative && md.imageCreative.gallery) || [];
+  const competitors = (md.product && md.product.productCompetitors) || [];
+  const sellGroups = [
+    { key: 'usp', code: 'USP', name: '独特卖点' },
+    { key: 'ksp', code: 'KSP', name: '核心卖点' },
+    { key: 'osp', code: 'OSP', name: '补充卖点' },
+  ];
+  return `
+    <section class="copy-audit-left">
+      ${categoryModule ? `<div class="copy-audit-card">
+        <div class="copy-audit-card-title">1. 基础信息</div>
+        <div class="review-info-grid copy-info-grid">
+          ${categoryModule.body.map(([label, value]) => `<div class="review-info-cell"><span>${esc(label)}</span><strong>${esc(value || '—')}</strong></div>`).join('')}
+        </div>
+      </div>` : ''}
+
+      <div class="copy-audit-card">
+        <div class="copy-audit-card-title">2. AI 评测打分</div>
+        <div class="copy-audit-ai-score">${renderAiScoreCardLite(buildImageCopyDemoScore())}</div>
+      </div>
+
+      <div class="copy-audit-card">
+        <div class="copy-audit-card-title">3. 卖点信息</div>
+        <div class="image-copy-selling-list">
+          ${sellGroups.map(g => `
+            <div class="image-copy-selling-group">
+              <div class="image-copy-selling-head">
+                <span class="image-copy-selling-badge image-copy-selling-${g.key}">${g.code}</span>
+                <span>${g.name} <em>(${(selling[g.key] || []).length} 条)</em></span>
+              </div>
+              <ul>
+                ${(selling[g.key] || []).map(it => `
+                  <li><strong>${esc(it.title || '')}</strong><span>${esc(it.desc || '')}</span></li>
+                `).join('')}
+              </ul>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="copy-audit-card">
+        <div class="copy-audit-card-title">4. 卖点创意</div>
+        <ul class="image-copy-gallery-list">
+          ${gallery.map((it, i) => `
+            <li>
+              <span class="image-copy-gallery-index">${esc(it.image || ('图' + (i + 1)))}</span>
+              <span class="image-copy-gallery-text">${esc(it.productPoint || '')}</span>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+
+      <div class="copy-audit-card">
+        <div class="copy-audit-card-title">5. 竞对信息</div>
+        <div class="image-copy-comp-list">
+          ${competitors.map((c, ci) => `
+            <div class="image-copy-comp-card">
+              <div class="image-copy-comp-head">
+                <span class="image-copy-comp-index">竞对${['一','二','三','四','五'][ci] || ci + 1}</span>
+                <strong>${esc(c.name || '')}</strong>
+                <span class="image-copy-comp-asin">ASIN：<code>${esc(c.asin || '')}</code></span>
+                <a class="image-copy-comp-link" href="${esc(c.link || '#')}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                  Amazon
+                </a>
+              </div>
+              <div class="image-copy-listing-strip">
+                ${(c.listingImages || []).map((url, ii) => `
+                  <figure class="image-copy-listing-item" onclick="window.open('${esc(url)}','_blank')">
+                    <img src="${esc(url)}" alt="${esc(c.name)}图${ii + 1}" loading="lazy">
+                    <figcaption>${ii === 0 ? '主图' : '图' + (ii + 1)}</figcaption>
+                  </figure>
+                `).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </section>`;
+}
+
+function renderImageCopyAuditRight(row, payload) {
+  const esc = copyReviewEscape;
+  const md = (typeof MOCK_DATA !== 'undefined') ? MOCK_DATA : {};
+  const gallery = (md.imageCreative && md.imageCreative.gallery) || [];
+  return `
+    <section class="copy-audit-right copy-audit-submission">
+      <div class="image-copy-chip-bar" id="image-copy-chip-bar">
+        ${gallery.map((it, i) => {
+          const label = it.image || ('图' + (i + 1));
+          return `<button type="button" class="image-copy-chip" data-img-target="${esc(label)}" data-img-idx="${i}" onclick="scrollToImageCopyCard(${i})">
+            <span class="image-copy-chip-label">${esc(label)}</span>
+            <span class="image-copy-chip-dot"></span>
+          </button>`;
+        }).join('')}
+      </div>
+      <div class="copy-audit-card copy-submission-card">
+        <div class="copy-audit-card-title">2. 提交内容：7 张图文案</div>
+        <div class="image-copy-submit-list">
+          ${gallery.map((it, i) => {
+            const label = it.image || ('图' + (i + 1));
+            const creativeText = it.productPoint || '';
+            const englishCopy = it.imageCopy || '';
+            return `
+              <div class="image-copy-submit-card" id="image-copy-card-${i}" data-img-target="${esc(label)}">
+                <div class="image-copy-submit-title">${esc(label)}</div>
+                <div class="image-copy-intent">
+                  <span class="image-copy-intent-label">卖点创意</span>
+                  <span class="image-copy-intent-text">${esc(creativeText)}</span>
+                </div>
+                <div class="image-copy-en-block">
+                  <div class="image-copy-en-text">${esc(englishCopy)}</div>
+                </div>
+                ${renderImageCopyIssueButtons(label, label)}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    </section>`;
+}
+
+function renderImageCopyIssueButtons(target, label) {
+  const issues = ['图文不符', '卖点缺失', '同质重复', '关键词缺失', '排序错位', '合规风险'];
+  return `<div class="copy-issue-actions image-copy-issue-actions" data-target="${copyReviewEscape(target)}">
+    <span>${copyReviewEscape(label)} 快捷标记</span>
+    ${issues.map(issue => `<button type="button" onclick="toggleCopyAuditIssue(this, '${copyReviewEscape(target)}', '${copyReviewEscape(issue)}')">${copyReviewEscape(issue)}</button>`).join('')}
+  </div>`;
+}
+
+function scrollToImageCopyCard(idx) {
+  const right = document.querySelector('#copy-audit-modal .copy-audit-right');
+  const card = document.getElementById('image-copy-card-' + idx);
+  if (!right || !card) return;
+  const chipBar = document.getElementById('image-copy-chip-bar');
+  const offset = chipBar ? chipBar.offsetHeight + 8 : 8;
+  const top = card.offsetTop - offset;
+  right.scrollTo({ top, behavior: 'smooth' });
+  syncImageCopyChipActive(idx);
+}
+
+function syncImageCopyChipActive(idx) {
+  const bar = document.getElementById('image-copy-chip-bar');
+  if (!bar) return;
+  bar.querySelectorAll('.image-copy-chip').forEach(c => c.classList.remove('active'));
+  const target = bar.querySelector(`.image-copy-chip[data-img-idx="${idx}"]`);
+  if (target) target.classList.add('active');
+}
+
+function syncImageCopyChipMarks() {
+  const bar = document.getElementById('image-copy-chip-bar');
+  if (!bar) return;
+  const counts = {};
+  copyAuditIssueMarks.forEach(m => {
+    counts[m.target] = (counts[m.target] || 0) + 1;
+  });
+  bar.querySelectorAll('.image-copy-chip').forEach(chip => {
+    const t = chip.getAttribute('data-img-target');
+    const c = counts[t] || 0;
+    chip.classList.toggle('marked', c > 0);
+    const dot = chip.querySelector('.image-copy-chip-dot');
+    if (dot) dot.textContent = c > 0 ? c : '';
+  });
+}
+
+function syncImageCopyProgress() {
+  const el = document.getElementById('image-copy-progress');
+  if (!el) return;
+  const targets = new Set(copyAuditIssueMarks.map(m => m.target));
+  const total = copyAuditIssueMarks.length;
+  el.textContent = `已标 ${targets.size}/7 张图 · 共 ${total} 项问题`;
+  el.classList.toggle('image-copy-progress-active', total > 0);
+}
+
+// ============================================
+// 新品 FAQ 类型审核 -- 左右两侧 + 子控件
+// ============================================
+
+function renderFaqCopyAuditLeft(row, payload) {
+  const esc = copyReviewEscape;
+  const basics = [
+    ['需求类型', row.type || '新品 FAQ'],
+    ['站点',     row.site || '—'],
+    ['品牌',     row.brand || '—'],
+    ['子品类',   row.subcategory || row.sub_category || '—'],
+    ['SKU',      row.sku || '—'],
+    ['优先级',   row.priority || '—'],
+    ['文案人员', row.copywriter || '—'],
+    ['期望交付', row.expected_delivery || row.due_date || '—'],
+  ];
+  const score = buildFaqDemoScore();
+  const toReadOnly = html => html.replace(/contenteditable="true"/g, 'contenteditable="false"');
+  const competitorsHtml = (typeof renderFaqCompetitor === 'function') ? toReadOnly(renderFaqCompetitor()) : '';
+  const painHtml = (typeof renderPain === 'function') ? toReadOnly(renderPain()) : '';
+  return `
+    <section class="copy-audit-left copy-audit-left-readonly">
+      <div class="copy-audit-card">
+        <div class="copy-audit-card-title">1. 基础信息</div>
+        <div class="review-info-grid copy-info-grid">
+          ${basics.map(([k, v]) => `<div class="review-info-cell"><span>${esc(k)}</span><strong>${esc(v)}</strong></div>`).join('')}
+        </div>
+      </div>
+      <div class="copy-audit-card">
+        <div class="copy-audit-card-title">2. AI 评测打分</div>
+        <div class="copy-audit-ai-score">${renderAiScoreCardLite(score)}</div>
+      </div>
+      <div class="copy-audit-card">
+        <div class="copy-audit-card-title">3. 竞对信息</div>
+        <div class="copy-audit-faq-comp">${competitorsHtml}</div>
+      </div>
+      <div class="copy-audit-card">
+        <div class="copy-audit-card-title">4. 用户痛点</div>
+        <div class="copy-audit-faq-pain">${painHtml}</div>
+      </div>
+    </section>`;
+}
+
+function buildListingDemoScore() {
+  const items = [
+    { key: 'seo',        name: 'SEO 覆盖',   weight: 25, score: 88, ideal: '核心词 pill organizer / weekly pill case 自然覆盖' },
+    { key: 'selling',    name: '卖点表达',   weight: 25, score: 84, ideal: '安全材质、便携、老年友好表达清晰' },
+    { key: 'geo',        name: 'GEO 本地化', weight: 15, score: 82, ideal: '符合美国站习惯，可加强场景化表达' },
+    { key: 'compliance', name: '合规风险',   weight: 20, score: 91, ideal: '未出现治疗承诺，整体安全' },
+    { key: 'diff',       name: '竞品差异',   weight: 15, score: 80, ideal: '便携标签已体现，可更直接对比 EZY DOSE' },
+  ].map(r => ({ ...r, status: r.score >= 90 ? 'great' : r.score >= 75 ? 'good' : r.score >= 60 ? 'warn' : 'bad' }));
+  const total = Math.round(items.reduce((s, i) => s + i.score * i.weight / 100, 0));
+  const grade = total >= 90 ? 'S' : total >= 80 ? 'A' : total >= 70 ? 'B' : 'C';
+  return {
+    total, grade, items,
+    summary: 'Title 与 TD 整体表达清晰，建议加强 GEO 场景化覆盖与竞品差异化表达。',
+    suggestions: items.filter(i => i.score < 90).slice(0, 3)
+      .map(i => `• 【${i.name}】当前 ${i.score} 分，建议：${i.ideal}`),
+  };
+}
+
+function buildImageCopyDemoScore() {
+  const items = [
+    { key: 'consistency', name: '图文一致性', weight: 25, score: 85, ideal: '图片内容与文案描述高度对应' },
+    { key: 'selling',     name: '卖点突出度', weight: 25, score: 82, ideal: '核心卖点在首屏清晰呈现' },
+    { key: 'visual',      name: '视觉层级',   weight: 15, score: 78, ideal: '主次信息层级分明，字号对比合理' },
+    { key: 'compliance',  name: '合规性',     weight: 20, score: 90, ideal: '无医疗承诺，无虚假对比' },
+    { key: 'conversion',  name: '转化力',     weight: 15, score: 80, ideal: '包含场景化使用图、痛点共鸣表达' },
+  ].map(r => ({ ...r, status: r.score >= 90 ? 'great' : r.score >= 75 ? 'good' : r.score >= 60 ? 'warn' : 'bad' }));
+  const total = Math.round(items.reduce((s, i) => s + i.score * i.weight / 100, 0));
+  const grade = total >= 90 ? 'S' : total >= 80 ? 'A' : total >= 70 ? 'B' : 'C';
+  return {
+    total, grade, items,
+    summary: '图文整体一致性良好，建议提升视觉层级清晰度与卖点首屏突出度。',
+    suggestions: items.filter(i => i.score < 90).slice(0, 3)
+      .map(i => `• 【${i.name}】当前 ${i.score} 分，建议：${i.ideal}`),
+  };
+}
+
+function buildFaqDemoScore() {
+  const rules = (typeof SCORE_RULES !== 'undefined' && Array.isArray(SCORE_RULES) && SCORE_RULES.length) ? SCORE_RULES : [
+    { key: 'q-clarity',  name: 'Q 表达清晰度',   weight: 20, ideal: '问题表达直接，贴近用户搜索习惯' },
+    { key: 'a-coverage', name: 'A 信息覆盖度',   weight: 25, ideal: '答案覆盖容量、安全、合规、场景四要素' },
+    { key: 'keyword',    name: '关键词覆盖',     weight: 15, ideal: '自然嵌入核心 SEO 关键词' },
+    { key: 'compliance', name: '合规性',         weight: 15, ideal: '避免医疗承诺词，使用 organize / store 等表达' },
+    { key: 'geo',        name: 'GEO 本地化',     weight: 10, ideal: '使用美区用户偏好的短句和场景化表达' },
+    { key: 'readability',name: '可读性',         weight: 15, ideal: '句长适中，避免长难句' },
+  ];
+  const presetScores = [88, 76, 82, 90, 85, 79];
+  const items = rules.slice(0, 6).map((r, i) => {
+    const s = presetScores[i] != null ? presetScores[i] : 80;
+    const status = s >= 90 ? 'great' : (s >= 75 ? 'good' : (s >= 60 ? 'warn' : 'bad'));
+    return Object.assign({}, r, { score: s, status });
+  });
+  const total = Math.round(items.reduce((sum, it) => sum + it.score * (it.weight || 0) / 100, 0));
+  const grade = total >= 90 ? 'S' : (total >= 80 ? 'A' : (total >= 70 ? 'B' : 'C'));
+  const suggestions = items.filter(i => i.score < 90).slice(0, 3)
+    .map(i => `• 【${i.name}】当前 ${i.score} 分，建议：${i.ideal || '优化对应维度表达'}`);
+  return {
+    total, grade, items,
+    summary: '本次 FAQ 整体表达清晰，建议加强 A 答案的信息覆盖与本地化短句使用。',
+    suggestions,
+  };
+}
+
+function renderAiScoreCardLite(s) {
+  const esc = copyReviewEscape;
+  const gradeCls = s.grade === 'S' ? 'grade-s' : (s.grade === 'A' ? 'grade-a' : (s.grade === 'B' ? 'grade-b' : 'grade-c'));
+  const statusColor = { great: '#10b981', good: '#3b82f6', warn: '#f59e0b', bad: '#ef4444' };
+  return `
+    <div class="ai-score-card">
+      <div class="ai-score-header">
+        <div class="ai-score-total">
+          <div class="score-num">${s.total}</div>
+          <div class="score-grade ${gradeCls}">${esc(s.grade)}</div>
+        </div>
+        <div class="ai-score-summary">
+          <div class="ai-score-title">综合评分</div>
+          <div class="ai-score-desc">${esc(s.summary)}</div>
+        </div>
+      </div>
+      <div class="ai-score-items">
+        ${s.items.map(it => `
+          <div class="ai-score-item">
+            <div class="ai-score-item-row">
+              <span class="ai-score-name">${esc(it.name)}</span>
+              <span class="ai-score-weight">权重 ${it.weight}%</span>
+              <span class="ai-score-val" style="color:${statusColor[it.status]};">${it.score}</span>
+            </div>
+            <div class="ai-score-bar">
+              <div class="ai-score-bar-fill" style="width:${it.score}%;background:${statusColor[it.status]};"></div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      ${s.suggestions && s.suggestions.length ? `
+        <div class="ai-score-suggest">
+          <div class="ai-score-suggest-title">优化建议</div>
+          <div class="ai-score-suggest-list">${s.suggestions.map(t => `<div>${esc(t)}</div>`).join('')}</div>
+        </div>` : ''}
+    </div>`;
+}
+
+function renderFaqCopyAuditRight(row, payload) {
+  const esc = copyReviewEscape;
+  const list = (typeof MOCK_DATA !== 'undefined' && MOCK_DATA.faqSubmission) || [];
+  const chipBar = `
+    <div class="faq-copy-chip-bar">
+      ${list.map((it, i) => `
+        <button type="button" class="faq-copy-chip ${i === 0 ? 'active' : ''}" data-idx="${i}" onclick="scrollToFaqCard(${i})">
+          <span class="faq-copy-chip-dot" data-idx="${i}"></span>
+          FAQ ${i + 1}
+        </button>
+      `).join('')}
+    </div>`;
+  const cards = list.map((it, i) => `
+    <div class="copy-audit-card faq-copy-submit-card" id="faq-copy-card-${i}" data-faq-target="FAQ-${i + 1}">
+      <div class="faq-copy-submit-title">FAQ ${i + 1}</div>
+      <div class="faq-copy-q-block">
+        <span class="faq-copy-q-label">Q</span>
+        <div class="faq-copy-q-text">${esc(it.q)}</div>
+      </div>
+      <div class="faq-copy-a-block">
+        <span class="faq-copy-a-label">A</span>
+        <div class="faq-copy-a-text">${esc(it.a)}</div>
+      </div>
+      ${renderFaqIssueButtons(`FAQ-${i + 1}`, `FAQ ${i + 1}`)}
+    </div>
+  `).join('');
+  return `
+    <section class="copy-audit-right copy-audit-submission">
+      <div class="copy-audit-card copy-submission-card">
+        <div class="copy-audit-card-title">5. 提交内容：${list.length} 条 FAQ 问答</div>
+        ${chipBar}
+        <div class="faq-copy-submit-list">${cards}</div>
+      </div>
+    </section>`;
+}
+
+function renderFaqIssueButtons(target, label) {
+  const issues = ['表达不清', '事实错误', '答非所问', '合规风险', '关键词缺失', '重复问题'];
+  return `<div class="copy-issue-actions faq-copy-issue-actions" data-target="${copyReviewEscape(target)}">
+    <span>${copyReviewEscape(label)} 快捷标记</span>
+    ${issues.map(issue => `<button type="button" onclick="toggleCopyAuditIssue(this, '${copyReviewEscape(target)}', '${copyReviewEscape(issue)}')">${copyReviewEscape(issue)}</button>`).join('')}
+  </div>`;
+}
+
+function scrollToFaqCard(idx) {
+  const el = document.getElementById(`faq-copy-card-${idx}`);
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.classList.add('audited');
+  syncFaqChipActive(idx);
+  syncFaqProgress();
+}
+
+function syncFaqChipActive(idx) {
+  document.querySelectorAll('.faq-copy-chip').forEach(b => {
+    b.classList.toggle('active', String(b.dataset.idx) === String(idx));
+  });
+}
+
+function syncFaqChipMarks() {
+  document.querySelectorAll('.faq-copy-chip').forEach(b => {
+    const idx = b.dataset.idx;
+    const card = document.getElementById(`faq-copy-card-${idx}`);
+    const has = card && card.querySelector('.faq-copy-issue-actions button.active');
+    const dot = b.querySelector('.faq-copy-chip-dot');
+    if (dot) dot.classList.toggle('marked', !!has);
+  });
+}
+
+function syncFaqProgress() {
+  const el = document.getElementById('faq-copy-progress');
+  if (!el) return;
+  const total = ((typeof MOCK_DATA !== 'undefined' && MOCK_DATA.faqSubmission) || []).length;
+  if (!total) { el.style.display = 'none'; return; }
+  const marks = document.querySelectorAll('.faq-copy-issue-actions button.active').length;
+  const seen = document.querySelectorAll('.faq-copy-submit-card.audited').length;
+  el.style.display = '';
+  el.textContent = `已审 ${seen}/${total} · 已标 ${marks} 项`;
+  el.classList.toggle('image-copy-progress-active', marks > 0 || seen > 0);
 }
 
 function renderCopyAuditIssueButtons(target, label) {
@@ -867,6 +1305,10 @@ function toggleCopyAuditIssue(btn, target, issue) {
   }
   syncCopyAuditMarkedReason();
   syncCopyAuditHighlight();
+  syncImageCopyChipMarks();
+  syncImageCopyProgress();
+  if (typeof syncFaqChipMarks === 'function') syncFaqChipMarks();
+  if (typeof syncFaqProgress === 'function') syncFaqProgress();
 }
 
 function syncCopyAuditHighlight() {
@@ -1027,6 +1469,12 @@ function selectCopyQuickReview(value) {
     return;
   }
   if (reasonWrap) reasonWrap.style.display = '';
+  if (value === '其他') {
+    reasonEl.value = '';
+    reasonEl.placeholder = '请填写驳回理由（必填）';
+    reasonEl.focus();
+    return;
+  }
   reasonEl.value = copyAuditIssueMarks.length ? `${reasonEl.value}；${value}` : value;
   reasonEl.focus();
 }
@@ -1050,5 +1498,7 @@ window.rejectCopyAudit = rejectCopyAudit;
 window.selectCopyQuickReview = selectCopyQuickReview;
 window.scrollCopyAuditModule = scrollCopyAuditModule;
 window.toggleCopyAuditOutline = toggleCopyAuditOutline;
+window.scrollToImageCopyCard = scrollToImageCopyCard;
+window.scrollToFaqCard = scrollToFaqCard;
 window.openWorkbenchCopyAudit = openWorkbenchCopyAudit;
 window.goToCopyRejectedEdit = goToCopyRejectedEdit;

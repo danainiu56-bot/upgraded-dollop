@@ -1907,3 +1907,150 @@
     color: var(--danger);
   }
 
+  /* ============================================
+     工作台 -- 时间粒度段控件 + 时间选择器
+  ============================================ */
+  .wb-granularity-seg {
+    display: inline-flex;
+    background: #f1f5f9;
+    border-radius: 10px;
+    padding: 2px;
+  }
+  .wb-granularity-seg button {
+    border: 0;
+    background: transparent;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .wb-granularity-seg button:hover { color: #0f172a; }
+  .wb-granularity-seg button.active {
+    background: white;
+    color: #111827;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+  }
+  .wb-time-pickers {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 4px;
+  }
+  .wb-time-pickers .wb-month-select {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 4px 8px;
+    background: white;
+    font-weight: 600;
+  }
+
+  /* ============================================
+     工作台 -- 需求量趋势图模块
+  ============================================ */
+  .wb-trend-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .wb-trend-ctrls {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .wb-trend-tab,
+  .wb-trend-chip {
+    display: inline-flex;
+    background: #f1f5f9;
+    border-radius: 10px;
+    padding: 2px;
+  }
+  .wb-trend-tab button,
+  .wb-trend-chip button {
+    border: 0;
+    background: transparent;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .wb-trend-tab button:hover,
+  .wb-trend-chip button:hover { color: #0f172a; }
+  .wb-trend-tab button.active {
+    background: white;
+    color: #6366f1;
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.18);
+  }
+  .wb-trend-chip button.active {
+    background: white;
+    color: #111827;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+  }
+  .wb-trend-board {
+    margin-top: 12px;
+  }
+  .wb-trend-svg-wrap {
+    position: relative;
+    width: 100%;
+  }
+  #wb-trend-svg {
+    display: block;
+    width: 100%;
+    height: 320px;
+  }
+  .wb-trend-tooltip {
+    position: absolute;
+    background: #0f172a;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.12s;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+    z-index: 5;
+    white-space: nowrap;
+  }
+  .wb-trend-tooltip.show { opacity: 1; }
+  .wb-trend-dot {
+    cursor: pointer;
+    transition: r 0.12s;
+  }
+  .wb-trend-dot:hover { r: 5; }
+  .wb-trend-bar {
+    cursor: pointer;
+    transition: opacity 0.12s;
+  }
+  .wb-trend-bar:hover { opacity: 0.78; }
+  .wb-trend-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #e2e8f0;
+    font-size: 12px;
+    color: #64748b;
+  }
+  .wb-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .wb-legend-item i {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+

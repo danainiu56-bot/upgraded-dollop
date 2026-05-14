@@ -20,10 +20,10 @@
 <link rel="stylesheet" href="styles/pages/topbar.css?v=20260509-1710">
 <link rel="stylesheet" href="styles/pages/layout.css?v=20260509-1710">
 <link rel="stylesheet" href="styles/pages/wizard.css?v=20260509-1710">
-<link rel="stylesheet" href="styles/pages/result.css?v=20260509-1810">
+<link rel="stylesheet" href="styles/pages/result.css?v=20260514-1545">
 <link rel="stylesheet" href="styles/pages/demand-list.css?v=20260509-1710">
-<link rel="stylesheet" href="styles/pages/copy-list.css?v=20260509-1710">
-<link rel="stylesheet" href="styles/pages/workbench.css?v=20260509-1710">
+<link rel="stylesheet" href="styles/pages/copy-list.css?v=20260514-1620">
+<link rel="stylesheet" href="styles/pages/workbench.css?v=20260514-1430">
 <link rel="stylesheet" href="styles/pages/ai-chat.css?v=20260513-1120">
 
 <!-- ===== Mock 数据层（必须在主 script 之前加载，因为有顶层立即引用）===== -->
@@ -33,18 +33,19 @@
 <script src="scripts/data/skus.js?v=20260509-1710"></script>
 <script src="scripts/data/demand-list.js?v=20260512-1618"></script>
 <script src="scripts/data/copy-list.js?v=20260512-1655"></script>
-<script src="scripts/data/result-mock.js?v=20260509-1710"></script>
+<script src="scripts/data/result-mock.js?v=20260514-1605"></script>
 <script src="scripts/data/ai-skills.js?v=20260509-1710"></script>
 <script src="scripts/data/ai-history.js?v=20260509-1710"></script>
 <script src="scripts/data/bg-knowledge.js?v=20260509-1710"></script>
 <script src="scripts/data/score-rules.js?v=20260509-1710"></script>
 <script src="scripts/data/input-templates.js?v=20260511-1430"></script>
+<script src="scripts/data/workbench-mock.js?v=20260514-1430"></script>
 
 <!-- ===== Core 基础设施（在数据之后、主 inline 脚本之前加载）===== -->
 <script src="scripts/core/icons.js?v=20260509-1710"></script>
 <script src="scripts/core/utils.js?v=20260509-1710"></script>
 <script src="scripts/core/toast.js?v=20260509-1710"></script>
-<script src="scripts/core/router.js?v=20260509-1710"></script>
+<script src="scripts/core/router.js?v=20260514-1430"></script>
 
 <!-- ===== SheetJS（Excel 生成库，在页面脚本之前加载） ===== -->
 <script src="scripts/vendor/xlsx.full.min.js"></script>
@@ -52,12 +53,13 @@
 <!-- ===== 页面级 JS（按业务模块） ===== -->
 <script src="scripts/pages/topbar.js?v=20260509-1710"></script>
 <script src="scripts/pages/wizard.js?v=20260511-1430"></script>
-<script src="scripts/pages/result.js?v=20260511-1215"></script>
+<script src="scripts/pages/result.js?v=20260514-1550"></script>
 <script src="scripts/pages/demand-list.js?v=20260509-1710"></script>
 <script src="scripts/pages/copy-list.js?v=20260512-1655"></script>
 <script src="scripts/pages/review-list.js?v=20260509-1710"></script>
-<script src="scripts/pages/copy-review-list.js?v=20260509-1710"></script>
+<script src="scripts/pages/copy-review-list.js?v=20260514-1645"></script>
 <script src="scripts/pages/ai-chat.js?v=20260513-1120"></script>
+<script src="scripts/pages/workbench-trend.js?v=20260514-1430"></script>
 
 <!-- ===== 入口（DOMContentLoaded 初始化）===== -->
 <script src="scripts/main.js?v=20260509-1710"></script>
@@ -109,7 +111,7 @@
 
     <!-- 顶部 Tab -->
     <div class="list-tab-bar">
-      <div class="list-tab" onclick="switchTab('home')">首页</div>
+      <div class="list-tab" onclick="switchTab('home')">工作台</div>
       <div class="list-tab active" onclick="switchTab('copywriting')">
         <span id="list-active-tab-title">需求管理</span>
         <span class="tab-close" title="关闭" onclick="event.stopPropagation();showToast('当前 Tab 不可关闭','warning');">✕</span>
@@ -385,46 +387,20 @@
     <section id="workbench-view" class="workbench-view" style="display:none;">
       <div class="wb-toolbar">
         <div class="wb-date">
-          <span>数据月份</span>
-          <select id="wb-month-select" class="wb-month-select" onchange="refreshWorkbench()"></select>
+          <span>数据范围</span>
+          <div class="wb-granularity-seg" id="wb-granularity-seg">
+            <button type="button" data-g="month" class="active" onclick="setWbGranularity('month')">月</button>
+            <button type="button" data-g="quarter" onclick="setWbGranularity('quarter')">季度</button>
+            <button type="button" data-g="year" onclick="setWbGranularity('year')">年</button>
+          </div>
+          <div class="wb-time-pickers" id="wb-time-pickers"></div>
         </div>
         <button class="wb-anomaly-toggle" id="wb-anomaly-toggle" onclick="toggleWorkbenchAnomalyOnly()">只看异常</button>
       </div>
 
       <div class="wb-health-layout">
-        <section class="wb-health-hero" onclick="openWorkbenchRiskOverview()">
-          <div class="health-eyebrow">本月经营健康度</div>
-          <div class="health-status">需关注</div>
-          <p>需求量持续上升，整体交付达标，但风险需求高于安全线。建议先处理 3 个已逾期需求，并控制 Listing 图片文案积压。</p>
-          <div class="health-facts">
-            <span class="static">需求总量 86</span>
-            <span onclick="event.stopPropagation(); openWorkbenchRiskOverview()">风险需求 12</span>
-            <span class="danger" onclick="event.stopPropagation(); openWorkbenchRiskOverview()">已逾期 3</span>
-            <span class="warn" onclick="event.stopPropagation(); openWorkbenchRiskOverview()">即将逾期 9</span>
-          </div>
-        </section>
-        <div class="wb-health-metrics">
-          <div class="health-metric" onclick="openWorkbenchKpiDetail('delivery')">
-            <span>准时交付率</span>
-            <strong>92%</strong>
-            <em>整体达标</em>
-          </div>
-          <div class="health-metric" onclick="openWorkbenchKpiDetail('draft')">
-            <span>一稿通过率</span>
-            <strong>84%</strong>
-            <em>低于 90% 目标</em>
-          </div>
-          <div class="health-metric" onclick="openWorkbenchKpiDetail('grammar')">
-            <span>语法准确率</span>
-            <strong>96.8%</strong>
-            <em>基础质量稳定</em>
-          </div>
-          <div class="health-metric" onclick="openWorkbenchKpiDetail('ai')">
-            <span>AI 采纳率</span>
-            <strong>76%</strong>
-            <em>视频脚本偏低</em>
-          </div>
-        </div>
+        <section class="wb-health-hero" id="wb-health-hero" onclick="openWorkbenchRiskOverview()"></section>
+        <div class="wb-health-metrics" id="wb-health-metrics"></div>
       </div>
 
       <section class="wb-panel">
@@ -446,33 +422,7 @@
               </div>
               <div class="chart-legend"><span class="normal"></span>进行中 <span class="warn"></span>即将逾期 <span class="danger"></span>已逾期</div>
             </div>
-            <div class="chart-bar-list">
-              <div class="chart-bar-row risk-warn" data-bu="物理治疗" data-risk="true" onclick="applyWorkbenchBuFilter('物理治疗')">
-                <div class="chart-label"><strong>物理治疗</strong><em>新品 Listing 集中，关注审核排期</em></div>
-                <div class="chart-stack-wrap"><div class="stacked-bar"><span class="normal" style="width:76.9%;"></span><span class="warn" style="width:15.4%;"></span><span class="danger" style="width:7.7%;"></span></div><div class="chart-segment-counts"><span class="normal">进行中 20</span><span class="warn">即将逾期 4</span><span class="danger">已逾期 2</span></div></div>
-                <div class="chart-kpi"><b>26</b><span>风险 6</span></div>
-              </div>
-              <div class="chart-bar-row risk-high" data-bu="慢病耗材" data-risk="true" onclick="applyWorkbenchBuFilter('慢病耗材')">
-                <div class="chart-label"><strong>慢病耗材</strong><em>资料缺失较多，先补齐输入质量</em></div>
-                <div class="chart-stack-wrap"><div class="stacked-bar"><span class="normal" style="width:72.2%;"></span><span class="warn" style="width:16.7%;"></span><span class="danger" style="width:11.1%;"></span></div><div class="chart-segment-counts"><span class="normal">进行中 13</span><span class="warn">即将逾期 3</span><span class="danger">已逾期 2</span></div></div>
-                <div class="chart-kpi"><b>18</b><span>风险 5</span></div>
-              </div>
-              <div class="chart-bar-row risk-warn" data-bu="家居关怀" data-risk="true" onclick="applyWorkbenchBuFilter('家居关怀')">
-                <div class="chart-label"><strong>家居关怀</strong><em>图片文案积压，建议协调生成资源</em></div>
-                <div class="chart-stack-wrap"><div class="stacked-bar"><span class="normal" style="width:70.6%;"></span><span class="warn" style="width:23.5%;"></span><span class="danger" style="width:5.9%;"></span></div><div class="chart-segment-counts"><span class="normal">进行中 12</span><span class="warn">即将逾期 4</span><span class="danger">已逾期 1</span></div></div>
-                <div class="chart-kpi"><b>17</b><span>风险 5</span></div>
-              </div>
-              <div class="chart-bar-row risk-warn" data-bu="北美市场" data-risk="true" onclick="applyWorkbenchBuFilter('北美市场')">
-                <div class="chart-label"><strong>北美市场</strong><em>新品占比高，需提前锁定开卖节奏</em></div>
-                <div class="chart-stack-wrap"><div class="stacked-bar"><span class="normal" style="width:71.4%;"></span><span class="warn" style="width:21.4%;"></span><span class="danger" style="width:7.2%;"></span></div><div class="chart-segment-counts"><span class="normal">进行中 10</span><span class="warn">即将逾期 3</span><span class="danger">已逾期 1</span></div></div>
-                <div class="chart-kpi"><b>14</b><span>风险 4</span></div>
-              </div>
-              <div class="chart-bar-row risk-good" data-bu="健康家访" data-risk="false" onclick="applyWorkbenchBuFilter('健康家访')">
-                <div class="chart-label"><strong>健康家访</strong><em>交付稳定，保持当前节奏</em></div>
-                <div class="chart-stack-wrap"><div class="stacked-bar"><span class="normal" style="width:81.8%;"></span><span class="warn" style="width:18.2%;"></span><span class="danger" style="width:0%;"></span></div><div class="chart-segment-counts"><span class="normal">进行中 9</span><span class="warn">即将逾期 2</span><span class="danger">已逾期 0</span></div></div>
-                <div class="chart-kpi"><b>11</b><span>风险 2</span></div>
-              </div>
-            </div>
+            <div class="chart-bar-list" id="wb-bu-list"></div>
           </div>
           <div class="chart-panel">
             <div class="chart-panel-head">
@@ -482,34 +432,40 @@
               </div>
               <div class="chart-legend"><span class="normal"></span>进行中 <span class="warn"></span>即将逾期 <span class="danger"></span>已逾期</div>
             </div>
-            <div class="chart-bar-list">
-              <div class="chart-bar-row risk-warn" data-demand-card="新品 Listing" data-bu-match="物理治疗,北美市场" data-risk="true" onclick="openWorkbenchDemandOverview('新品 Listing')">
-                <div class="chart-label"><strong>新品 Listing</strong><em>关联开卖时间，需提前预警</em></div>
-                <div class="chart-stack-wrap"><div class="stacked-bar"><span class="normal" style="width:75%;"></span><span class="warn" style="width:16.7%;"></span><span class="danger" style="width:8.3%;"></span></div><div class="chart-segment-counts"><span class="normal">进行中 18</span><span class="warn">即将逾期 4</span><span class="danger">已逾期 2</span></div></div>
-                <div class="chart-kpi"><b>24</b><span>风险 6</span></div>
-              </div>
-              <div class="chart-bar-row risk-high" data-demand-card="Listing 图片文案" data-bu-match="家居关怀,北美市场" data-risk="true" onclick="openWorkbenchDemandOverview('Listing 图片文案')">
-                <div class="chart-label"><strong>Listing 图片文案</strong><em>风险最高，优先看审核队列</em></div>
-                <div class="chart-stack-wrap"><div class="stacked-bar"><span class="normal" style="width:61.5%;"></span><span class="warn" style="width:23.1%;"></span><span class="danger" style="width:15.4%;"></span></div><div class="chart-segment-counts"><span class="normal">进行中 8</span><span class="warn">即将逾期 3</span><span class="danger">已逾期 2</span></div></div>
-                <div class="chart-kpi"><b>13</b><span>风险 5</span></div>
-              </div>
-              <div class="chart-bar-row risk-warn" data-demand-card="说明书" data-bu-match="慢病耗材,物理治疗" data-risk="true" onclick="openWorkbenchDemandOverview('说明书')">
-                <div class="chart-label"><strong>说明书</strong><em>资料完整性影响交付质量</em></div>
-                <div class="chart-stack-wrap"><div class="stacked-bar"><span class="normal" style="width:71.4%;"></span><span class="warn" style="width:14.3%;"></span><span class="danger" style="width:14.3%;"></span></div><div class="chart-segment-counts"><span class="normal">进行中 5</span><span class="warn">即将逾期 1</span><span class="danger">已逾期 1</span></div></div>
-                <div class="chart-kpi"><b>7</b><span>风险 2</span></div>
-              </div>
-              <div class="chart-bar-row risk-warn" data-demand-card="视频脚本文案" data-bu-match="家居关怀,慢病耗材" data-risk="true" onclick="openWorkbenchDemandOverview('视频脚本文案')">
-                <div class="chart-label"><strong>视频脚本文案</strong><em>生成周期偏长，关注产能占用</em></div>
-                <div class="chart-stack-wrap"><div class="stacked-bar"><span class="normal" style="width:66.7%;"></span><span class="warn" style="width:33.3%;"></span><span class="danger" style="width:0%;"></span></div><div class="chart-segment-counts"><span class="normal">进行中 4</span><span class="warn">即将逾期 2</span><span class="danger">已逾期 0</span></div></div>
-                <div class="chart-kpi"><b>6</b><span>风险 2</span></div>
-              </div>
-              <div class="chart-bar-row risk-good" data-demand-card="FAQ" data-bu-match="健康家访,家居关怀" data-risk="false" onclick="openWorkbenchDemandOverview('FAQ')">
-                <div class="chart-label"><strong>FAQ</strong><em>低风险，可作为弹性承接类型</em></div>
-                <div class="chart-stack-wrap"><div class="stacked-bar"><span class="normal" style="width:80%;"></span><span class="warn" style="width:20%;"></span><span class="danger" style="width:0%;"></span></div><div class="chart-segment-counts"><span class="normal">进行中 4</span><span class="warn">即将逾期 1</span><span class="danger">已逾期 0</span></div></div>
-                <div class="chart-kpi"><b>5</b><span>风险 1</span></div>
-              </div>
+            <div class="chart-bar-list" id="wb-type-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="wb-panel" id="wb-trend-panel">
+        <div class="wb-panel-head wb-trend-head">
+          <div>
+            <h2>需求量趋势</h2>
+            <p id="wb-trend-subtitle">按当前时间粒度展示需求量随时间的变化，可切换指标与拆分维度。</p>
+          </div>
+          <div class="wb-trend-ctrls">
+            <div class="wb-trend-tab" data-role="metric">
+              <button type="button" class="active" data-v="total">需求总量</button>
+              <button type="button" data-v="completed">完成量</button>
+              <button type="button" data-v="overdue">逾期数</button>
+            </div>
+            <div class="wb-trend-chip" data-role="split">
+              <button type="button" class="active" data-v="none">不拆分</button>
+              <button type="button" data-v="bu">按 BU</button>
+              <button type="button" data-v="type">按类型</button>
+            </div>
+            <div class="wb-trend-chip" data-role="chart">
+              <button type="button" class="active" data-v="line">折线</button>
+              <button type="button" data-v="bar">堆叠柱</button>
             </div>
           </div>
+        </div>
+        <div class="wb-trend-board">
+          <div class="wb-trend-svg-wrap">
+            <svg id="wb-trend-svg" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"></svg>
+            <div class="wb-trend-tooltip" id="wb-trend-tooltip"></div>
+          </div>
+          <div class="wb-trend-legend" id="wb-trend-legend"></div>
         </div>
       </section>
 
@@ -524,18 +480,7 @@
             <div class="team-table-head">
               <span>人员</span><span>语法准确率</span><span>一稿通过率</span><span>AI采纳率</span><span>人效</span><span>当前负载</span><span>管理建议</span>
             </div>
-            <div class="team-table-row" onclick="openWorkbenchPersonDetail('Mason')">
-              <strong>Mason</strong><span class="metric-good">98%</span><span>88%</span><span>80%</span><b>18</b><i><em style="width:88%;"></em></i><p>高负载，少接急单</p>
-            </div>
-            <div class="team-table-row" onclick="openWorkbenchPersonDetail('Yumi')">
-              <strong>Yumi</strong><span class="metric-good">97%</span><span>84%</span><span>76%</span><b>15</b><i><em style="width:76%;"></em></i><p>可承接 FAQ</p>
-            </div>
-            <div class="team-table-row attention" onclick="openWorkbenchPersonDetail('Brian')">
-              <strong>Brian</strong><span class="metric-warn">94%</span><span class="metric-danger">76%</span><span class="metric-danger">68%</span><b>12</b><i><em style="width:62%;"></em></i><p>一稿偏低，暂缓复杂需求</p>
-            </div>
-            <div class="team-table-row" onclick="openWorkbenchPersonDetail('Suki')">
-              <strong>Suki</strong><span>96%</span><span>82%</span><span>74%</span><b>10</b><i><em style="width:54%;"></em></i><p>可承接慢病耗材</p>
-            </div>
+            <div id="wb-team-rows"></div>
           </div>
         </section>
       </div>
@@ -547,13 +492,7 @@
               <h2>质量问题分布</h2>
             </div>
           </div>
-          <div class="wb-quality-list">
-            <div class="wb-quality-row"><span>信息错误</span><b>38%</b><i style="width:38%;"></i></div>
-            <div class="wb-quality-row"><span>因果链不完整</span><b>24%</b><i style="width:24%;"></i></div>
-            <div class="wb-quality-row"><span>卖点表达不清</span><b>18%</b><i style="width:18%;"></i></div>
-            <div class="wb-quality-row"><span>GEO/本地化不匹配</span><b>12%</b><i style="width:12%;"></i></div>
-            <div class="wb-quality-row"><span>SEO 覆盖不足</span><b>8%</b><i style="width:8%;"></i></div>
-          </div>
+          <div class="wb-quality-list" id="wb-quality-list"></div>
         </section>
 
         <section class="wb-panel">
@@ -562,12 +501,7 @@
               <h2>管理关注项</h2>
             </div>
           </div>
-          <div class="wb-focus-list">
-            <div class="wb-focus-item high">Listing 图片文案有 2 个已逾期，建议优先协调审核资源。</div>
-            <div class="wb-focus-item">Brian 一稿通过率低于团队均值，需要复盘需求理解偏差。</div>
-            <div class="wb-focus-item">Mason 当前负载最高，后续新增需求建议分流给 Suki。</div>
-            <div class="wb-focus-item good">FAQ 与新闻稿交付稳定，可保持当前节奏。</div>
-          </div>
+          <div class="wb-focus-list" id="wb-focus-list"></div>
         </section>
       </div>
 

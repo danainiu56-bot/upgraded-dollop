@@ -1043,6 +1043,407 @@
     color: #b45309;
   }
 
+  /* ============================================
+     图片文案审核弹窗 -- 左侧专属样式
+  ============================================ */
+  .image-copy-selling-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .image-copy-selling-group {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    padding: 10px 12px;
+  }
+  .image-copy-selling-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .image-copy-selling-head em {
+    font-style: normal;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .image-copy-selling-badge {
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .image-copy-selling-usp { background: linear-gradient(135deg, #f59e0b, #ea580c); }
+  .image-copy-selling-ksp { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+  .image-copy-selling-osp { background: linear-gradient(135deg, #14b8a6, #0d9488); }
+  .image-copy-selling-group ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .image-copy-selling-group li {
+    font-size: 12px;
+    line-height: 1.6;
+    padding: 6px 8px;
+    background: #fafbfc;
+    border-radius: 6px;
+  }
+  .image-copy-selling-group li strong {
+    display: block;
+    color: var(--text);
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .image-copy-selling-group li span {
+    color: var(--text-muted);
+  }
+
+  .image-copy-gallery-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .image-copy-gallery-list li {
+    display: flex;
+    gap: 10px;
+    padding: 8px 10px;
+    background: #fafbfc;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .image-copy-gallery-index {
+    flex-shrink: 0;
+    font-weight: 700;
+    color: var(--primary);
+    min-width: 32px;
+  }
+  .image-copy-gallery-text {
+    color: var(--text);
+    flex: 1;
+  }
+
+  .image-copy-comp-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .image-copy-comp-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #fff;
+  }
+  .image-copy-comp-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+  .image-copy-comp-index {
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  }
+  .image-copy-comp-head strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+  .image-copy-comp-asin {
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+  .image-copy-comp-asin code {
+    background: var(--bg);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--text);
+  }
+  .image-copy-comp-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 12px;
+    color: var(--primary);
+    text-decoration: none;
+    margin-left: auto;
+  }
+  .image-copy-comp-link:hover { text-decoration: underline; }
+  .image-copy-comp-link svg { display: block; }
+
+  .image-copy-listing-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .image-copy-listing-item {
+    margin: 0;
+    flex: 0 0 auto;
+    width: 80px;
+    cursor: pointer;
+  }
+  .image-copy-listing-item img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    transition: transform .2s;
+    display: block;
+  }
+  .image-copy-listing-item:hover img {
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(0,0,0,.12);
+  }
+  .image-copy-listing-item figcaption {
+    margin-top: 3px;
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  /* ============================================
+     图片文案审核弹窗 -- 右侧 7 张图卡片
+  ============================================ */
+  .image-copy-submit-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .image-copy-submit-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    background: #fff;
+  }
+  .image-copy-submit-head {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .image-copy-submit-thumb {
+    margin: 0;
+    flex: 0 0 auto;
+    width: 100px;
+    cursor: pointer;
+  }
+  .image-copy-submit-thumb img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    display: block;
+    transition: transform .2s;
+  }
+  .image-copy-submit-thumb:hover img {
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(0,0,0,.12);
+  }
+  .image-copy-submit-thumb figcaption {
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    font-weight: 600;
+  }
+  .image-copy-submit-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .image-copy-submit-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .image-copy-submit-text {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text);
+    background: #fafbfc;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+
+  /* ============================================
+     图片文案审核 -- 英文图片文案块
+  ============================================ */
+  .image-copy-en-block {
+    margin-top: 8px;
+    padding: 10px 12px;
+    background: #f0f9ff;
+    border-left: 3px solid #0ea5e9;
+    border-radius: 4px;
+  }
+  .image-copy-en-label {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    color: #0369a1;
+    background: #e0f2fe;
+    padding: 2px 6px;
+    border-radius: 4px;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .image-copy-en-text {
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    letter-spacing: 0.1px;
+    color: #0c4a6e;
+  }
+
+  /* ============================================
+     图片文案审核 -- 图跳转 chip 条
+  ============================================ */
+  .image-copy-chip-bar {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 10px;
+    margin: -16px -16px 12px;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border);
+  }
+  .image-copy-chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .image-copy-chip:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  .image-copy-chip.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+  }
+  .image-copy-chip.marked {
+    border-color: #f59e0b;
+    background: #fffbeb;
+    color: #b45309;
+  }
+  .image-copy-chip.marked.active {
+    background: #f59e0b;
+    color: #fff;
+  }
+  .image-copy-chip-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .image-copy-chip.marked .image-copy-chip-dot {
+    background: #f59e0b;
+    color: #fff;
+    padding: 0 4px;
+  }
+  .image-copy-chip.marked.active .image-copy-chip-dot {
+    background: #fff;
+    color: #b45309;
+  }
+
+  /* ============================================
+     图片文案审核 -- 头部进度标签
+  ============================================ */
+  .image-copy-progress {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .image-copy-progress.image-copy-progress-active {
+    background: #fffbeb;
+    color: #b45309;
+    border-color: #fcd34d;
+  }
+
+  /* ============================================
+     图片文案审核 -- 创意意图对照行
+  ============================================ */
+  .image-copy-intent {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    padding: 8px 10px;
+    background: #f5f3ff;
+    border-left: 3px solid #8b5cf6;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .image-copy-intent-label {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 700;
+    color: #6d28d9;
+    background: #ede9fe;
+    padding: 2px 6px;
+    border-radius: 4px;
+    line-height: 1.2;
+  }
+  .image-copy-intent-text {
+    color: #4c1d95;
+    flex: 1;
+  }
+
+  /* ============================================
+     图片文案审核 -- 专属快捷标记按钮（橙黄色高亮态保持）
+  ============================================ */
+  .image-copy-issue-actions button:hover,
+  .image-copy-issue-actions button.active {
+    border-color: #f59e0b;
+    background: #fffbeb;
+    color: #b45309;
+  }
+
   /* 驳回记录时间轴 */
   .copy-reject-count {
     font-size: 11px;
@@ -1300,4 +1701,111 @@
       grid-template-columns: 1fr;
     }
   }
+
+  /* ============================================
+     新品 FAQ 类型审核窗口
+  ============================================ */
+  .copy-audit-left-readonly [contenteditable="true"] {
+    pointer-events: none;
+    cursor: default !important;
+    user-select: text;
+  }
+  .copy-audit-left-readonly [contenteditable="true"]:empty::before {
+    content: '' !important;
+  }
+  .copy-audit-left-readonly [contenteditable="true"].editing {
+    outline: none !important;
+    background: transparent !important;
+  }
+
+  .copy-audit-ai-score .ai-score-card { padding: 0; }
+
+  .faq-copy-chip-bar {
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 0;
+    background: white;
+    z-index: 1;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 10px;
+  }
+  .faq-copy-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: white;
+    color: #475569;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .faq-copy-chip:hover { border-color: #6366f1; color: #6366f1; }
+  .faq-copy-chip.active {
+    background: #6366f1;
+    color: white;
+    border-color: #6366f1;
+  }
+  .faq-copy-chip-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #cbd5e1;
+  }
+  .faq-copy-chip.active .faq-copy-chip-dot { background: #fff; }
+  .faq-copy-chip-dot.marked { background: #ef4444 !important; }
+
+  .faq-copy-submit-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .faq-copy-submit-card {
+    padding: 14px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #fff;
+    transition: box-shadow .15s, border-color .15s;
+  }
+  .faq-copy-submit-card.audited {
+    box-shadow: inset 3px 0 0 #6366f1;
+    border-color: #c7d2fe;
+  }
+  .faq-copy-submit-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: #0f172a;
+    margin-bottom: 10px;
+  }
+  .faq-copy-q-block,
+  .faq-copy-a-block {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .faq-copy-q-label,
+  .faq-copy-a-label {
+    text-align: center;
+    font-weight: 700;
+    font-size: 12px;
+    border-radius: 4px;
+    padding: 3px 0;
+    height: fit-content;
+  }
+  .faq-copy-q-label { background: #eef2ff; color: #6366f1; }
+  .faq-copy-a-label { background: #ecfdf5; color: #10b981; }
+  .faq-copy-q-text,
+  .faq-copy-a-text {
+    color: #0f172a;
+    line-height: 1.55;
+    font-size: 13px;
+  }
+  .faq-copy-issue-actions { margin-top: 10px; }
 

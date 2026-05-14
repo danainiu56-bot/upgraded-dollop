@@ -1,0 +1,1391 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>产品到营销系统 — 项目进度看板</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #65738a;
+      --line: #e6ebf2;
+      --soft: #f0f4f8;
+      --green: #16a06b;
+      --green-bg: #e9f8f1;
+      --blue: #2869d9;
+      --blue-bg: #eaf1ff;
+      --gray: #718096;
+      --gray-bg: #f1f3f5;
+      --red: #dc3f45;
+      --red-bg: #fff0f0;
+      --amber: #c27b14;
+      --amber-bg: #fff6e5;
+      --shadow: 0 12px 30px rgba(22, 34, 51, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: linear-gradient(180deg, #f8fafc 0%, var(--bg) 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+    }
+
+    button, input, textarea, select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+
+    .title-wrap {
+      min-width: 0;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      color: var(--muted);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .btn {
+      height: 36px;
+      padding: 0 13px;
+      border-radius: 10px;
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--line);
+      box-shadow: 0 2px 8px rgba(20, 31, 48, 0.04);
+    }
+
+    .btn:hover {
+      border-color: #cfd8e6;
+      background: #fbfcfe;
+    }
+
+    .btn.primary {
+      color: #fff;
+      border-color: #1f5fc6;
+      background: #2869d9;
+    }
+
+    .btn.danger {
+      color: var(--red);
+      background: var(--red-bg);
+      border-color: #ffd1d4;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .kpis {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .kpi-card {
+      padding: 18px;
+      min-height: 118px;
+    }
+
+    .kpi-label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .kpi-value {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-top: 10px;
+      font-size: 34px;
+      font-weight: 760;
+      letter-spacing: -0.04em;
+    }
+
+    .kpi-unit {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0;
+    }
+
+    .kpi-extra {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .progress-ring {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: conic-gradient(var(--green) var(--pct), #edf1f6 0);
+      flex: none;
+    }
+
+    .progress-ring::before {
+      content: attr(data-label);
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--card);
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .two-cols {
+      grid-template-columns: 1.05fr 0.95fr;
+      align-items: start;
+      margin-bottom: 16px;
+    }
+
+    .section {
+      padding: 18px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 750;
+    }
+
+    .section-note {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .bar-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 130px 1fr 52px;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .bar-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #2b374a;
+      font-size: 13px;
+    }
+
+    .bar-track {
+      height: 9px;
+      border-radius: 999px;
+      background: #edf1f6;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #22b77a, #2f78e8);
+    }
+
+    .bar-value {
+      color: var(--muted);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-size: 12px;
+    }
+
+    .risk-list {
+      display: grid;
+      gap: 9px;
+      max-height: 318px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .risk-item {
+      display: grid;
+      grid-template-columns: 72px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      border: 1px solid #ffe1d7;
+      border-radius: 12px;
+      background: #fff7f3;
+    }
+
+    .risk-main {
+      min-width: 0;
+    }
+
+    .risk-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 650;
+    }
+
+    .risk-meta {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .milestone-card {
+      margin-bottom: 16px;
+    }
+
+    .milestone-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .milestone {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fbfcfe;
+    }
+
+    .milestone-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 9px;
+    }
+
+    .milestone-name {
+      min-height: 40px;
+      font-weight: 720;
+      line-height: 1.35;
+    }
+
+    .milestone-desc {
+      min-height: 48px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .milestone-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .modules {
+      display: grid;
+      gap: 14px;
+    }
+
+    .module {
+      overflow: hidden;
+    }
+
+    .module-head {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #fbfcfe);
+    }
+
+    .module-title-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .module-name {
+      font-size: 17px;
+      font-weight: 780;
+    }
+
+    .module-summary {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .module-progress {
+      width: 220px;
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #edf1f6;
+    }
+
+    .module-progress > span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #21ad74, #2e77e7);
+    }
+
+    .module-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .table-wrap {
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1120px;
+    }
+
+    th, td {
+      padding: 11px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #f1f4f8;
+      color: #4b5870;
+      font-size: 12px;
+      font-weight: 720;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .name-cell {
+      min-width: 220px;
+      font-weight: 630;
+    }
+
+    .note-cell {
+      min-width: 220px;
+      color: var(--muted);
+    }
+
+    .editable {
+      min-height: 24px;
+      padding: 3px 5px;
+      border-radius: 7px;
+      outline: none;
+      cursor: text;
+    }
+
+    .editable:hover, .editable:focus {
+      background: #eef4ff;
+      box-shadow: inset 0 0 0 1px #c9dbff;
+    }
+
+    .date-input, .owner-input, .select {
+      width: 100%;
+      height: 30px;
+      padding: 0 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .owner-input {
+      min-width: 86px;
+    }
+
+    .date-input {
+      min-width: 130px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 58px;
+      height: 26px;
+      padding: 0 9px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge.clickable {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .status-done {
+      color: var(--green);
+      background: var(--green-bg);
+      border-color: #bdebd5;
+    }
+
+    .status-doing {
+      color: var(--blue);
+      background: var(--blue-bg);
+      border-color: #c9dcff;
+    }
+
+    .status-todo {
+      color: #586477;
+      background: var(--gray-bg);
+      border-color: #dde3ea;
+    }
+
+    .status-na {
+      color: #8a95a6;
+      background: #fff;
+      border-color: #dfe5ed;
+    }
+
+    .priority-P0 {
+      color: var(--red);
+      background: var(--red-bg);
+      border-color: #ffd1d4;
+    }
+
+    .priority-P1 {
+      color: var(--amber);
+      background: var(--amber-bg);
+      border-color: #ffe0a3;
+    }
+
+    .priority-P2 {
+      color: #687386;
+      background: #f3f5f8;
+      border-color: #dfe4eb;
+    }
+
+    .block-btn {
+      min-width: 56px;
+      height: 28px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+    }
+
+    .block-btn.active {
+      color: var(--red);
+      background: var(--red-bg);
+      border-color: #ffcbd0;
+      font-weight: 750;
+    }
+
+    .small-btn {
+      height: 30px;
+      padding: 0 10px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #3d4a5f;
+      font-size: 12px;
+    }
+
+    .small-btn:hover {
+      background: #f8fafc;
+    }
+
+    .small-btn.danger {
+      color: var(--red);
+      border-color: #ffd4d8;
+      background: #fff8f8;
+    }
+
+    .empty {
+      padding: 24px;
+      color: var(--muted);
+      text-align: center;
+      background: #fbfcfe;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 10;
+      padding: 12px 16px;
+      border-radius: 12px;
+      color: #fff;
+      background: rgba(23, 32, 51, 0.92);
+      box-shadow: var(--shadow);
+      transform: translateY(16px);
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.18s ease;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    @media (max-width: 1100px) {
+      .hero {
+        display: grid;
+      }
+
+      .toolbar {
+        justify-content: flex-start;
+      }
+
+      .kpis, .two-cols, .milestone-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .app {
+        padding: 18px;
+      }
+
+      .kpis, .two-cols, .milestone-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .module-head {
+        grid-template-columns: 1fr;
+      }
+
+      .module-actions {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="app"></div>
+  <input id="importFile" class="file-input" type="file" accept="application/json">
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const STORAGE_KEY = 'pmp.dashboard.v1';
+    const STATUS_ORDER = ['done', 'doing', 'todo', 'na'];
+    const PRIORITY_ORDER = ['P0', 'P1', 'P2'];
+    const STATUS_LABEL = { done: '已完成', doing: '进行中', todo: '待开发', na: '不需要' };
+    const TODAY = new Date().toISOString().slice(0, 10);
+
+    const seed = {
+      title: '产品到营销系统 — 全局开发进度',
+      updatedAt: new Date().toISOString(),
+      modules: [
+        {
+          id: 'mod_workbench',
+          name: '工作台',
+          collapsed: false,
+          items: [
+            item('it_workbench_1', 'KPI 看板 & 数据展板', 'done', 'todo', 'na', '产品', 'P1', '', false, 'ms_foundation', '看板指标口径需要与后端字段保持一致'),
+            item('it_workbench_2', '人员预览看板', 'done', 'todo', 'na', '前端', 'P2', '', false, 'ms_foundation', ''),
+            item('it_workbench_3', '需求提交按钮入口', 'done', 'todo', 'na', '前端', 'P1', '', false, 'ms_upload', '')
+          ]
+        },
+        {
+          id: 'mod_requirements',
+          name: '需求管理',
+          collapsed: false,
+          items: [
+            item('it_req_1', '需求列表页 & 筛选', 'done', 'todo', 'todo', '产品', 'P0', '', false, 'ms_core', ''),
+            item('it_req_2', '创建 / 编辑 / 详情弹窗', 'done', 'doing', 'todo', '前后端', 'P0', '', false, 'ms_core', '字段校验、状态流转需要重点确认'),
+            item('it_req_3', '上传 & 解析附件', 'done', 'todo', 'todo', 'AI', 'P0', '', true, 'ms_upload', '依赖解析链路与模型能力'),
+            item('it_req_4', '状态流转与审批', 'done', 'todo', 'todo', '产品', 'P1', '', false, 'ms_core', '')
+          ]
+        },
+        {
+          id: 'mod_copywriting',
+          name: '文案管理',
+          collapsed: false,
+          items: [
+            item('it_copy_1', '文案列表展示 & 筛选', 'done', 'todo', 'todo', '前端', 'P1', '', false, 'ms_core', ''),
+            item('it_copy_2', '编辑文案 & 正文版本号', 'done', 'todo', 'todo', '产品', 'P1', '', false, 'ms_core', '')
+          ]
+        },
+        {
+          id: 'mod_strategy',
+          name: '策略管理',
+          collapsed: false,
+          items: [
+            item('it_strategy_1', '策略生成 & 规则配置', 'done', 'todo', 'todo', '产品', 'P1', '', false, 'ms_ai', 'AI 规则依赖 model rule、提示词模板'),
+            item('it_strategy_2', '推荐文案分发', 'done', 'todo', 'todo', 'AI', 'P2', '', false, 'ms_ai', '')
+          ]
+        },
+        {
+          id: 'mod_content_assets',
+          name: '文案素材',
+          collapsed: false,
+          items: [
+            item('it_asset_1', '文案素材列表 & 快速筛选', 'done', 'todo', 'todo', '前端', 'P2', '', false, 'ms_core', ''),
+            item('it_asset_2', '内容详情展示', 'done', 'todo', 'todo', '前端', 'P2', '', false, 'ms_core', '')
+          ]
+        },
+        {
+          id: 'mod_create_material',
+          name: '创建素材库需求',
+          collapsed: false,
+          items: [
+            item('it_create_1', 'Step 1：需求信息填写 & 业务类型', 'done', 'doing', 'todo', '产品', 'P0', '', false, 'ms_upload', '字段映射到 join_edf，注意枚举兼容'),
+            item('it_create_2', 'Step 2：下载模板与上传', 'done', 'todo', 'todo', '前端', 'P0', '', false, 'ms_upload', ''),
+            item('it_create_3', 'Step 2：Excel 模板校验', 'done', 'todo', 'todo', '后端', 'P0', '', true, 'ms_upload', '模板字段需先统一'),
+            item('it_create_4', '链接文本下载 & 入库', 'done', 'todo', 'todo', '后端', 'P1', '', false, 'ms_upload', 'Landing 详情页解析，需处理重试'),
+            item('it_create_5', '文件上传 API 对接', 'doing', 'todo', 'todo', '前后端', 'P0', '', true, 'ms_upload', '接口联调未完成')
+          ]
+        },
+        {
+          id: 'mod_parser',
+          name: '解析运营页',
+          collapsed: false,
+          items: [
+            item('it_parser_1', '解析各渠道的落地页 HTML', 'done', 'todo', 'todo', 'AI', 'P0', '', true, 'ms_parser', ''),
+            item('it_parser_2', '内容抽取 & 清洗', 'done', 'todo', 'todo', 'AI', 'P0', '', false, 'ms_parser', '避免正文污染、噪音过滤'),
+            item('it_parser_3', '销售亮点提取 & 内容摘要', 'done', 'todo', 'todo', 'AI', 'P1', '', false, 'ms_parser', '')
+          ]
+        },
+        {
+          id: 'mod_ai_chat',
+          name: 'AI 文案对话',
+          collapsed: false,
+          items: [
+            item('it_chat_1', '二次对话 & 参数确认', 'done', 'todo', 'todo', 'AI', 'P1', '', false, 'ms_ai', ''),
+            item('it_chat_2', '文案编辑 Tab 能力', 'done', 'todo', 'todo', 'AI', 'P1', '', false, 'ms_ai', ''),
+            item('it_chat_3', '平台文案 & 投放建议', 'done', 'todo', 'todo', 'AI', 'P1', '', false, 'ms_ai', '输出需保证结构化，便于前端展示'),
+            item('it_chat_4', '决策产品库', 'done', 'todo', 'todo', 'AI', 'P2', '', false, 'ms_ai', ''),
+            item('it_chat_5', 'AI 生成 & 文案大纲', 'done', 'todo', 'todo', 'AI', 'P1', '', false, 'ms_ai', ''),
+            item('it_chat_6', '投放中心（生成 Power）', 'done', 'todo', 'todo', 'AI', 'P2', '', false, 'ms_ai', '')
+          ]
+        },
+        {
+          id: 'mod_ai_capability',
+          name: 'AI 能力',
+          collapsed: false,
+          items: [
+            item('it_ai_1', '大模型 Prompt 与模型参数', 'todo', 'todo', 'doing', 'AI', 'P0', '', false, 'ms_ai', '输出格式、召回稳定性待验证'),
+            item('it_ai_2', 'LLM 文案生成主链路', 'todo', 'todo', 'todo', 'AI', 'P0', '', true, 'ms_ai', ''),
+            item('it_ai_3', '文案风格与行业标签', 'todo', 'todo', 'todo', 'AI', 'P1', '', false, 'ms_ai', ''),
+            item('it_ai_4', 'AIGC 内容质检与评分', 'todo', 'todo', 'todo', 'AI', 'P1', '', false, 'ms_ai', '')
+          ]
+        },
+        {
+          id: 'mod_infra',
+          name: '基础设施',
+          collapsed: false,
+          items: [
+            item('it_infra_1', '用户认证 & 权限体系', 'todo', 'todo', 'na', '后端', 'P1', '', false, 'ms_foundation', '正式环境鉴权、权限隔离'),
+            item('it_infra_2', '数据统计 & ORM', 'todo', 'todo', 'na', '后端', 'P1', '', false, 'ms_foundation', ''),
+            item('it_infra_3', '文件存储 & 下载 API', 'todo', 'doing', 'na', '后端', 'P0', '', false, 'ms_upload', ''),
+            item('it_infra_4', '日志监控（埋点追踪）', 'todo', 'todo', 'na', '后端', 'P2', '', false, 'ms_foundation', '')
+          ]
+        }
+      ],
+      milestones: [
+        milestone('ms_foundation', 'P0', '前端主干页面完成', '工作台、列表、基础交互和静态页面跑通', '2026-05-18', 'doing'),
+        milestone('ms_upload', 'P0', '上传与解析主链路打通', '文件上传、模板校验、解析入库形成闭环', '2026-05-22', 'doing'),
+        milestone('ms_parser', 'P1', '运营页解析可用', '页面解析、正文抽取、亮点摘要可稳定输出', '2026-05-28', 'todo'),
+        milestone('ms_ai', 'P1', 'AI 文案链路完成', 'Prompt、生成、质检和结构化输出完成联调', '2026-06-03', 'todo'),
+        milestone('ms_acceptance', 'P2', '系统验收与上线', '测试、验收、监控和上线准备完成', '2026-06-10', 'todo')
+      ]
+    };
+
+    let state = loadState();
+    let onlyOpen = false;
+
+    function item(id, name, frontend, backend, ai, owner, priority, dueDate, blocked, milestoneId, note) {
+      return {
+        id,
+        name,
+        tracks: { frontend, backend, ai },
+        owner,
+        priority,
+        dueDate,
+        blocked,
+        milestoneId,
+        note,
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function milestone(id, priority, name, description, targetDate, status) {
+      return { id, priority, name, description, targetDate, status };
+    }
+
+    function clone(data) {
+      return JSON.parse(JSON.stringify(data));
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return clone(seed);
+        const parsed = JSON.parse(raw);
+        if (!parsed.modules || !parsed.milestones) return clone(seed);
+        return parsed;
+      } catch {
+        return clone(seed);
+      }
+    }
+
+    function saveState() {
+      state.updatedAt = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function render() {
+      document.getElementById('app').innerHTML = `
+        <header class="hero">
+          <div class="title-wrap">
+            <h1 class="title" contenteditable="true" data-edit-title>${escapeHtml(state.title)}</h1>
+            <p class="subtitle">最后保存：${formatTime(state.updatedAt)} · 数据保存在当前浏览器，可导出 JSON 备份。</p>
+          </div>
+          <div class="toolbar">
+            <button class="btn primary" data-action="add-module">+ 新增模块</button>
+            <button class="btn" data-action="toggle-open">${onlyOpen ? '显示全部' : '仅看未完成'}</button>
+            <button class="btn" data-action="export">导出 JSON</button>
+            <button class="btn" data-action="import">导入 JSON</button>
+            <button class="btn danger" data-action="reset">恢复初始数据</button>
+          </div>
+        </header>
+        ${renderKpis()}
+        <div class="grid two-cols">
+          ${renderModuleChart()}
+          ${renderRiskPanel()}
+        </div>
+        ${renderMilestones()}
+        <main class="modules">${renderModules()}</main>
+      `;
+      bindEvents();
+    }
+
+    function renderKpis() {
+      const stats = calcStats();
+      return `
+        <section class="grid kpis">
+          <div class="card kpi-card">
+            <div class="kpi-label">功能点总数</div>
+            <div class="kpi-value">${stats.total}<span class="kpi-unit">个</span></div>
+            <div class="kpi-extra">${state.modules.length} 个模块 · ${state.milestones.length} 个里程碑</div>
+          </div>
+          <div class="card kpi-card">
+            <div class="kpi-label">整体完成率</div>
+            <div class="kpi-value">
+              <span>${stats.done}</span><span class="kpi-unit">已完成</span>
+              <span class="progress-ring" style="--pct:${stats.percent * 3.6}deg" data-label="${stats.percent}%"></span>
+            </div>
+            <div class="kpi-extra">完成口径：前端/后端/AI 全部完成或不需要</div>
+          </div>
+          <div class="card kpi-card">
+            <div class="kpi-label">进行中</div>
+            <div class="kpi-value">${stats.doing}<span class="kpi-unit">个</span></div>
+            <div class="kpi-extra">任一赛道为进行中即计入</div>
+          </div>
+          <div class="card kpi-card">
+            <div class="kpi-label">风险项</div>
+            <div class="kpi-value">${stats.risks.length}<span class="kpi-unit">个</span></div>
+            <div class="kpi-extra">P0 未完成 / 阻塞 / 超期自动聚合</div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderModuleChart() {
+      const rows = state.modules.map(mod => ({
+        name: mod.name,
+        percent: modulePercent(mod),
+        total: mod.items.length
+      })).sort((a, b) => a.percent - b.percent);
+
+      return `
+        <section class="card section">
+          <div class="section-head">
+            <h2 class="section-title">模块完成率</h2>
+            <span class="section-note">低完成率模块排在前面</span>
+          </div>
+          <div class="bar-list">
+            ${rows.map(row => `
+              <div class="bar-row">
+                <div class="bar-name" title="${escapeHtml(row.name)}">${escapeHtml(row.name)}</div>
+                <div class="bar-track"><div class="bar-fill" style="width:${row.percent}%"></div></div>
+                <div class="bar-value">${row.percent}%</div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderRiskPanel() {
+      const risks = calcStats().risks;
+      return `
+        <section class="card section">
+          <div class="section-head">
+            <h2 class="section-title">风险与阻塞</h2>
+            <span class="section-note">${risks.length ? '优先处理 P0 和阻塞项' : '当前没有明显风险'}</span>
+          </div>
+          <div class="risk-list">
+            ${risks.length ? risks.map(risk => `
+              <div class="risk-item">
+                <span class="badge priority-${risk.item.priority}">${risk.item.priority}</span>
+                <div class="risk-main">
+                  <div class="risk-title">${escapeHtml(risk.item.name)}</div>
+                  <div class="risk-meta">${escapeHtml(risk.module.name)} · ${risk.reasons.join(' / ')}</div>
+                </div>
+                <button class="small-btn" data-focus-item="${risk.module.id}:${risk.item.id}">定位</button>
+              </div>
+            `).join('') : '<div class="empty">没有 P0 未完成、阻塞或超期事项。</div>'}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderMilestones() {
+      return `
+        <section class="card section milestone-card">
+          <div class="section-head">
+            <h2 class="section-title">关键里程碑</h2>
+            <button class="small-btn" data-action="add-milestone">+ 新增里程碑</button>
+          </div>
+          <div class="milestone-grid">
+            ${state.milestones.map(ms => {
+              const percent = milestonePercent(ms.id);
+              return `
+                <article class="milestone">
+                  <div class="milestone-top">
+                    <span class="badge clickable priority-${ms.priority}" data-cycle-milestone-priority="${ms.id}">${ms.priority}</span>
+                    <button class="small-btn danger" data-delete-milestone="${ms.id}">删除</button>
+                  </div>
+                  <div class="milestone-name editable" contenteditable="true" data-edit-milestone="${ms.id}:name">${escapeHtml(ms.name)}</div>
+                  <div class="milestone-desc editable" contenteditable="true" data-edit-milestone="${ms.id}:description">${escapeHtml(ms.description)}</div>
+                  <div class="bar-track"><div class="bar-fill" style="width:${percent}%"></div></div>
+                  <div class="milestone-foot">
+                    <input class="date-input" type="date" value="${ms.targetDate || ''}" data-milestone-date="${ms.id}">
+                    <span>${percent}%</span>
+                  </div>
+                </article>
+              `;
+            }).join('')}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderModules() {
+      if (!state.modules.length) return '<section class="card empty">暂无模块，请点击“新增模块”。</section>';
+
+      return state.modules.map(mod => {
+        const visibleItems = onlyOpen ? mod.items.filter(it => !isItemDone(it)) : mod.items;
+        const percent = modulePercent(mod);
+        return `
+          <section class="card module" id="module-${mod.id}">
+            <div class="module-head">
+              <div>
+                <div class="module-title-line">
+                  <div class="module-name editable" contenteditable="true" data-edit-module="${mod.id}">${escapeHtml(mod.name)}</div>
+                  <span class="badge status-${percent === 100 ? 'done' : percent > 0 ? 'doing' : 'todo'}">${percent}%</span>
+                </div>
+                <div class="module-summary">
+                  <span>${mod.items.length} 个功能点</span>
+                  <span>${mod.items.filter(isItemDone).length} 已完成</span>
+                  <span>${mod.items.filter(isItemDoing).length} 进行中</span>
+                  <span class="module-progress"><span style="width:${percent}%"></span></span>
+                </div>
+              </div>
+              <div class="module-actions">
+                <button class="small-btn" data-action="add-item" data-module-id="${mod.id}">+ 新增功能点</button>
+                <button class="small-btn" data-action="move-module-up" data-module-id="${mod.id}">上移</button>
+                <button class="small-btn" data-action="move-module-down" data-module-id="${mod.id}">下移</button>
+                <button class="small-btn" data-action="toggle-module" data-module-id="${mod.id}">${mod.collapsed ? '展开' : '折叠'}</button>
+                <button class="small-btn danger" data-action="delete-module" data-module-id="${mod.id}">删除模块</button>
+              </div>
+            </div>
+            <div class="${mod.collapsed ? 'hidden' : ''}">
+              ${visibleItems.length ? renderTable(mod, visibleItems) : '<div class="empty">当前筛选下没有功能点。</div>'}
+            </div>
+          </section>
+        `;
+      }).join('');
+    }
+
+    function renderTable(mod, items) {
+      return `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>功能点</th>
+                <th>前端</th>
+                <th>后端</th>
+                <th>AI</th>
+                <th>负责人</th>
+                <th>优先级</th>
+                <th>截止日期</th>
+                <th>阻塞</th>
+                <th>关联里程碑</th>
+                <th>备注</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${items.map(it => `
+                <tr id="item-${it.id}">
+                  <td class="name-cell"><div class="editable" contenteditable="true" data-edit-item="${mod.id}:${it.id}:name">${escapeHtml(it.name)}</div></td>
+                  ${['frontend', 'backend', 'ai'].map(track => `
+                    <td><span class="badge clickable status-${it.tracks[track]}" data-cycle-status="${mod.id}:${it.id}:${track}">${STATUS_LABEL[it.tracks[track]]}</span></td>
+                  `).join('')}
+                  <td><input class="owner-input" value="${escapeAttr(it.owner)}" data-owner="${mod.id}:${it.id}"></td>
+                  <td><span class="badge clickable priority-${it.priority}" data-cycle-priority="${mod.id}:${it.id}">${it.priority}</span></td>
+                  <td><input class="date-input" type="date" value="${it.dueDate || ''}" data-due="${mod.id}:${it.id}"></td>
+                  <td><button class="block-btn ${it.blocked ? 'active' : ''}" data-toggle-block="${mod.id}:${it.id}">${it.blocked ? '阻塞' : '正常'}</button></td>
+                  <td>${renderMilestoneSelect(mod.id, it)}</td>
+                  <td class="note-cell"><div class="editable" contenteditable="true" data-edit-item="${mod.id}:${it.id}:note">${escapeHtml(it.note || '')}</div></td>
+                  <td>
+                    <button class="small-btn" data-action="move-item-up" data-module-id="${mod.id}" data-item-id="${it.id}">上移</button>
+                    <button class="small-btn" data-action="move-item-down" data-module-id="${mod.id}" data-item-id="${it.id}">下移</button>
+                    <button class="small-btn danger" data-delete-item="${mod.id}:${it.id}">删除</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderMilestoneSelect(moduleId, it) {
+      return `
+        <select class="select" data-item-milestone="${moduleId}:${it.id}">
+          <option value="">未关联</option>
+          ${state.milestones.map(ms => `<option value="${ms.id}" ${it.milestoneId === ms.id ? 'selected' : ''}>${ms.priority} · ${escapeHtml(ms.name)}</option>`).join('')}
+        </select>
+      `;
+    }
+
+    function bindEvents() {
+      document.querySelector('[data-edit-title]').addEventListener('blur', event => {
+        state.title = event.target.textContent.trim() || seed.title;
+        saveAndRender('标题已保存');
+      });
+
+      document.querySelectorAll('[data-action]').forEach(btn => {
+        btn.addEventListener('click', handleAction);
+      });
+
+      document.querySelectorAll('[data-edit-module]').forEach(el => {
+        el.addEventListener('blur', () => {
+          const mod = getModule(el.dataset.editModule);
+          mod.name = el.textContent.trim() || '未命名模块';
+          saveAndRender('模块已保存');
+        });
+      });
+
+      document.querySelectorAll('[data-edit-item]').forEach(el => {
+        el.addEventListener('blur', () => {
+          const [moduleId, itemId, field] = el.dataset.editItem.split(':');
+          const it = getItem(moduleId, itemId);
+          it[field] = el.textContent.trim();
+          touch(it);
+          saveAndRender('功能点已保存');
+        });
+      });
+
+      document.querySelectorAll('[data-cycle-status]').forEach(el => {
+        el.addEventListener('click', () => {
+          const [moduleId, itemId, track] = el.dataset.cycleStatus.split(':');
+          const it = getItem(moduleId, itemId);
+          it.tracks[track] = nextOf(STATUS_ORDER, it.tracks[track]);
+          touch(it);
+          saveAndRender('状态已更新');
+        });
+      });
+
+      document.querySelectorAll('[data-cycle-priority]').forEach(el => {
+        el.addEventListener('click', () => {
+          const [moduleId, itemId] = el.dataset.cyclePriority.split(':');
+          const it = getItem(moduleId, itemId);
+          it.priority = nextOf(PRIORITY_ORDER, it.priority);
+          touch(it);
+          saveAndRender('优先级已更新');
+        });
+      });
+
+      document.querySelectorAll('[data-toggle-block]').forEach(el => {
+        el.addEventListener('click', () => {
+          const [moduleId, itemId] = el.dataset.toggleBlock.split(':');
+          const it = getItem(moduleId, itemId);
+          it.blocked = !it.blocked;
+          touch(it);
+          saveAndRender(it.blocked ? '已标记阻塞' : '已取消阻塞');
+        });
+      });
+
+      document.querySelectorAll('[data-owner], [data-due], [data-item-milestone], [data-milestone-date]').forEach(el => {
+        el.addEventListener('change', handleFieldChange);
+      });
+
+      document.querySelectorAll('[data-delete-item]').forEach(el => {
+        el.addEventListener('click', () => {
+          const [moduleId, itemId] = el.dataset.deleteItem.split(':');
+          if (!confirm('确认删除这个功能点？')) return;
+          const mod = getModule(moduleId);
+          mod.items = mod.items.filter(it => it.id !== itemId);
+          saveAndRender('功能点已删除');
+        });
+      });
+
+      document.querySelectorAll('[data-focus-item]').forEach(el => {
+        el.addEventListener('click', () => {
+          const [moduleId, itemId] = el.dataset.focusItem.split(':');
+          const mod = getModule(moduleId);
+          mod.collapsed = false;
+          saveState();
+          render();
+          const target = document.getElementById(`item-${itemId}`);
+          target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          target?.animate([{ background: '#fff1c7' }, { background: 'transparent' }], { duration: 1400 });
+        });
+      });
+
+      document.querySelectorAll('[data-edit-milestone]').forEach(el => {
+        el.addEventListener('blur', () => {
+          const [id, field] = el.dataset.editMilestone.split(':');
+          const ms = getMilestone(id);
+          ms[field] = el.textContent.trim();
+          saveAndRender('里程碑已保存');
+        });
+      });
+
+      document.querySelectorAll('[data-cycle-milestone-priority]').forEach(el => {
+        el.addEventListener('click', () => {
+          const ms = getMilestone(el.dataset.cycleMilestonePriority);
+          ms.priority = nextOf(PRIORITY_ORDER, ms.priority);
+          saveAndRender('里程碑优先级已更新');
+        });
+      });
+
+      document.querySelectorAll('[data-delete-milestone]').forEach(el => {
+        el.addEventListener('click', () => {
+          const id = el.dataset.deleteMilestone;
+          if (!confirm('确认删除这个里程碑？功能点关联会被清空。')) return;
+          state.milestones = state.milestones.filter(ms => ms.id !== id);
+          state.modules.forEach(mod => mod.items.forEach(it => {
+            if (it.milestoneId === id) it.milestoneId = '';
+          }));
+          saveAndRender('里程碑已删除');
+        });
+      });
+
+      const importFile = document.getElementById('importFile');
+      importFile.onchange = handleImportFile;
+    }
+
+    function handleAction(event) {
+      const action = event.currentTarget.dataset.action;
+      const moduleId = event.currentTarget.dataset.moduleId;
+      const itemId = event.currentTarget.dataset.itemId;
+
+      if (action === 'add-module') addModule();
+      if (action === 'toggle-open') {
+        onlyOpen = !onlyOpen;
+        render();
+      }
+      if (action === 'export') exportJson();
+      if (action === 'import') document.getElementById('importFile').click();
+      if (action === 'reset') resetData();
+      if (action === 'add-milestone') addMilestone();
+      if (action === 'add-item') addItem(moduleId);
+      if (action === 'toggle-module') toggleModule(moduleId);
+      if (action === 'delete-module') deleteModule(moduleId);
+      if (action === 'move-module-up') moveInArray(state.modules, moduleId, -1, '模块已上移');
+      if (action === 'move-module-down') moveInArray(state.modules, moduleId, 1, '模块已下移');
+      if (action === 'move-item-up') moveItem(moduleId, itemId, -1);
+      if (action === 'move-item-down') moveItem(moduleId, itemId, 1);
+    }
+
+    function handleFieldChange(event) {
+      const el = event.target;
+      if (el.dataset.owner) {
+        const [moduleId, itemId] = el.dataset.owner.split(':');
+        const it = getItem(moduleId, itemId);
+        it.owner = el.value.trim();
+        touch(it);
+        saveAndRender('负责人已保存');
+      }
+      if (el.dataset.due) {
+        const [moduleId, itemId] = el.dataset.due.split(':');
+        const it = getItem(moduleId, itemId);
+        it.dueDate = el.value;
+        touch(it);
+        saveAndRender('截止日期已保存');
+      }
+      if (el.dataset.itemMilestone) {
+        const [moduleId, itemId] = el.dataset.itemMilestone.split(':');
+        const it = getItem(moduleId, itemId);
+        it.milestoneId = el.value;
+        touch(it);
+        saveAndRender('关联里程碑已保存');
+      }
+      if (el.dataset.milestoneDate) {
+        const ms = getMilestone(el.dataset.milestoneDate);
+        ms.targetDate = el.value;
+        saveAndRender('里程碑日期已保存');
+      }
+    }
+
+    function addModule() {
+      const name = prompt('请输入模块名称：', '新模块');
+      if (!name) return;
+      state.modules.push({ id: uid('mod'), name: name.trim(), collapsed: false, items: [] });
+      saveAndRender('模块已新增');
+    }
+
+    function addItem(moduleId) {
+      const mod = getModule(moduleId);
+      mod.items.push(item(uid('it'), '新功能点', 'todo', 'todo', 'todo', '', 'P1', '', false, '', ''));
+      mod.collapsed = false;
+      saveAndRender('功能点已新增');
+    }
+
+    function addMilestone() {
+      state.milestones.push(milestone(uid('ms'), 'P1', '新里程碑', '补充说明', '', 'todo'));
+      saveAndRender('里程碑已新增');
+    }
+
+    function toggleModule(moduleId) {
+      const mod = getModule(moduleId);
+      mod.collapsed = !mod.collapsed;
+      saveAndRender(mod.collapsed ? '模块已折叠' : '模块已展开');
+    }
+
+    function deleteModule(moduleId) {
+      if (!confirm('确认删除整个模块及其功能点？')) return;
+      state.modules = state.modules.filter(mod => mod.id !== moduleId);
+      saveAndRender('模块已删除');
+    }
+
+    function moveItem(moduleId, itemId, dir) {
+      const mod = getModule(moduleId);
+      moveInArray(mod.items, itemId, dir, dir < 0 ? '功能点已上移' : '功能点已下移');
+    }
+
+    function moveInArray(arr, id, dir, message) {
+      const index = arr.findIndex(row => row.id === id);
+      const next = index + dir;
+      if (index < 0 || next < 0 || next >= arr.length) return;
+      [arr[index], arr[next]] = [arr[next], arr[index]];
+      saveAndRender(message);
+    }
+
+    function resetData() {
+      if (!confirm('确认恢复为初始数据？当前浏览器内的修改会被覆盖。')) return;
+      state = clone(seed);
+      saveAndRender('已恢复初始数据');
+    }
+
+    function exportJson() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `项目进度看板-${new Date().toISOString().slice(0, 10)}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast('JSON 已导出');
+    }
+
+    function handleImportFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          if (!parsed.modules || !parsed.milestones) throw new Error('invalid');
+          state = parsed;
+          saveAndRender('JSON 已导入');
+        } catch {
+          alert('导入失败：JSON 结构不正确。');
+        } finally {
+          event.target.value = '';
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function calcStats() {
+      const all = state.modules.flatMap(mod => mod.items.map(it => ({ module: mod, item: it })));
+      const done = all.filter(row => isItemDone(row.item)).length;
+      const doing = all.filter(row => isItemDoing(row.item)).length;
+      const risks = all.map(row => {
+        const reasons = [];
+        if (row.item.priority === 'P0' && !isItemDone(row.item)) reasons.push('P0 未完成');
+        if (row.item.blocked) reasons.push('已阻塞');
+        if (row.item.dueDate && row.item.dueDate < TODAY && !isItemDone(row.item)) reasons.push('已超期');
+        return reasons.length ? { ...row, reasons } : null;
+      }).filter(Boolean);
+      return {
+        total: all.length,
+        done,
+        doing,
+        risks,
+        percent: all.length ? Math.round(done / all.length * 100) : 0
+      };
+    }
+
+    function modulePercent(mod) {
+      if (!mod.items.length) return 0;
+      return Math.round(mod.items.filter(isItemDone).length / mod.items.length * 100);
+    }
+
+    function milestonePercent(milestoneId) {
+      const linked = state.modules.flatMap(mod => mod.items).filter(it => it.milestoneId === milestoneId);
+      if (!linked.length) return 0;
+      return Math.round(linked.filter(isItemDone).length / linked.length * 100);
+    }
+
+    function isItemDone(it) {
+      return Object.values(it.tracks).every(status => status === 'done' || status === 'na');
+    }
+
+    function isItemDoing(it) {
+      return !isItemDone(it) && Object.values(it.tracks).includes('doing');
+    }
+
+    function getModule(id) {
+      return state.modules.find(mod => mod.id === id);
+    }
+
+    function getItem(moduleId, itemId) {
+      return getModule(moduleId).items.find(it => it.id === itemId);
+    }
+
+    function getMilestone(id) {
+      return state.milestones.find(ms => ms.id === id);
+    }
+
+    function nextOf(arr, current) {
+      return arr[(arr.indexOf(current) + 1) % arr.length] || arr[0];
+    }
+
+    function touch(it) {
+      it.updatedAt = new Date().toISOString();
+    }
+
+    function saveAndRender(message) {
+      saveState();
+      render();
+      showToast(message);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove('show'), 1500);
+    }
+
+    function formatTime(value) {
+      if (!value) return '未保存';
+      return new Date(value).toLocaleString('zh-CN', { hour12: false });
+    }
+
+    function uid(prefix) {
+      return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replaceAll('\n', ' ');
+    }
+
+    render();
+  </script>
+</body>
+</html>

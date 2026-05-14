@@ -291,19 +291,218 @@ function showCopyReviewView() {
   if (typeof saveView === 'function') saveView('copy-review');
 }
 
-// ----- refreshWorkbench -----
-function refreshWorkbench() {
-  const now = new Date();
-  const monthSelect = document.getElementById('wb-month-select');
-  if (!monthSelect) return;
-  if (!monthSelect.options.length) {
-    for (let i = 0; i < 6; i += 1) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      const label = `${d.getFullYear()}年${d.getMonth() + 1}月`;
-      monthSelect.insertAdjacentHTML('beforeend', `<option value="${value}">${label}</option>`);
+// ============================================
+// 工作台时间粒度状态 + 看板动态渲染
+// ============================================
+
+let wbState = { granularity: 'month', year: 2026, month: 5, quarter: 2, anomalyOnly: false };
+
+function setWbGranularity(g) {
+  if (!['month', 'quarter', 'year'].includes(g)) return;
+  wbState.granularity = g;
+  // 更新段控件 active
+  document.querySelectorAll('#wb-granularity-seg button').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.g === g);
+  });
+  refreshWorkbench();
+}
+
+function setWbYear(y) {
+  wbState.year = parseInt(y, 10);
+  refreshWorkbench();
+}
+function setWbMonth(m) {
+  wbState.month = parseInt(m, 10);
+  refreshWorkbench();
+}
+function setWbQuarter(q) {
+  wbState.quarter = parseInt(q, 10);
+  refreshWorkbench();
+}
+
+function renderWbTimePickers() {
+  const wrap = document.getElementById('wb-time-pickers');
+  if (!wrap) return;
+  const years = [2025, 2026];
+  const yearOpts = years.map(y => `<option value="${y}" ${y === wbState.year ? 'selected' : ''}>${y}年</option>`).join('');
+  if (wbState.granularity === 'month') {
+    const monthOpts = [];
+    for (let m = 1; m <= 12; m++) {
+      monthOpts.push(`<option value="${m}" ${m === wbState.month ? 'selected' : ''}>${m}月</option>`);
     }
+    wrap.innerHTML = `
+      <select class="wb-month-select" onchange="setWbYear(this.value)">${yearOpts}</select>
+      <select class="wb-month-select" onchange="setWbMonth(this.value)">${monthOpts.join('')}</select>`;
+  } else if (wbState.granularity === 'quarter') {
+    const qOpts = [1, 2, 3, 4].map(q => `<option value="${q}" ${q === wbState.quarter ? 'selected' : ''}>Q${q}</option>`).join('');
+    wrap.innerHTML = `
+      <select class="wb-month-select" onchange="setWbYear(this.value)">${yearOpts}</select>
+      <select class="wb-month-select" onchange="setWbQuarter(this.value)">${qOpts}</select>`;
+  } else {
+    wrap.innerHTML = `<select class="wb-month-select" onchange="setWbYear(this.value)">${yearOpts}</select>`;
   }
+}
+
+function refreshWorkbench() {
+  renderWbTimePickers();
+  const data = (typeof getWorkbenchData === 'function') ? getWorkbenchData(wbState) : null;
+  if (!data) return;
+  renderWbHealth(data);
+  renderWbBuDist(data);
+  renderWbTypeDist(data);
+  renderWbTeam(data);
+  renderWbQuality(data);
+  renderWbFocus(data);
+  if (typeof renderWbTrend === 'function') renderWbTrend();
+  // 重新应用 BU 筛选/异常筛选状态
+  if (typeof updateWorkbenchDistributionFilter === 'function') updateWorkbenchDistributionFilter();
+}
+
+function wbScopeLabel() {
+  const g = wbState.granularity;
+  if (g === 'month') return `${wbState.year} 年 ${wbState.month} 月`;
+  if (g === 'quarter') return `${wbState.year} 年 Q${wbState.quarter}`;
+  return `${wbState.year} 年`;
+}
+
+function renderWbHealth(data) {
+  const hero = document.getElementById('wb-health-hero');
+  const metrics = document.getElementById('wb-health-metrics');
+  if (hero) {
+    const eyebrow = `${wbScopeLabel()} 经营健康度`;
+    const status = data.health.status;
+    hero.innerHTML = `
+      <div class="health-eyebrow">${eyebrow}</div>
+      <div class="health-status">${status}</div>
+      <p>${data.health.summary}</p>
+      <div class="health-facts">
+        <span class="static">需求总量 ${data.total}</span>
+        <span onclick="event.stopPropagation(); openWorkbenchRiskOverview()">风险需求 ${data.overdue + data.willOverdue}</span>
+        <span class="danger" onclick="event.stopPropagation(); openWorkbenchRiskOverview()">已逾期 ${data.overdue}</span>
+        <span class="warn" onclick="event.stopPropagation(); openWorkbenchRiskOverview()">即将逾期 ${data.willOverdue}</span>
+      </div>`;
+  }
+  if (metrics) {
+    const k = data.kpi;
+    const fmt = v => `${(v * 100).toFixed(1).replace(/\.0$/, '')}%`;
+    metrics.innerHTML = `
+      <div class="health-metric" onclick="openWorkbenchKpiDetail('delivery')">
+        <span>准时交付率</span><strong>${fmt(k.delivery)}</strong><em>${k.delivery >= 0.9 ? '整体达标' : '低于 90% 目标'}</em>
+      </div>
+      <div class="health-metric" onclick="openWorkbenchKpiDetail('draft')">
+        <span>一稿通过率</span><strong>${fmt(k.draft)}</strong><em>${k.draft >= 0.9 ? '达标' : '低于 90% 目标'}</em>
+      </div>
+      <div class="health-metric" onclick="openWorkbenchKpiDetail('grammar')">
+        <span>语法准确率</span><strong>${fmt(k.grammar)}</strong><em>基础质量稳定</em>
+      </div>
+      <div class="health-metric" onclick="openWorkbenchKpiDetail('ai')">
+        <span>AI 采纳率</span><strong>${fmt(k.ai)}</strong><em>${k.ai >= 0.8 ? '采纳良好' : '部分类型偏低'}</em>
+      </div>`;
+  }
+}
+
+function renderWbBuDist(data) {
+  const list = document.getElementById('wb-bu-list');
+  if (!list) return;
+  const rows = WB_BU_LIST.map(name => {
+    const total = data.bu[name] || 0;
+    const risk = data.buRisk[name] || { warn: 0, danger: 0 };
+    const normal = Math.max(0, total - risk.warn - risk.danger);
+    const pct = (n) => total ? `${(n * 100 / total).toFixed(1)}%` : '0%';
+    const isRisk = (risk.warn + risk.danger) > 0;
+    const riskCls = risk.danger >= 2 ? 'risk-high' : (isRisk ? 'risk-warn' : 'risk-good');
+    return `
+      <div class="chart-bar-row ${riskCls}" data-bu="${name}" data-risk="${isRisk}" onclick="applyWorkbenchBuFilter('${name}')">
+        <div class="chart-label"><strong>${name}</strong><em>${WB_BU_HINT[name] || ''}</em></div>
+        <div class="chart-stack-wrap">
+          <div class="stacked-bar">
+            <span class="normal" style="width:${pct(normal)};"></span>
+            <span class="warn" style="width:${pct(risk.warn)};"></span>
+            <span class="danger" style="width:${pct(risk.danger)};"></span>
+          </div>
+          <div class="chart-segment-counts">
+            <span class="normal">进行中 ${normal}</span>
+            <span class="warn">即将逾期 ${risk.warn}</span>
+            <span class="danger">已逾期 ${risk.danger}</span>
+          </div>
+        </div>
+        <div class="chart-kpi"><b>${total}</b><span>风险 ${risk.warn + risk.danger}</span></div>
+      </div>`;
+  }).join('');
+  list.innerHTML = rows;
+}
+
+function renderWbTypeDist(data) {
+  const list = document.getElementById('wb-type-list');
+  if (!list) return;
+  const rows = WB_TYPE_LIST.map(name => {
+    const total = data.type[name] || 0;
+    const risk = data.typeRisk[name] || { warn: 0, danger: 0 };
+    const normal = Math.max(0, total - risk.warn - risk.danger);
+    const pct = (n) => total ? `${(n * 100 / total).toFixed(1)}%` : '0%';
+    const isRisk = (risk.warn + risk.danger) > 0;
+    const riskCls = risk.danger >= 2 ? 'risk-high' : (isRisk ? 'risk-warn' : 'risk-good');
+    return `
+      <div class="chart-bar-row ${riskCls}" data-demand-card="${name}" data-bu-match="${WB_TYPE_BU_MATCH[name] || ''}" data-risk="${isRisk}" onclick="openWorkbenchDemandOverview('${name}')">
+        <div class="chart-label"><strong>${name}</strong><em>${WB_TYPE_HINT[name] || ''}</em></div>
+        <div class="chart-stack-wrap">
+          <div class="stacked-bar">
+            <span class="normal" style="width:${pct(normal)};"></span>
+            <span class="warn" style="width:${pct(risk.warn)};"></span>
+            <span class="danger" style="width:${pct(risk.danger)};"></span>
+          </div>
+          <div class="chart-segment-counts">
+            <span class="normal">进行中 ${normal}</span>
+            <span class="warn">即将逾期 ${risk.warn}</span>
+            <span class="danger">已逾期 ${risk.danger}</span>
+          </div>
+        </div>
+        <div class="chart-kpi"><b>${total}</b><span>风险 ${risk.warn + risk.danger}</span></div>
+      </div>`;
+  }).join('');
+  list.innerHTML = rows;
+}
+
+function renderWbTeam(data) {
+  const wrap = document.getElementById('wb-team-rows');
+  if (!wrap) return;
+  const maxLoad = Math.max(...data.team.map(t => t.load), 1);
+  const fmtPct = v => `${(v * 100).toFixed(0)}%`;
+  const cls = (label, value) => {
+    if (label === 'grammar') return value >= 0.97 ? 'metric-good' : (value < 0.95 ? 'metric-warn' : '');
+    if (label === 'draft') return value < 0.80 ? 'metric-danger' : '';
+    if (label === 'ai') return value < 0.70 ? 'metric-danger' : '';
+    return '';
+  };
+  wrap.innerHTML = data.team.map(t => {
+    const attention = t.draft < 0.80 ? 'attention' : '';
+    return `<div class="team-table-row ${attention}" onclick="openWorkbenchPersonDetail('${t.name}')">
+      <strong>${t.name}</strong>
+      <span class="${cls('grammar', t.grammar)}">${fmtPct(t.grammar)}</span>
+      <span class="${cls('draft', t.draft)}">${fmtPct(t.draft)}</span>
+      <span class="${cls('ai', t.ai)}">${fmtPct(t.ai)}</span>
+      <b>${t.load}</b>
+      <i><em style="width:${Math.min(100, Math.round(t.load * 100 / maxLoad))}%;"></em></i>
+      <p>${WB_TEAM_HINT[t.name] || ''}</p>
+    </div>`;
+  }).join('');
+}
+
+function renderWbQuality(data) {
+  const list = document.getElementById('wb-quality-list');
+  if (!list) return;
+  list.innerHTML = data.quality.map(q =>
+    `<div class="wb-quality-row"><span>${q.label}</span><b>${q.pct}%</b><i style="width:${q.pct}%;"></i></div>`
+  ).join('');
+}
+
+function renderWbFocus(data) {
+  const list = document.getElementById('wb-focus-list');
+  if (!list) return;
+  const cls = ['high', '', '', 'good'];
+  list.innerHTML = data.focus.map((text, i) =>
+    `<div class="wb-focus-item ${cls[i] || ''}">${text}</div>`
+  ).join('');
 }
 
 const WORKBENCH_PERSON_DATA = {
