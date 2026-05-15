@@ -32,6 +32,7 @@ function fillStaticIcons() {
   set('method-icon-1', IL('link', 28));
   set('method-icon-2', IL('template', 28));
   set('feishu-hint-icon', I('bulb', 18));
+  set('feishu-warning-icon', I('alert-triangle', 16));
   set('add-link-btn', `${I('plus', 16)}<span>添加飞书文档链接（${(window.feishuLinks || []).length || 1}/10）</span>`);
   set('template-download-icon', IL('download', 26));
   set('download-template-btn', `${I('download', 14)}<span>下载模板</span>`);

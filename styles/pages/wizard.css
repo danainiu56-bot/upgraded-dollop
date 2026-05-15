@@ -706,6 +706,19 @@
     line-height: 1.6;
   }
 
+  .feishu-data-warning {
+    margin-top: 8px;
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
   .feishu-link-preview {
     background: white;
     border-top: 1px dashed var(--border);

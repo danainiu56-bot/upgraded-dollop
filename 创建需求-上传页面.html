@@ -24,7 +24,7 @@
 <link rel="stylesheet" href="styles/pages/demand-list.css?v=20260509-1710">
 <link rel="stylesheet" href="styles/pages/copy-list.css?v=20260514-1620">
 <link rel="stylesheet" href="styles/pages/workbench.css?v=20260514-1430">
-<link rel="stylesheet" href="styles/pages/ai-chat.css?v=20260513-1120">
+<link rel="stylesheet" href="styles/pages/ai-chat.css?v=20260515-1610">
 
 <!-- ===== Mock 数据层（必须在主 script 之前加载，因为有顶层立即引用）===== -->
 <!-- 接 API 时只改这些文件 -->
@@ -58,7 +58,7 @@
 <script src="scripts/pages/copy-list.js?v=20260512-1655"></script>
 <script src="scripts/pages/review-list.js?v=20260509-1710"></script>
 <script src="scripts/pages/copy-review-list.js?v=20260514-1645"></script>
-<script src="scripts/pages/ai-chat.js?v=20260513-1120"></script>
+<script src="scripts/pages/ai-chat.js?v=20260515-1610"></script>
 <script src="scripts/pages/workbench-trend.js?v=20260514-1430"></script>
 
 <!-- ===== 入口（DOMContentLoaded 初始化）===== -->
@@ -1109,33 +1109,35 @@
             <div class="delivery-hint-group-title">
               <strong>新品需求</strong>
             </div>
-            <div class="delivery-hint-item primary"><strong>新品 Listing</strong><span>产品开卖前 10 个工作日完成</span></div>
-            <div class="delivery-hint-item"><strong>新品 Title</strong><span>按新品开卖排期确认</span></div>
-            <div class="delivery-hint-item"><strong>新品 TD</strong><span>按新品开卖排期确认</span></div>
-            <div class="delivery-hint-item"><strong>新品卖点图片</strong><span>按新品开卖排期确认</span></div>
-            <div class="delivery-hint-item"><strong>新品视频脚本</strong><span>按新品开卖排期确认</span></div>
-            <div class="delivery-hint-item"><strong>包装盒</strong><span>按新品开卖排期确认</span></div>
-            <div class="delivery-hint-item"><strong>产品说明书</strong><span>按新品开卖排期确认</span></div>
-            <div class="delivery-hint-item"><strong>FQA</strong><span>按新品开卖排期确认</span></div>
-            <div class="delivery-hint-item"><strong>广告创意</strong><span>按新品开卖排期确认</span></div>
-            <div class="delivery-hint-item"><strong>种草文案</strong><span>按新品开卖排期确认</span></div>
-            <div class="delivery-hint-item"><strong>新闻稿</strong><span>按新品开卖排期确认</span></div>
+            <div class="delivery-hint-item primary"><strong>新品 Listing</strong><span>≥10 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>新品 Title</strong><span>≥1 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>新品 TD</strong><span>≥1 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>新品卖点图片</strong><span>≥1 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>新品视频脚本</strong><span>≥1 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>包装盒</strong><span>≥5 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>产品说明书</strong><span>≥3 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>FQA</strong><span>≥3 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>Device Name 确认</strong><span>≥2 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>Device Name &amp; IFU 信息</strong><span>≥3 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>广告创意</strong><span>按实际沟通确认</span></div>
+            <div class="delivery-hint-item"><strong>种草文案</strong><span>按实际沟通确认</span></div>
+            <div class="delivery-hint-item"><strong>新闻稿</strong><span>按实际沟通确认</span></div>
           </section>
           <section class="delivery-hint-group">
             <div class="delivery-hint-group-title">
               <strong>优化需求</strong>
             </div>
-            <div class="delivery-hint-item primary"><strong>优化 Listing</strong><span>4 个工作日</span></div>
-            <div class="delivery-hint-item"><strong>优化 Title</strong><span>1 个工作日</span></div>
-            <div class="delivery-hint-item"><strong>优化 TD</strong><span>2 个工作日</span></div>
-            <div class="delivery-hint-item"><strong>优化卖点图片</strong><span>1 个工作日</span></div>
-            <div class="delivery-hint-item"><strong>优化视频脚本</strong><span>1 个工作日</span></div>
-            <div class="delivery-hint-item"><strong>包装盒</strong><span>2 个工作日</span></div>
-            <div class="delivery-hint-item"><strong>优化说明书</strong><span>2 个工作日</span></div>
-            <div class="delivery-hint-item"><strong>优化 FQA</strong><span>待配置</span></div>
-            <div class="delivery-hint-item"><strong>优化广告创意</strong><span>待配置</span></div>
-            <div class="delivery-hint-item"><strong>优化种草文案</strong><span>待配置</span></div>
-            <div class="delivery-hint-item"><strong>优化新闻稿</strong><span>待配置</span></div>
+            <div class="delivery-hint-item primary"><strong>优化 Listing</strong><span>≥2 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>优化 Title</strong><span>≥0.5 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>优化 TD</strong><span>≥1 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>优化卖点图片</strong><span>≥1 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>优化视频脚本</strong><span>≥2 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>包装盒</strong><span>≥3 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>优化说明书</strong><span>≥2 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>优化 FQA</strong><span>≥1 个工作日</span></div>
+            <div class="delivery-hint-item"><strong>优化广告创意</strong><span>按实际沟通确认</span></div>
+            <div class="delivery-hint-item"><strong>优化种草文案</strong><span>按实际沟通确认</span></div>
+            <div class="delivery-hint-item"><strong>优化新闻稿</strong><span>按实际沟通确认</span></div>
           </section>
         </div>
       </div>
@@ -1205,6 +1207,14 @@
             <div>
               <div style="font-weight:600;color:#0369a1;margin-bottom:2px;">如何获取飞书文档链接？</div>
               <div style="color:#0c4a6e;">在飞书文档右上角点击「分享」→ 选择「复制链接」→ 粘贴到上方输入框</div>
+            </div>
+          </div>
+
+          <div class="feishu-data-warning">
+            <span id="feishu-warning-icon" style="color:#d97706;flex-shrink:0;"></span>
+            <div>
+              <div style="font-weight:600;color:#92400e;margin-bottom:2px;">数据安全提示</div>
+              <div style="color:#78350f;">飞书文档中请勿包含成本、利润、经营目标等商业敏感信息。如文档内含上述内容，请在提交前完成脱敏处理，避免数据外泄风险。</div>
             </div>
           </div>
 

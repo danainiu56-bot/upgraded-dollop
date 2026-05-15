@@ -1720,6 +1720,138 @@
     border: none;
     border-radius: 0;
   }
+
+  /* ── Score Card v2 (sc2) ─────────────────────── */
+  .sc2-hero {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 14px 18px;
+    background: linear-gradient(135deg, #f5f7ff, #eef1fd);
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+  .sc2-ring-wrap {
+    position: relative;
+    width: 74px;
+    height: 74px;
+    flex-shrink: 0;
+  }
+  .sc2-ring-wrap svg { transform: rotate(-90deg); }
+  .sc2-ring-num {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 22px;
+    font-weight: 700;
+    color: #111;
+    line-height: 1;
+  }
+  .sc2-grade-badge {
+    position: absolute;
+    bottom: -3px; right: -3px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    font-size: 11px; font-weight: 700;
+    color: #fff;
+    border: 2px solid #fff;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sc2-hero-info h3 { font-size: 15px; font-weight: 600; color: #111; margin: 0; }
+  .sc2-hero-info p  { font-size: 13px; color: #555; margin-top: 5px; line-height: 1.55; }
+
+  .sc2-dims { padding: 0 2px; }
+
+  .sc2-dim-block { border-bottom: 1px solid #f3f3f3; }
+  .sc2-dim-block:last-child { border-bottom: none; }
+
+  .sc2-dim-trigger {
+    display: flex;
+    align-items: center;
+    padding: 11px 0 8px;
+    cursor: pointer;
+    user-select: none;
+    gap: 0;
+  }
+  .sc2-dim-trigger:hover .sc2-dim-label { color: #4f46e5; }
+
+  .sc2-dim-label { font-size: 13px; font-weight: 500; color: #222; flex: 1; }
+  .sc2-dim-meta  { display: flex; align-items: center; gap: 8px; }
+  .sc2-dim-weight { font-size: 11px; color: #ccc; }
+  .sc2-dim-score  { font-size: 14px; font-weight: 700; min-width: 28px; text-align: right; }
+  .sc2-dim-score.pass { color: #16a34a; }
+  .sc2-dim-score.warn { color: #d97706; }
+  .sc2-dim-score.fail { color: #dc2626; }
+
+  .sc2-chevron {
+    font-size: 13px; color: #ccc;
+    margin-left: 8px;
+    display: inline-block;
+    transition: transform 0.2s ease;
+    line-height: 1;
+  }
+  .sc2-dim-block.open .sc2-chevron { transform: rotate(90deg); }
+
+  .sc2-progress-bar {
+    height: 5px;
+    background: #f0f0f0;
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 0;
+  }
+  .sc2-progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.7s cubic-bezier(.4,0,.2,1);
+  }
+  .sc2-progress-fill.pass { background: #22c55e; }
+  .sc2-progress-fill.warn { background: #f59e0b; }
+  .sc2-progress-fill.fail { background: #ef4444; }
+
+  .sc2-dim-detail {
+    display: none;
+    padding: 6px 0 10px;
+  }
+  .sc2-dim-block.open .sc2-dim-detail { display: block; }
+  .sc2-dim-ideal {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.6;
+    padding-left: 8px;
+    border-left: 2px solid #e0e0e0;
+    margin: 0;
+  }
+
+  .sc2-suggestions {
+    margin: 10px 0 0;
+    padding: 12px 14px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+  }
+  .sc2-sug-title { font-size: 12px; font-weight: 600; color: #92400e; margin-bottom: 8px; }
+  .sc2-sug-item {
+    display: flex;
+    gap: 7px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #78350f;
+    line-height: 1.55;
+    align-items: flex-start;
+  }
+  .sc2-sug-item:last-child { margin-bottom: 0; }
+  .sc2-sug-tag {
+    flex-shrink: 0;
+    margin-top: 1px;
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #92400e;
+    white-space: nowrap;
+  }
   .aichat-score-modal-foot {
     flex-shrink: 0;
     display: flex;

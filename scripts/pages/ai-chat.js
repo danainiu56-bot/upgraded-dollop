@@ -1512,6 +1512,11 @@ function openAiScoreModal(payload) {
   document.addEventListener('keydown', onAiScoreModalKeydown);
 }
 
+function toggleAiScoreDim(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('open');
+}
+
 function closeAiScoreModal() {
   document.removeEventListener('keydown', onAiScoreModalKeydown);
   const root = document.getElementById('aichat-score-modal');
@@ -1538,41 +1543,63 @@ function regenerateFromAiScoreModal() {
 
 function renderAiScoreCard(s) {
   const esc = typeof escapeAiHtml === 'function' ? escapeAiHtml : (x) => String(x || '');
-  const gradeCls = s.grade === 'S' ? 'grade-s' : (s.grade === 'A' ? 'grade-a' : (s.grade === 'B' ? 'grade-b' : 'grade-c'));
-  const statusColor = { great: '#10b981', good: '#3b82f6', warn: '#f59e0b', bad: '#ef4444' };
-  return `
-    <div class="ai-score-card">
-      <div class="ai-score-header">
-        <div class="ai-score-total">
-          <div class="score-num">${s.total}</div>
-          <div class="score-grade ${gradeCls}">${esc(s.grade)}</div>
-        </div>
-        <div class="ai-score-summary">
-          <div class="ai-score-title">综合评分</div>
-          <div class="ai-score-desc">${esc(s.summary)}</div>
-        </div>
-      </div>
-      <div class="ai-score-items">
-        ${s.items.map(it => `
-          <div class="ai-score-item">
-            <div class="ai-score-item-row">
-              <span class="ai-score-name">${esc(it.name)}</span>
-              <span class="ai-score-weight">权重 ${it.weight}%</span>
-              <span class="ai-score-val" style="color:${statusColor[it.status]};">${it.score}</span>
-            </div>
-            <div class="ai-score-bar">
-              <div class="ai-score-bar-fill" style="width:${it.score}%;background:${statusColor[it.status]};"></div>
-            </div>
+  const circ = 188.5;
+  const offset = circ * (1 - Math.min(100, Math.max(0, s.total)) / 100);
+  const gradeColor = { S: '#7c3aed', A: '#2563eb', B: '#059669', C: '#d97706', D: '#dc2626' };
+  const ringColor = gradeColor[s.grade] || '#4f46e5';
+  const statusCls = st => (st === 'great' || st === 'good') ? 'pass' : (st === 'warn' ? 'warn' : 'fail');
+
+  const dimsHtml = (s.items || []).map((it, i) => {
+    const cls = statusCls(it.status);
+    const dimId = `sc2-dim-${i}`;
+    return `
+      <div class="sc2-dim-block" id="${dimId}">
+        <div class="sc2-dim-trigger" onclick="toggleAiScoreDim('${dimId}')">
+          <span class="sc2-dim-label">${esc(it.name)}</span>
+          <div class="sc2-dim-meta">
+            <span class="sc2-dim-weight">${it.weight}%</span>
+            <span class="sc2-dim-score ${cls}">${it.score}</span>
+            <span class="sc2-chevron">›</span>
           </div>
-        `).join('')}
-      </div>
-      ${s.suggestions && s.suggestions.length ? `
-        <div class="ai-score-suggest">
-          <div class="ai-score-suggest-title">📝 优化建议</div>
-          <div class="ai-score-suggest-list">${s.suggestions.map(t => `<div>${esc(t)}</div>`).join('')}</div>
         </div>
-      ` : ''}
+        <div class="sc2-progress-bar">
+          <div class="sc2-progress-fill ${cls}" style="width:${it.score}%"></div>
+        </div>
+        <div class="sc2-dim-detail">
+          <p class="sc2-dim-ideal">${esc(it.ideal || '')}</p>
+        </div>
+      </div>`;
+  }).join('');
+
+  let sugHtml = '';
+  if (s.suggestions && s.suggestions.length) {
+    const items = s.suggestions.map(t => {
+      const m = String(t).match(/【([^】]+)】/);
+      const tag = m ? m[1] : '建议';
+      const body = String(t).replace(/^•\s*/, '').replace(/【[^】]+】/, '').trim();
+      return `<div class="sc2-sug-item"><span class="sc2-sug-tag">${esc(tag)}</span><span>${esc(body)}</span></div>`;
+    }).join('');
+    sugHtml = `<div class="sc2-suggestions"><div class="sc2-sug-title">优化建议</div>${items}</div>`;
+  }
+
+  return `
+    <div class="sc2-hero">
+      <div class="sc2-ring-wrap">
+        <svg width="74" height="74" viewBox="0 0 74 74">
+          <circle cx="37" cy="37" r="30" fill="none" stroke="#e8eaf6" stroke-width="6"/>
+          <circle cx="37" cy="37" r="30" fill="none" stroke="${ringColor}" stroke-width="6"
+                  stroke-dasharray="${circ}" stroke-dashoffset="${offset.toFixed(1)}" stroke-linecap="round"/>
+        </svg>
+        <div class="sc2-ring-num">${s.total}</div>
+        <div class="sc2-grade-badge" style="background:${ringColor}">${esc(s.grade)}</div>
+      </div>
+      <div class="sc2-hero-info">
+        <h3>综合评分</h3>
+        <p>${esc(s.summary)}</p>
+      </div>
     </div>
+    <div class="sc2-dims">${dimsHtml}</div>
+    ${sugHtml}
   `;
 }
 
